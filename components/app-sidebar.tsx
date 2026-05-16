@@ -1,5 +1,4 @@
 "use client"
-import { useState, useEffect } from "react"
 import { useTheme } from "next-themes"
 import { LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
