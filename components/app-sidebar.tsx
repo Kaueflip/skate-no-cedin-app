@@ -74,17 +74,11 @@ const menuItems = [
 export function AppSidebar() {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
   const router = useRouter()
   async function handleLogout() {
     await supabase.auth.signOut()
     router.push("/login")
   }
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   return (
     <Sidebar>
@@ -145,13 +139,26 @@ export function AppSidebar() {
                 <DropdownMenuItem>
                   <span>Configurações</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-                  {mounted && theme === "dark" ? (
+                <DropdownMenuItem
+                  onClick={() =>
+                    setTheme(
+                      theme === "dark"
+                        ? "light"
+                        : "dark"
+                    )
+                  }
+                >
+                  {theme === "dark" ? (
                     <Sun className="mr-2 h-4 w-4" />
                   ) : (
                     <Moon className="mr-2 h-4 w-4" />
                   )}
-                  <span>{mounted && theme === "dark" ? "Modo Claro" : "Modo Escuro"}</span>
+
+                  <span>
+                    {theme === "dark"
+                      ? "Modo Claro"
+                      : "Modo Escuro"}
+                  </span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleLogout}
