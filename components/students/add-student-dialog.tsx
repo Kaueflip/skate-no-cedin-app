@@ -41,6 +41,8 @@ import { Textarea }
 import { Plus }
     from "lucide-react"
 
+import Image from "next/image"
+
 type Props = {
     onAddStudent: (
         student: Omit<
@@ -277,7 +279,7 @@ export function AddStudentDialog({
                         }
                     />
 
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
 
                         <Label>
                             Foto do aluno
@@ -294,7 +296,55 @@ export function AddStudentDialog({
                             }
                         />
 
-                    </div>
+                    </div> */}
+
+
+
+                    <div className="space-y-4">
+
+                        <Label>
+                            Foto do aluno
+                        </Label>
+
+                        <div className="flex items-center gap-4">
+
+                            <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border bg-muted">
+
+                                {foto ? (
+
+                                    <Image
+                                        src={URL.createObjectURL(foto)}
+                                        alt="Preview"
+                                        width={80}
+                                        height={80}
+                                        className="h-full w-full object-cover"
+                                    />
+
+                                ) : (
+
+                                    <span className="text-xs text-muted-foreground">
+
+                                        Sem foto
+
+                                    </span>
+                                )}
+
+                            </div>
+
+                            <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) =>
+                                    setFoto(
+                                        e.target.files?.[0] ||
+                                        null
+                                    )
+                                }
+                            />
+
+                        </div>
+
+                    </div>__
 
                     <Select
                         value={turno}
