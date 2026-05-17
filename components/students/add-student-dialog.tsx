@@ -248,7 +248,12 @@ export function AddStudentDialog({
 
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-[520px]">
+            <DialogContent
+                className="
+                   max-h-[90vh]
+                   overflow-y-auto
+                   sm:max-w-[520px]"
+            >
 
                 <DialogHeader>
 
@@ -561,7 +566,12 @@ export function AddStudentDialog({
                     <Button
                         onClick={handleSubmit}
                         disabled={loading}
-                        className="w-full"
+                        className="
+                                        h-11
+                                        w-full
+                                        text-base
+                                        font-medium
+                                    "
                     >
 
                         {loading
