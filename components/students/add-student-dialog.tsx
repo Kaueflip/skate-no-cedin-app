@@ -318,10 +318,11 @@ export function AddStudentDialog({
                     <div className="grid gap-2">
 
                         <Label>
-                            Nome Completo
+                            Nome Completo *
                         </Label>
 
                         <Input
+                            required
                             value={newStudent.nome}
                             onChange={(e) =>
                                 setNewStudent({
@@ -341,10 +342,12 @@ export function AddStudentDialog({
                         <div className="grid gap-2">
 
                             <Label>
-                                Idade
+                                Idade *
                             </Label>
 
                             <Input
+                                required
+                                min={1}
                                 type="number"
                                 value={newStudent.idade}
                                 onChange={(e) =>
@@ -363,10 +366,11 @@ export function AddStudentDialog({
                         <div className="grid gap-2">
 
                             <Label>
-                                Turma
+                                Turma *
                             </Label>
 
                             <Input
+                                required
                                 value={newStudent.turma}
                                 onChange={(e) =>
                                     setNewStudent({
