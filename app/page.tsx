@@ -3,6 +3,55 @@ import Image from "next/image"
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-[#e5e8f7] text-zinc-900">
+      <header className="sticky top-0 z-50 border-b border-zinc-200/80 bg-white/70 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-900 text-sm font-black text-white">
+              SC
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold leading-none">
+                Skate no Cedin
+              </p>
+
+              <p className="text-xs text-zinc-500">
+                Projeto Social
+              </p>
+            </div>
+          </div>
+
+          <nav className="hidden items-center gap-8 md:flex">
+            <a
+              href="#sobre"
+              className="text-sm font-medium text-zinc-600 transition hover:text-zinc-900"
+            >
+              Sobre
+            </a>
+
+            <a
+              href="#galeria"
+              className="text-sm font-medium text-zinc-600 transition hover:text-zinc-900"
+            >
+              Galeria
+            </a>
+
+            <a
+              href="#sistema"
+              className="text-sm font-medium text-zinc-600 transition hover:text-zinc-900"
+            >
+              Plataforma
+            </a>
+          </nav>
+
+          <a
+            href="/login"
+            className="rounded-2xl bg-zinc-900 px-5 py-2 text-sm font-semibold text-white transition hover:scale-[1.02]"
+          >
+            Entrar
+          </a>
+        </div>
+      </header>
       <section className="relative overflow-hidden border-b border-zinc-200/80">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_50%)]" />
 
@@ -156,7 +205,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="border-y border-zinc-200/80 bg-black">
+      <section
+        id="galeria"
+        className="border-y border-zinc-200/80 bg-[#dde2f3]"
+      >
         <div className="mx-auto max-w-7xl px-6 py-24">
           <div className="mb-14 flex flex-col gap-4 text-center">
             <p className="text-sm font-semibold uppercase tracking-[0.25em] text-zinc-500">
@@ -173,9 +225,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-
-            <div className="overflow-hidden rounded-[2rem] border border-zinc-200/80 bg-white/70 shadow-sm">
-
+            <div className="overflow-hidden rounded-[2rem] border border-zinc-200/80 bg-white/70">
               <Image
                 unoptimized
                 src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/landing%20page/galeria/inst-cedin%20(2).webp"
@@ -184,13 +234,10 @@ export default function LandingPage() {
                 height={800}
                 className="h-[420px] w-full object-cover transition duration-500 hover:scale-105"
               />
-
             </div>
 
             <div className="grid gap-4">
-
-              <div className="overflow-hidden rounded-[2rem] border border-zinc-200/80 bg-white/70 shadow-sm">
-
+              <div className="overflow-hidden rounded-[2rem] border border-zinc-200/80 bg-white/70">
                 <Image
                   unoptimized
                   src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/landing%20page/galeria/inst-cedin%20(1).webp"
@@ -199,11 +246,9 @@ export default function LandingPage() {
                   height={800}
                   className="h-[200px] w-full object-cover transition duration-500 hover:scale-105"
                 />
-
               </div>
 
-              <div className="overflow-hidden rounded-[2rem] border border-zinc-200/80 bg-white/70 shadow-sm">
-
+              <div className="overflow-hidden rounded-[2rem] border border-zinc-200/80 bg-white/70">
                 <Image
                   unoptimized
                   src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/landing%20page/galeria/inst-cedin%20(4).webp"
@@ -212,13 +257,10 @@ export default function LandingPage() {
                   height={800}
                   className="h-[200px] w-full object-cover transition duration-500 hover:scale-105"
                 />
-
               </div>
-
             </div>
 
-            <div className="overflow-hidden rounded-[2rem] border border-zinc-200/80 bg-white/70 shadow-sm">
-
+            <div className="overflow-hidden rounded-[2rem] border border-zinc-200/80 bg-white/70">
               <Image
                 unoptimized
                 src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/landing%20page/galeria/inst-cedin%20(3).webp"
@@ -227,13 +269,10 @@ export default function LandingPage() {
                 height={800}
                 className="h-[420px] w-full object-cover transition duration-500 hover:scale-105"
               />
-
             </div>
 
             <div className="grid gap-4">
-
-              <div className="overflow-hidden rounded-[2rem] border border-zinc-200/80 bg-white/70 shadow-sm">
-
+              <div className="overflow-hidden rounded-[2rem] border border-zinc-200/80 bg-white/70">
                 <Image
                   unoptimized
                   src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/landing%20page/galeria/inst-cedin%20(6).webp"
@@ -242,11 +281,9 @@ export default function LandingPage() {
                   height={800}
                   className="h-[200px] w-full object-cover transition duration-500 hover:scale-105"
                 />
-
               </div>
 
-              <div className="overflow-hidden rounded-[2rem] border border-zinc-200/80 bg-white/70 shadow-sm">
-
+              <div className="overflow-hidden rounded-[2rem] border border-zinc-200/80 bg-white/70">
                 <Image
                   unoptimized
                   src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/landing%20page/galeria/inst-cedin%20(5).webp"
@@ -255,16 +292,16 @@ export default function LandingPage() {
                   height={800}
                   className="h-[200px] w-full object-cover transition duration-500 hover:scale-105"
                 />
-
               </div>
-
             </div>
-
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-24">
+      <section
+        id="sistema"
+        className="mx-auto max-w-7xl px-6 py-24"
+      >
         <div className="rounded-[2rem] border border-zinc-200/80 bg-gradient-to-br from-white to-[#dfe3f5] p-10 lg:p-16">
           <div className="mx-auto max-w-3xl text-center">
             <p className="mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-zinc-500">
