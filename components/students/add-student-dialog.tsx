@@ -1,13 +1,17 @@
 "use client"
 
-import { useState }
-    from "react"
+import Image from "next/image"
+
+import { useState } from "react"
 
 import type { Student }
     from "@/types/student"
 
 import { toast }
     from "sonner"
+
+import { Plus }
+    from "lucide-react"
 
 import { Button }
     from "@/components/ui/button"
@@ -18,10 +22,14 @@ import { Input }
 import { Label }
     from "@/components/ui/label"
 
+import { Textarea }
+    from "@/components/ui/textarea"
+
 import {
     Dialog,
     DialogContent,
     DialogDescription,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -34,14 +42,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-
-import { Textarea }
-    from "@/components/ui/textarea"
-
-import { Plus }
-    from "lucide-react"
-
-import Image from "next/image"
 
 type Props = {
     onAddStudent: (
@@ -70,40 +70,27 @@ export function AddStudentDialog({
             null
         )
 
-    const [nome, setNome] =
-        useState("")
+    const [newStudent, setNewStudent] =
+        useState({
+            nome: "",
 
-    const [idade, setIdade] =
-        useState("")
+            idade: "",
 
-    const [turma, setTurma] =
-        useState("")
+            turma: "",
 
-    const [
-        responsavelNome,
-        setResponsavelNome,
-    ] = useState("")
+            turno: "Manhã" as
+                "Manhã" |
+                "Tarde",
 
-    const [
-        responsavelContato,
-        setResponsavelContato,
-    ] = useState("")
+            nivel: "Iniciante" as
+                Student["nivel"],
 
-    const [
-        observacoes,
-        setObservacoes,
-    ] = useState("")
+            responsavel_nome: "",
 
-    const [turno, setTurno] =
-        useState<
-            "Manhã" |
-            "Tarde"
-        >("Manhã")
+            responsavel_contato: "",
 
-    const [nivel, setNivel] =
-        useState<
-            Student["nivel"]
-        >("Iniciante")
+            observacoes: "",
+        })
 
     async function handleSubmit() {
 
@@ -113,33 +100,43 @@ export function AddStudentDialog({
 
             await onAddStudent(
                 {
-                    nome,
+                    nome:
+                        newStudent.nome,
 
                     idade:
-                        Number(idade),
+                        Number(
+                            newStudent.idade
+                        ),
 
-                    turma,
+                    turma:
+                        newStudent.turma,
 
-                    turno,
+                    turno:
+                        newStudent.turno,
 
-                    nivel,
+                    nivel:
+                        newStudent.nivel,
+
+                    responsavel_nome:
+                        newStudent
+                            .responsavel_nome,
+
+                    responsavel_contato:
+                        newStudent
+                            .responsavel_contato,
+
+                    observacoes:
+                        newStudent
+                            .observacoes,
+
+                    ativo: true,
+
+                    foto_url: null,
 
                     data_inicio:
                         new Date()
                             .toISOString()
                             .split("T")[0],
-
-                    foto_url: null,
-
-                    responsavel_nome:
-                        responsavelNome,
-
-                    responsavel_contato:
-                        responsavelContato,
-
-                    observacoes,
-
-                    ativo: true,
                 },
 
                 foto
@@ -167,15 +164,25 @@ export function AddStudentDialog({
 
     function resetForm() {
 
-        setNome("")
-        setIdade("")
-        setTurma("")
-        setResponsavelNome("")
-        setResponsavelContato("")
-        setObservacoes("")
-        setTurno("Manhã")
-        setNivel("Iniciante")
         setFoto(null)
+
+        setNewStudent({
+            nome: "",
+
+            idade: "",
+
+            turma: "",
+
+            turno: "Manhã",
+
+            nivel: "Iniciante",
+
+            responsavel_nome: "",
+
+            responsavel_contato: "",
+
+            observacoes: "",
+        })
     }
 
     return (
@@ -189,7 +196,7 @@ export function AddStudentDialog({
 
                 <Button>
 
-                    <Plus />
+                    <Plus className="mr-2 h-4 w-4" />
 
                     Novo Aluno
 
@@ -197,139 +204,57 @@ export function AddStudentDialog({
 
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-lg">
+            <DialogContent className="sm:max-w-[520px]">
 
                 <DialogHeader>
 
                     <DialogTitle>
 
-                        Novo Aluno
+                        Adicionar Aluno
 
                     </DialogTitle>
 
                     <DialogDescription>
 
-                        Cadastre um novo aluno
-                        no sistema
+                        Preencha os dados
+                        do novo aluno
 
                     </DialogDescription>
 
                 </DialogHeader>
 
-                <div className="space-y-4">
+                <div className="grid gap-5 py-4">
 
-                    <Input
-                        placeholder="Nome"
-                        value={nome}
-                        onChange={(e) =>
-                            setNome(
-                                e.target.value
-                            )
-                        }
-                    />
+                    <div className="flex items-center gap-4">
 
-                    <Input
-                        type="number"
-                        placeholder="Idade"
-                        value={idade}
-                        onChange={(e) =>
-                            setIdade(
-                                e.target.value
-                            )
-                        }
-                    />
+                        <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border bg-muted">
 
-                    <Input
-                        placeholder="Turma"
-                        value={turma}
-                        onChange={(e) =>
-                            setTurma(
-                                e.target.value
-                            )
-                        }
-                    />
+                            {foto ? (
 
-                    <Input
-                        placeholder="Responsável"
-                        value={responsavelNome}
-                        onChange={(e) =>
-                            setResponsavelNome(
-                                e.target.value
-                            )
-                        }
-                    />
+                                <Image
+                                    src={URL.createObjectURL(foto)}
+                                    alt="Preview"
+                                    width={96}
+                                    height={96}
+                                    className="h-full w-full object-cover"
+                                />
 
-                    <Input
-                        placeholder="Contato"
-                        value={responsavelContato}
-                        onChange={(e) =>
-                            setResponsavelContato(
-                                e.target.value
-                            )
-                        }
-                    />
+                            ) : (
 
-                    <Textarea
-                        placeholder="Observações"
-                        value={observacoes}
-                        onChange={(e) =>
-                            setObservacoes(
-                                e.target.value
-                            )
-                        }
-                    />
+                                <span className="text-xs text-muted-foreground">
 
-                    {/* <div className="space-y-2">
+                                    Sem foto
 
-                        <Label>
-                            Foto do aluno
-                        </Label>
+                                </span>
+                            )}
 
-                        <Input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) =>
-                                setFoto(
-                                    e.target.files?.[0] ||
-                                    null
-                                )
-                            }
-                        />
+                        </div>
 
-                    </div> */}
+                        <div className="flex-1 space-y-2">
 
-
-
-                    <div className="space-y-4">
-
-                        <Label>
-                            Foto do aluno
-                        </Label>
-
-                        <div className="flex items-center gap-4">
-
-                            <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border bg-muted">
-
-                                {foto ? (
-
-                                    <Image
-                                        src={URL.createObjectURL(foto)}
-                                        alt="Preview"
-                                        width={80}
-                                        height={80}
-                                        className="h-full w-full object-cover"
-                                    />
-
-                                ) : (
-
-                                    <span className="text-xs text-muted-foreground">
-
-                                        Sem foto
-
-                                    </span>
-                                )}
-
-                            </div>
+                            <Label>
+                                Foto do aluno
+                            </Label>
 
                             <Input
                                 type="file"
@@ -346,92 +271,258 @@ export function AddStudentDialog({
 
                     </div>
 
-                    <Select
-                        value={turno}
-                        onValueChange={(
-                            value
-                        ) =>
-                            setTurno(
-                                value as
-                                "Manhã" |
-                                "Tarde"
-                            )
-                        }
-                    >
+                    <div className="grid gap-2">
 
-                        <SelectTrigger>
+                        <Label>
+                            Nome Completo
+                        </Label>
 
-                            <SelectValue />
+                        <Input
+                            value={newStudent.nome}
+                            onChange={(e) =>
+                                setNewStudent({
+                                    ...newStudent,
 
-                        </SelectTrigger>
+                                    nome:
+                                        e.target.value,
+                                })
+                            }
+                            placeholder="Nome do aluno"
+                        />
 
-                        <SelectContent>
+                    </div>
 
-                            <SelectItem value="Manhã">
-                                Manhã
-                            </SelectItem>
+                    <div className="grid grid-cols-2 gap-4">
 
-                            <SelectItem value="Tarde">
-                                Tarde
-                            </SelectItem>
+                        <div className="grid gap-2">
 
-                        </SelectContent>
+                            <Label>
+                                Idade
+                            </Label>
 
-                    </Select>
+                            <Input
+                                type="number"
+                                value={newStudent.idade}
+                                onChange={(e) =>
+                                    setNewStudent({
+                                        ...newStudent,
 
-                    <Select
-                        value={nivel}
-                        onValueChange={(
-                            value
-                        ) =>
-                            setNivel(
-                                value as
-                                Student["nivel"]
-                            )
-                        }
-                    >
+                                        idade:
+                                            e.target.value,
+                                    })
+                                }
+                                placeholder="10"
+                            />
 
-                        <SelectTrigger>
+                        </div>
 
-                            <SelectValue />
+                        <div className="grid gap-2">
 
-                        </SelectTrigger>
+                            <Label>
+                                Turma
+                            </Label>
 
-                        <SelectContent>
+                            <Input
+                                value={newStudent.turma}
+                                onChange={(e) =>
+                                    setNewStudent({
+                                        ...newStudent,
 
-                            <SelectItem value="Iniciante">
-                                Iniciante
-                            </SelectItem>
+                                        turma:
+                                            e.target.value,
+                                    })
+                                }
+                                placeholder="6º A"
+                            />
 
-                            <SelectItem value="Básico">
-                                Básico
-                            </SelectItem>
+                        </div>
 
-                            <SelectItem value="Intermediário">
-                                Intermediário
-                            </SelectItem>
+                    </div>
 
-                            <SelectItem value="Avançado">
-                                Avançado
-                            </SelectItem>
+                    <div className="grid grid-cols-2 gap-4">
 
-                        </SelectContent>
+                        <div className="grid gap-2">
 
-                    </Select>
+                            <Label>
+                                Turno
+                            </Label>
+
+                            <Select
+                                value={newStudent.turno}
+                                onValueChange={(value) =>
+                                    setNewStudent({
+                                        ...newStudent,
+
+                                        turno:
+                                            value as
+                                            "Manhã" |
+                                            "Tarde",
+                                    })
+                                }
+                            >
+
+                                <SelectTrigger>
+
+                                    <SelectValue />
+
+                                </SelectTrigger>
+
+                                <SelectContent>
+
+                                    <SelectItem value="Manhã">
+                                        Manhã
+                                    </SelectItem>
+
+                                    <SelectItem value="Tarde">
+                                        Tarde
+                                    </SelectItem>
+
+                                </SelectContent>
+
+                            </Select>
+
+                        </div>
+
+                        <div className="grid gap-2">
+
+                            <Label>
+                                Nível
+                            </Label>
+
+                            <Select
+                                value={newStudent.nivel}
+                                onValueChange={(value) =>
+                                    setNewStudent({
+                                        ...newStudent,
+
+                                        nivel:
+                                            value as
+                                            Student["nivel"],
+                                    })
+                                }
+                            >
+
+                                <SelectTrigger>
+
+                                    <SelectValue />
+
+                                </SelectTrigger>
+
+                                <SelectContent>
+
+                                    <SelectItem value="Iniciante">
+                                        Iniciante
+                                    </SelectItem>
+
+                                    <SelectItem value="Básico">
+                                        Básico
+                                    </SelectItem>
+
+                                    <SelectItem value="Intermediário">
+                                        Intermediário
+                                    </SelectItem>
+
+                                    <SelectItem value="Avançado">
+                                        Avançado
+                                    </SelectItem>
+
+                                </SelectContent>
+
+                            </Select>
+
+                        </div>
+
+                    </div>
+
+                    <div className="grid gap-2">
+
+                        <Label>
+                            Responsável
+                        </Label>
+
+                        <Input
+                            value={
+                                newStudent
+                                    .responsavel_nome
+                            }
+                            onChange={(e) =>
+                                setNewStudent({
+                                    ...newStudent,
+
+                                    responsavel_nome:
+                                        e.target.value,
+                                })
+                            }
+                            placeholder="Nome do responsável"
+                        />
+
+                    </div>
+
+                    <div className="grid gap-2">
+
+                        <Label>
+                            Contato
+                        </Label>
+
+                        <Input
+                            value={
+                                newStudent
+                                    .responsavel_contato
+                            }
+                            onChange={(e) =>
+                                setNewStudent({
+                                    ...newStudent,
+
+                                    responsavel_contato:
+                                        e.target.value,
+                                })
+                            }
+                            placeholder="(47) 99999-9999"
+                        />
+
+                    </div>
+
+                    <div className="grid gap-2">
+
+                        <Label>
+                            Observações
+                        </Label>
+
+                        <Textarea
+                            value={
+                                newStudent
+                                    .observacoes
+                            }
+                            onChange={(e) =>
+                                setNewStudent({
+                                    ...newStudent,
+
+                                    observacoes:
+                                        e.target.value,
+                                })
+                            }
+                            placeholder="Observações adicionais"
+                        />
+
+                    </div>
+
+                </div>
+
+                <DialogFooter>
 
                     <Button
-                        className="w-full"
                         onClick={handleSubmit}
                         disabled={loading}
+                        className="w-full"
                     >
 
                         {loading
                             ? "Salvando..."
-                            : "Cadastrar"}
+                            : "Cadastrar Aluno"}
 
                     </Button>
 
-                </div>
+                </DialogFooter>
 
             </DialogContent>
 
