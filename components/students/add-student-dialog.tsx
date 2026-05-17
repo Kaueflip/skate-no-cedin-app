@@ -308,6 +308,7 @@ export function AddStudentDialog({
                             <Input
                                 type="file"
                                 accept="image/*"
+                                capture="environment"
                                 onChange={(e) =>
                                     setFoto(
                                         e.target.files?.[0] ||
