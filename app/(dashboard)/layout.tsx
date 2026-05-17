@@ -1,7 +1,6 @@
-"use client"
-
 import type { ReactNode } from "react"
-
+import { redirect } from "next/navigation"
+import { createClient } from "@/lib/supabase-server"
 import {
   SidebarInset,
   SidebarProvider,
@@ -23,9 +22,20 @@ type Props = {
   children: ReactNode
 }
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: Props) {
+
+  const supabase =
+    await createClient()
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  if (!session) {
+    redirect("/login")
+  }
 
   return (
 

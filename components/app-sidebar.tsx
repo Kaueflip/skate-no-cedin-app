@@ -2,7 +2,7 @@
 import { useTheme } from "next-themes"
 import { LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase-browser"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -71,6 +71,7 @@ const menuItems = [
 ]
 
 export function AppSidebar() {
+  const supabase = createClient()
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
   const router = useRouter()
