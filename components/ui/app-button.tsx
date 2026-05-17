@@ -36,7 +36,10 @@ export function AppButton({
           px-6
           text-base
           font-semibold
-          shadow-sm
+          bg-primary
+            text-primary-foreground
+            shadow-sm
+            hover:opacity-90
           transition-all
           hover:scale-[1.01]
           active:scale-[0.99]
