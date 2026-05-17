@@ -341,7 +341,9 @@ export default function LoginPage() {
 
                                 <AppButton
                                     type="submit"
-                                    className="w-full bg-primary text-primary-foreground"
+                                    className="w-full bg-zinc-900
+text-white
+hover:bg-zinc-800"
                                     loading={loading}
                                 >
 

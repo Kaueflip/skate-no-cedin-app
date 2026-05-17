@@ -29,19 +29,26 @@ export function AppButton({
     return (
 
         <Button
+            variant="ghost"
             className={cn(
                 `
           h-12
           rounded-2xl
           px-6
+
+          bg-zinc-900
+          text-white
+
           text-base
           font-semibold
-          bg-primary
-            text-primary-foreground
-            shadow-sm
-            hover:opacity-90
+
+          shadow-sm
+            cursor-pointer
           transition-all
-          hover:scale-[1.01]
+
+          hover:bg-zinc-800
+          hover:text-white
+
           active:scale-[0.99]
         `,
                 className
