@@ -1,12 +1,136 @@
+"use client"
+
 import Image from "next/image"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+
 import Link from "next/link"
 
+import { useState }
+    from "react"
+
+import { useRouter }
+    from "next/navigation"
+
+import { toast }
+    from "sonner"
+
+import { createClient }
+    from "@/lib/supabase-browser"
+
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card"
+
+import { Label }
+    from "@/components/ui/label"
+
+import { Input }
+    from "@/components/ui/input"
+
+import { Button }
+    from "@/components/ui/button"
+
+import { AppButton }
+    from "@/components/ui/app-button"
 
 export default function LoginPage() {
+
+    const router =
+        useRouter()
+
+    const supabase =
+        createClient()
+
+    const [email, setEmail] =
+        useState("")
+
+    const [
+        password,
+        setPassword,
+    ] = useState("")
+
+    const [loading, setLoading] =
+        useState(false)
+
+    async function handleLogin(
+        e: React.FormEvent
+    ) {
+
+        e.preventDefault()
+
+        /*
+        =========================
+        VALIDAÇÕES
+        =========================
+        */
+
+        if (!email.trim()) {
+
+            toast.error(
+                "Informe o e-mail"
+            )
+
+            return
+        }
+
+        if (!password.trim()) {
+
+            toast.error(
+                "Informe a senha"
+            )
+
+            return
+        }
+
+        if (
+            password.length < 6
+        ) {
+
+            toast.error(
+                "Senha inválida"
+            )
+
+            return
+        }
+
+        try {
+
+            setLoading(true)
+
+            const { error } =
+                await supabase.auth
+                    .signInWithPassword({
+                        email,
+                        password,
+                    })
+
+            if (error)
+                throw error
+
+            toast.success(
+                "Login realizado"
+            )
+
+            router.push(
+                "/dashboard"
+            )
+
+            router.refresh()
+
+        } catch {
+
+            toast.error(
+                "Email ou senha inválidos"
+            )
+
+        } finally {
+
+            setLoading(false)
+        }
+    }
 
     return (
 
@@ -98,11 +222,15 @@ export default function LoginPage() {
                                 <div className="rounded-3xl border border-zinc-200/70 bg-white/60 px-6 py-5 backdrop-blur-xl">
 
                                     <p className="text-3xl font-black">
+
                                         +100
+
                                     </p>
 
                                     <p className="mt-1 text-sm text-zinc-500">
+
                                         Alunos
+
                                     </p>
 
                                 </div>
@@ -110,11 +238,15 @@ export default function LoginPage() {
                                 <div className="rounded-3xl border border-zinc-200/70 bg-white/60 px-6 py-5 backdrop-blur-xl">
 
                                     <p className="text-3xl font-black">
+
                                         100%
+
                                     </p>
 
                                     <p className="mt-1 text-sm text-zinc-500">
+
                                         Inclusivo
+
                                     </p>
 
                                 </div>
@@ -158,7 +290,12 @@ export default function LoginPage() {
 
                         <CardContent>
 
-                            <form className="space-y-5">
+                            <form
+                                onSubmit={
+                                    handleLogin
+                                }
+                                className="space-y-5"
+                            >
 
                                 <div className="space-y-2">
 
@@ -170,6 +307,13 @@ export default function LoginPage() {
                                         type="email"
                                         placeholder="seuemail@exemplo.com"
                                         className="h-12 border-zinc-200 bg-white/80"
+                                        value={email}
+                                        onChange={(e) =>
+                                            setEmail(
+                                                e.target.value
+                                            )
+                                        }
+                                        required
                                     />
 
                                 </div>
@@ -184,15 +328,26 @@ export default function LoginPage() {
                                         type="password"
                                         placeholder="••••••••"
                                         className="h-12 border-zinc-200 bg-white/80"
+                                        value={password}
+                                        onChange={(e) =>
+                                            setPassword(
+                                                e.target.value
+                                            )
+                                        }
+                                        required
                                     />
 
                                 </div>
 
-                                <Button className="h-12 w-full text-base font-semibold">
+                                <AppButton
+                                    type="submit"
+                                    className="w-full"
+                                    loading={loading}
+                                >
 
                                     Entrar no Sistema
 
-                                </Button>
+                                </AppButton>
 
                             </form>
 
