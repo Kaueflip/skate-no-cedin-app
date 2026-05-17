@@ -344,7 +344,7 @@ export function AddStudentDialog({
 
                         </div>
 
-                    </div>__
+                    </div>
 
                     <Select
                         value={turno}
