@@ -94,6 +94,50 @@ export function AddStudentDialog({
 
     async function handleSubmit() {
 
+        /*
+        =========================
+        VALIDAÇÕES
+        =========================
+        */
+
+        if (!newStudent.nome.trim()) {
+
+            toast.error(
+                "Informe o nome do aluno"
+            )
+
+            return
+        }
+
+        if (!newStudent.idade) {
+
+            toast.error(
+                "Informe a idade"
+            )
+
+            return
+        }
+
+        if (!newStudent.turma.trim()) {
+
+            toast.error(
+                "Informe a turma"
+            )
+
+            return
+        }
+
+        if (
+            Number(newStudent.idade) <= 0
+        ) {
+
+            toast.error(
+                "Idade inválida"
+            )
+
+            return
+        }
+
         try {
 
             setLoading(true)
