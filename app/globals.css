@@ -2,39 +2,39 @@
 @import "tw-animate-css";
 
 :root {
-  --background: #e5e8f7;
+  --background: 228 41% 94%;
 
-  --foreground: #18181b;
+  --foreground: 240 10% 11%;
 
-  --card: rgba(255, 255, 255, 0.72);
+  --card: 0 0% 100%;
 
-  --card-foreground: #18181b;
+  --card-foreground: 240 10% 11%;
 
-  --popover: rgba(255, 255, 255, 0.92);
+  --popover: 0 0% 100%;
 
-  --popover-foreground: #18181b;
+  --popover-foreground: 240 10% 11%;
 
-  --primary: #18181b;
+  --primary: 240 10% 11%;
 
-  --primary-foreground: #ffffff;
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: #dfe3f5;
+  --secondary: 225 35% 91%;
 
-  --secondary-foreground: #18181b;
+  --secondary-foreground: 240 10% 11%;
 
-  --muted: #d9def0;
+  --muted: 225 25% 88%;
 
-  --muted-foreground: #52525b;
+  --muted-foreground: 240 5% 45%;
 
-  --accent: #f4f6ff;
+  --accent: 225 45% 97%;
 
-  --accent-foreground: #18181b;
+  --accent-foreground: 240 10% 11%;
 
-  --border: rgba(161, 161, 170, 0.18);
+  --border: 240 6% 85%;
 
-  --input: rgba(255, 255, 255, 0.72);
+  --input: 0 0% 100%;
 
-  --ring: #18181b;
+  --ring: 240 10% 11%;
 
   --radius: 1.25rem;
 }
