@@ -6,19 +6,32 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 border-b border-zinc-200/80 bg-white/70 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-900 text-sm font-black text-white">
-              SC
-            </div>
+
+            <Image
+              unoptimized
+              src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo.svg"
+              alt="Skate no Cedin"
+              width={52}
+              height={52}
+              className="h-12 w-auto"
+            />
 
             <div>
+
               <p className="text-sm font-semibold leading-none">
+
                 Skate no Cedin
+
               </p>
 
               <p className="text-xs text-zinc-500">
+
                 Projeto Social
+
               </p>
+
             </div>
+
           </div>
 
           <nav className="hidden items-center gap-8 md:flex">
@@ -327,8 +340,47 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <footer className="border-t border-zinc-200/80 py-8 text-center text-sm text-zinc-500">
-        © 2026 Skate no Cedin • Todos os direitos reservados
+      <footer className="border-t border-zinc-200/80 bg-white/50">
+
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-6 py-8 md:flex-row">
+
+          <div className="flex items-center gap-3">
+
+            <Image
+              unoptimized
+              src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo.svg"
+              alt="Skate no Cedin"
+              width={48}
+              height={48}
+              className="h-10 w-auto"
+            />
+
+            <div>
+
+              <p className="text-sm font-semibold">
+
+                Skate no Cedin
+
+              </p>
+
+              <p className="text-xs text-zinc-500">
+
+                Cultura • Educação • Skate
+
+              </p>
+
+            </div>
+
+          </div>
+
+          <p className="text-sm text-zinc-500">
+
+            © 2026 Skate no Cedin • Todos os direitos reservados
+
+          </p>
+
+        </div>
+
       </footer>
     </main>
   )
