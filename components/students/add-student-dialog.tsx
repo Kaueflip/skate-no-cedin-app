@@ -15,6 +15,9 @@ import { Button }
 import { Input }
     from "@/components/ui/input"
 
+import { Label }
+    from "@/components/ui/label"
+
 import {
     Dialog,
     DialogContent,
@@ -44,7 +47,9 @@ type Props = {
             Student,
             "id" |
             "created_at"
-        >
+        >,
+
+        foto: File | null
     ) => Promise<void>
 }
 
@@ -57,6 +62,11 @@ export function AddStudentDialog({
 
     const [loading, setLoading] =
         useState(false)
+
+    const [foto, setFoto] =
+        useState<File | null>(
+            null
+        )
 
     const [nome, setNome] =
         useState("")
@@ -99,35 +109,39 @@ export function AddStudentDialog({
 
             setLoading(true)
 
-            await onAddStudent({
-                nome,
+            await onAddStudent(
+                {
+                    nome,
 
-                idade:
-                    Number(idade),
+                    idade:
+                        Number(idade),
 
-                turma,
+                    turma,
 
-                turno,
+                    turno,
 
-                nivel,
+                    nivel,
 
-                data_inicio:
-                    new Date()
-                        .toISOString()
-                        .split("T")[0],
+                    data_inicio:
+                        new Date()
+                            .toISOString()
+                            .split("T")[0],
 
-                foto_url: null,
+                    foto_url: null,
 
-                responsavel_nome:
-                    responsavelNome,
+                    responsavel_nome:
+                        responsavelNome,
 
-                responsavel_contato:
-                    responsavelContato,
+                    responsavel_contato:
+                        responsavelContato,
 
-                observacoes,
+                    observacoes,
 
-                ativo: true,
-            })
+                    ativo: true,
+                },
+
+                foto
+            )
 
             toast.success(
                 "Aluno cadastrado"
@@ -159,6 +173,7 @@ export function AddStudentDialog({
         setObservacoes("")
         setTurno("Manhã")
         setNivel("Iniciante")
+        setFoto(null)
     }
 
     return (
@@ -261,6 +276,25 @@ export function AddStudentDialog({
                             )
                         }
                     />
+
+                    <div className="space-y-2">
+
+                        <Label>
+                            Foto do aluno
+                        </Label>
+
+                        <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                                setFoto(
+                                    e.target.files?.[0] ||
+                                    null
+                                )
+                            }
+                        />
+
+                    </div>
 
                     <Select
                         value={turno}

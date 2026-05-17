@@ -34,31 +34,13 @@ export function useStudents() {
       count: "exact",
     });
 
-    /*
-      =========================
-      BUSCA POR NOME
-      =========================
-      */
-
     if (searchTerm) {
       query = query.ilike("nome", `%${searchTerm}%`);
     }
 
-    /*
-      =========================
-      FILTRO TURNO
-      =========================
-      */
-
     if (filterShift !== "all") {
       query = query.eq("turno", filterShift);
     }
-
-    /*
-      =========================
-      EXECUTAR QUERY
-      =========================
-      */
 
     const { data, error, count } = await query
       .order("created_at", {
@@ -97,8 +79,42 @@ export function useStudents() {
     };
   }, [fetchStudents]);
 
-  async function addStudent(studentData: Omit<Student, "id" | "created_at">) {
+  async function addStudent(
+    studentData: Omit<Student, "id" | "created_at">,
+
+    foto: File | null,
+  ) {
     const studentId = crypto.randomUUID();
+
+    let fotoUrl = null;
+
+    /*
+    =========================
+    UPLOAD FOTO
+    =========================
+    */
+
+    if (foto) {
+      const fileExt = foto.name.split(".").pop();
+
+      const filePath = `${studentId}/perfil.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("alunos")
+        .upload(filePath, foto, {
+          upsert: true,
+        });
+
+      if (uploadError) {
+        console.error(uploadError);
+
+        return;
+      }
+
+      const { data } = supabase.storage.from("alunos").getPublicUrl(filePath);
+
+      fotoUrl = data.publicUrl;
+    }
 
     /*
     =========================
@@ -120,7 +136,7 @@ export function useStudents() {
 
         nivel: studentData.nivel,
 
-        foto_url: studentData.foto_url || null,
+        foto_url: fotoUrl,
 
         responsavel_nome: studentData.responsavel_nome || null,
 
