@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase-browser";
 
 import type { Student } from "@/types/student";
+
+const supabase = createClient();
 
 export function useStudents() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -21,82 +23,42 @@ export function useStudents() {
 
   const pageSize = 10;
 
-  useEffect(() => {
-    fetchStudents();
-    fetchStats();
-  }, [page, searchTerm, filterShift]);
-
-  const [stats, setStats] = useState({
-    total: 0,
-    morning: 0,
-    afternoon: 0,
-    beginners: 0,
-    advanced: 0,
-    averageAge: 0,
-  });
-
-  async function fetchStats() {
-    const { data, error } = await supabase
-      .from("alunos_stats")
-      .select("*")
-      .single();
-
-    if (error) {
-      console.error(error);
-      return;
-    }
-
-    setStats({
-      total: data.total || 0,
-
-      morning: data.morning || 0,
-
-      afternoon: data.afternoon || 0,
-
-      beginners: data.beginners || 0,
-
-      advanced: data.advanced || 0,
-
-      averageAge: data.average_age || 0,
-    });
-  }
-
-  async function fetchStudents() {
+  const fetchStudents = useCallback(async () => {
     setLoading(true);
 
     const from = (page - 1) * pageSize;
 
     const to = from + pageSize - 1;
 
-    let query = supabase.from("alunos").select("*", {
+    let query = supabase.from("students").select("*", {
       count: "exact",
     });
 
     /*
-    =========================
-    BUSCA POR NOME
-    =========================
-    */
+      =========================
+      BUSCA POR NOME
+      =========================
+      */
 
     if (searchTerm) {
       query = query.ilike("nome", `%${searchTerm}%`);
     }
 
     /*
-    =========================
-    FILTRO TURNO
-    =========================
-    */
+      =========================
+      FILTRO TURNO
+      =========================
+      */
 
     if (filterShift !== "all") {
       query = query.eq("turno", filterShift);
     }
 
     /*
-    =========================
-    EXECUTAR QUERY
-    =========================
-    */
+      =========================
+      EXECUTAR QUERY
+      =========================
+      */
 
     const { data, error, count } = await query
       .order("created_at", {
@@ -117,17 +79,44 @@ export function useStudents() {
     setTotal(count || 0);
 
     setLoading(false);
-  }
+  }, [page, searchTerm, filterShift]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function load() {
+      if (!mounted) return;
+
+      await fetchStudents();
+    }
+
+    load();
+
+    return () => {
+      mounted = false;
+    };
+  }, [fetchStudents]);
 
   async function addStudent(studentData: {
     name: string;
+
     age: string;
+
     schoolClass: string;
+
     shift: string;
+
     level: string;
+
+    responsavelNome?: string;
+
+    responsavelContato?: string;
+
+    observacoes?: string;
+
     foto: File | null;
   }) {
-    const alunoId = crypto.randomUUID();
+    const studentId = crypto.randomUUID();
 
     let fotoUrl = "";
 
@@ -140,7 +129,7 @@ export function useStudents() {
     if (studentData.foto) {
       const fileExt = studentData.foto.name.split(".").pop();
 
-      const filePath = `${alunoId}/perfil.${fileExt}`;
+      const filePath = `${studentId}/perfil.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("alunos")
@@ -161,13 +150,13 @@ export function useStudents() {
 
     /*
     =========================
-    INSERT ALUNO
+    INSERT STUDENT
     =========================
     */
 
-    const { error } = await supabase.from("alunos").insert([
+    const { error } = await supabase.from("students").insert([
       {
-        id: alunoId,
+        id: studentId,
 
         nome: studentData.name,
 
@@ -180,6 +169,14 @@ export function useStudents() {
         nivel: studentData.level,
 
         foto_url: fotoUrl,
+
+        responsavel_nome: studentData.responsavelNome || null,
+
+        responsavel_contato: studentData.responsavelContato || null,
+
+        observacoes: studentData.observacoes || null,
+
+        ativo: true,
 
         data_inicio: new Date().toISOString().split("T")[0],
       },
@@ -218,7 +215,5 @@ export function useStudents() {
     filterShift,
 
     setFilterShift,
-
-    stats,
   };
 }

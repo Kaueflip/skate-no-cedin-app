@@ -1,20 +1,27 @@
 export type Student = {
-  id: string
-  nome: string
-  idade: number
-  turma: string
+  id: string;
 
-  turno: "Manhã" | "Tarde"
+  nome: string;
 
-  data_inicio: string
+  idade: number;
 
-  nivel:
-    | "Iniciante"
-    | "Básico"
-    | "Intermediário"
-    | "Avançado"
+  turma: string;
 
-  foto_url?: string
+  turno: "Manhã" | "Tarde";
 
-  created_at: string
-}
+  data_inicio: string;
+
+  nivel: "Iniciante" | "Básico" | "Intermediário" | "Avançado";
+
+  foto_url?: string | null;
+
+  created_at: string;
+
+  responsavel_nome?: string | null;
+
+  responsavel_contato?: string | null;
+
+  observacoes?: string | null;
+
+  ativo: boolean;
+};
