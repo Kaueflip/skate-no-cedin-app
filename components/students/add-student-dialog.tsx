@@ -32,6 +32,9 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 
+import { Textarea }
+    from "@/components/ui/textarea"
+
 import { Plus }
     from "lucide-react"
 
@@ -64,9 +67,25 @@ export function AddStudentDialog({
     const [turma, setTurma] =
         useState("")
 
+    const [
+        responsavelNome,
+        setResponsavelNome,
+    ] = useState("")
+
+    const [
+        responsavelContato,
+        setResponsavelContato,
+    ] = useState("")
+
+    const [
+        observacoes,
+        setObservacoes,
+    ] = useState("")
+
     const [turno, setTurno] =
         useState<
-            "Manhã" | "Tarde"
+            "Manhã" |
+            "Tarde"
         >("Manhã")
 
     const [nivel, setNivel] =
@@ -94,18 +113,29 @@ export function AddStudentDialog({
 
                 data_inicio:
                     new Date()
-                        .toISOString(),
+                        .toISOString()
+                        .split("T")[0],
 
                 foto_url: null,
+
+                responsavel_nome:
+                    responsavelNome,
+
+                responsavel_contato:
+                    responsavelContato,
+
+                observacoes,
+
+                ativo: true,
             })
 
             toast.success(
                 "Aluno cadastrado"
             )
 
-            setOpen(false)
-
             resetForm()
+
+            setOpen(false)
 
         } catch {
 
@@ -124,6 +154,9 @@ export function AddStudentDialog({
         setNome("")
         setIdade("")
         setTurma("")
+        setResponsavelNome("")
+        setResponsavelContato("")
+        setObservacoes("")
         setTurno("Manhã")
         setNivel("Iniciante")
     }
@@ -147,7 +180,7 @@ export function AddStudentDialog({
 
             </DialogTrigger>
 
-            <DialogContent>
+            <DialogContent className="sm:max-w-lg">
 
                 <DialogHeader>
 
@@ -194,6 +227,36 @@ export function AddStudentDialog({
                         value={turma}
                         onChange={(e) =>
                             setTurma(
+                                e.target.value
+                            )
+                        }
+                    />
+
+                    <Input
+                        placeholder="Responsável"
+                        value={responsavelNome}
+                        onChange={(e) =>
+                            setResponsavelNome(
+                                e.target.value
+                            )
+                        }
+                    />
+
+                    <Input
+                        placeholder="Contato"
+                        value={responsavelContato}
+                        onChange={(e) =>
+                            setResponsavelContato(
+                                e.target.value
+                            )
+                        }
+                    />
+
+                    <Textarea
+                        placeholder="Observações"
+                        value={observacoes}
+                        onChange={(e) =>
+                            setObservacoes(
                                 e.target.value
                             )
                         }

@@ -1,116 +1,39 @@
 "use client"
 
-import { Search }
+import { Users }
     from "lucide-react"
 
-import { Button }
-    from "@/components/ui/button"
-
-import { Input }
-    from "@/components/ui/input"
-
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
-
 type Props = {
-    searchTerm: string
-
-    onSearchChange: (
-        value: string
-    ) => void
-
-    filterShift: string
-
-    onFilterShiftChange: (
-        value: string
-    ) => void
-
-    loading?: boolean
-
-    onRefresh?: () => void
+    searchTerm?: string
 }
 
-export function StudentsFilters({
+export function StudentsEmptyState({
     searchTerm,
-    onSearchChange,
-    filterShift,
-    onFilterShiftChange,
-    loading,
-    onRefresh,
 }: Props) {
 
     return (
 
-        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center">
 
-            <div className="flex flex-1 flex-col gap-4 sm:flex-row">
+            <div className="rounded-full bg-primary/10 p-4">
 
-                <div className="relative flex-1">
-
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-
-                    <Input
-                        placeholder="Buscar aluno..."
-                        className="pl-9"
-                        value={searchTerm}
-                        onChange={(e) =>
-                            onSearchChange(
-                                e.target.value
-                            )
-                        }
-                    />
-
-                </div>
-
-                <Select
-                    value={filterShift}
-                    onValueChange={
-                        onFilterShiftChange
-                    }
-                >
-
-                    <SelectTrigger className="w-full sm:w-[180px]">
-
-                        <SelectValue placeholder="Turno" />
-
-                    </SelectTrigger>
-
-                    <SelectContent>
-
-                        <SelectItem value="all">
-                            Todos
-                        </SelectItem>
-
-                        <SelectItem value="Manhã">
-                            Manhã
-                        </SelectItem>
-
-                        <SelectItem value="Tarde">
-                            Tarde
-                        </SelectItem>
-
-                    </SelectContent>
-
-                </Select>
+                <Users className="h-8 w-8 text-primary" />
 
             </div>
 
-            <Button
-                variant="outline"
-                onClick={onRefresh}
-                disabled={loading}
-            >
+            <h3 className="mt-6 text-lg font-semibold">
 
-                {loading
-                    ? "Atualizando..."
-                    : "Atualizar"}
+                Nenhum aluno encontrado
 
-            </Button>
+            </h3>
+
+            <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+
+                {searchTerm
+                    ? `Nenhum resultado para "${searchTerm}".`
+                    : "Cadastre alunos para começar a gerenciar o projeto."}
+
+            </p>
 
         </div>
     )

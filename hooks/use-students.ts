@@ -97,56 +97,8 @@ export function useStudents() {
     };
   }, [fetchStudents]);
 
-  async function addStudent(studentData: {
-    name: string;
-
-    age: string;
-
-    schoolClass: string;
-
-    shift: string;
-
-    level: string;
-
-    responsavelNome?: string;
-
-    responsavelContato?: string;
-
-    observacoes?: string;
-
-    foto: File | null;
-  }) {
+  async function addStudent(studentData: Omit<Student, "id" | "created_at">) {
     const studentId = crypto.randomUUID();
-
-    let fotoUrl = "";
-
-    /*
-    =========================
-    UPLOAD FOTO
-    =========================
-    */
-
-    if (studentData.foto) {
-      const fileExt = studentData.foto.name.split(".").pop();
-
-      const filePath = `${studentId}/perfil.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("alunos")
-        .upload(filePath, studentData.foto, {
-          upsert: true,
-        });
-
-      if (uploadError) {
-        console.error(uploadError);
-
-        return;
-      }
-
-      const { data } = supabase.storage.from("alunos").getPublicUrl(filePath);
-
-      fotoUrl = data.publicUrl;
-    }
 
     /*
     =========================
@@ -158,27 +110,27 @@ export function useStudents() {
       {
         id: studentId,
 
-        nome: studentData.name,
+        nome: studentData.nome,
 
-        idade: Number(studentData.age),
+        idade: studentData.idade,
 
-        turma: studentData.schoolClass,
+        turma: studentData.turma,
 
-        turno: studentData.shift,
+        turno: studentData.turno,
 
-        nivel: studentData.level,
+        nivel: studentData.nivel,
 
-        foto_url: fotoUrl,
+        foto_url: studentData.foto_url || null,
 
-        responsavel_nome: studentData.responsavelNome || null,
+        responsavel_nome: studentData.responsavel_nome || null,
 
-        responsavel_contato: studentData.responsavelContato || null,
+        responsavel_contato: studentData.responsavel_contato || null,
 
         observacoes: studentData.observacoes || null,
 
-        ativo: true,
+        ativo: studentData.ativo,
 
-        data_inicio: new Date().toISOString().split("T")[0],
+        data_inicio: studentData.data_inicio,
       },
     ]);
 
