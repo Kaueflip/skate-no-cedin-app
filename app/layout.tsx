@@ -40,7 +40,30 @@ export default function RootLayout({
 
             {children}
 
-            <Toaster />
+            <Toaster toastOptions={{
+              classNames: {
+                toast: `
+        border-white/40
+
+        bg-[#eef1fb]
+
+        text-zinc-900
+
+        shadow-xl
+
+        backdrop-blur-2xl
+      `,
+
+                description:
+                  "text-zinc-500",
+
+                actionButton:
+                  "bg-zinc-900 text-white",
+
+                cancelButton:
+                  "bg-zinc-200 text-zinc-900",
+              },
+            }} />
 
             <Analytics />
 
