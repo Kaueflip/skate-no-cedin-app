@@ -80,17 +80,40 @@ export function StudentsFilters({
 
                     </SelectTrigger>
 
-                    <SelectContent>
+                    <SelectContent className="
+            rounded-xl
 
-                        <SelectItem value="all">
-                            Todos
+            border-white/40
+
+            bg-[#eef1fb]
+
+            backdrop-blur-2xl
+          ">
+
+                        <SelectItem value="all" className="
+  rounded-xl
+
+  focus:bg-white/80
+  focus:text-zinc-900
+">
+                            Todos os turnos
                         </SelectItem>
 
-                        <SelectItem value="Manhã">
+                        <SelectItem value="Manhã" className="
+  rounded-xl
+
+  focus:bg-white/80
+  focus:text-zinc-900
+">
                             Manhã
                         </SelectItem>
 
-                        <SelectItem value="Tarde">
+                        <SelectItem value="Tarde" className="
+  rounded-xl
+
+  focus:bg-white/80
+  focus:text-zinc-900
+">
                             Tarde
                         </SelectItem>
 
