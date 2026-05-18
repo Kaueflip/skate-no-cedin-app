@@ -61,9 +61,6 @@ absolute
         flex-col
         justify-between
 
-        border-r
-        border-border
-
         p-10
 
         lg:flex
