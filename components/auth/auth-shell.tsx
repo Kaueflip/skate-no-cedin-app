@@ -143,9 +143,7 @@ export function AuthShell({
 
                         <Image
                             unoptimized
-                            src="
-https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo.svg
-              "
+                            src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo.svg"
                             alt="Skate no Cedin"
                             width={48}
                             height={48}
@@ -159,9 +157,7 @@ https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo.sv
 
                         <Image
                             unoptimized
-                            src="
-https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo-light-cedin.png
-              "
+                            src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo-light-cedin.png"
                             alt="Skate no Cedin"
                             width={48}
                             height={48}
@@ -175,7 +171,7 @@ https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo-li
               "
                         />
 
-                        <div>
+                        {/*           <div>
 
                             <p className="
                 text-sm
@@ -196,7 +192,7 @@ https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo-li
 
                             </p>
 
-                        </div>
+                        </div> */}
 
                     </div>
 

@@ -21,8 +21,6 @@ import {
 import {
   Analytics,
 } from "@vercel/analytics/react"
-import Script from "next/script"
-
 
 
 export const metadata:
@@ -134,16 +132,7 @@ export default function RootLayout({
           </TooltipProvider>
 
         </ThemeProvider>
-        <Script
-          id="suppress-next-theme-warning"
-          strategy="beforeInteractive"
-        >
 
-          {`
-    window.__NEXT_THEME_INITIALIZED = true;
-  `}
-
-        </Script>
       </body>
 
     </html>

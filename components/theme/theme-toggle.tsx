@@ -1,5 +1,8 @@
 "use client"
 
+import dynamic
+    from "next/dynamic"
+
 import {
     Moon,
     Sun,
@@ -9,7 +12,7 @@ import {
     useTheme,
 } from "next-themes"
 
-export function ThemeToggle() {
+function ThemeToggleComponent() {
 
     const {
         resolvedTheme,
@@ -54,7 +57,6 @@ export function ThemeToggle() {
             aria-label="
         Alternar tema
       "
-            suppressHydrationWarning
         >
 
             {isDark ? (
@@ -80,3 +82,13 @@ export function ThemeToggle() {
         </button>
     )
 }
+
+export const ThemeToggle =
+    dynamic(
+        async () => (
+            ThemeToggleComponent
+        ),
+        {
+            ssr: false,
+        }
+    )
