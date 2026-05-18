@@ -13,8 +13,8 @@ import { toast }
 import { Plus }
     from "lucide-react"
 
-import { Button }
-    from "@/components/ui/button"
+import { AppButton }
+    from "@/components/ui/app-button"
 
 import { Input }
     from "@/components/ui/input"
@@ -42,6 +42,27 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+
+function formatPhone(
+    value: string
+) {
+
+    const numbers =
+        value.replace(/\D/g, "")
+
+    if (numbers.length <= 2) {
+
+        return numbers
+    }
+
+    if (numbers.length <= 7) {
+
+        return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`
+    }
+
+    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`
+}
+
 
 type Props = {
     onAddStudent: (
@@ -238,21 +259,30 @@ export function AddStudentDialog({
 
             <DialogTrigger asChild>
 
-                <Button>
+                <AppButton>
 
                     <Plus className="mr-2 h-4 w-4" />
 
                     Novo Aluno
 
-                </Button>
+                </AppButton>
 
             </DialogTrigger>
 
             <DialogContent
                 className="
-                   max-h-[90vh]
-                   overflow-y-auto
-                   sm:max-w-[520px]"
+                      max-h-[90vh]
+    overflow-y-auto
+
+    border-white/40
+
+    bg-[#eef1fb]
+
+    shadow-2xl
+
+    backdrop-blur-2xl
+
+    sm:max-w-[520px]"
             >
 
                 <DialogHeader>
@@ -272,11 +302,41 @@ export function AddStudentDialog({
 
                 </DialogHeader>
 
-                <div className="grid gap-5 py-4">
+                <div className="
+  grid
+  gap-6
 
-                    <div className="flex items-center gap-4">
+  py-4
+">
 
-                        <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border bg-muted">
+                    <div className="
+    flex
+    flex-col
+    gap-4
+
+    sm:flex-row
+    sm:items-center
+  ">
+
+                        <div className="
+      flex
+      h-24
+      w-24
+      shrink-0
+      items-center
+      justify-center
+
+      overflow-hidden
+
+      rounded-full
+
+      border
+      border-white/40
+
+      bg-white
+
+      shadow-sm
+    ">
 
                             {foto ? (
 
@@ -285,12 +345,19 @@ export function AddStudentDialog({
                                     alt="Preview"
                                     width={96}
                                     height={96}
-                                    className="h-full w-full object-cover"
+                                    className="
+            h-full
+            w-full
+            object-cover
+          "
                                 />
 
                             ) : (
 
-                                <span className="text-xs text-muted-foreground">
+                                <span className="
+          text-xs
+          text-zinc-500
+        ">
 
                                     Sem foto
 
@@ -299,7 +366,10 @@ export function AddStudentDialog({
 
                         </div>
 
-                        <div className="flex-1 space-y-2">
+                        <div className="
+      flex-1
+      space-y-2
+    ">
 
                             <Label>
                                 Foto do aluno
@@ -309,6 +379,15 @@ export function AddStudentDialog({
                                 type="file"
                                 accept="image/*"
                                 capture="environment"
+                                className="
+          h-11
+
+          rounded-xl
+
+          border-white/40
+
+          bg-white
+        "
                                 onChange={(e) =>
                                     setFoto(
                                         e.target.files?.[0] ||
@@ -321,14 +400,13 @@ export function AddStudentDialog({
 
                     </div>
 
-                    <div className="grid gap-2">
+                    <div className="space-y-2">
 
                         <Label>
                             Nome Completo *
                         </Label>
 
                         <Input
-                            required
                             value={newStudent.nome}
                             onChange={(e) =>
                                 setNewStudent({
@@ -339,21 +417,34 @@ export function AddStudentDialog({
                                 })
                             }
                             placeholder="Nome do aluno"
+                            required
+                            className="
+        h-11
+
+        rounded-xl
+
+        border-white/40
+
+        bg-white
+      "
                         />
 
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="
+    grid
+    gap-4
 
-                        <div className="grid gap-2">
+    sm:grid-cols-2
+  ">
+
+                        <div className="space-y-2">
 
                             <Label>
                                 Idade *
                             </Label>
 
                             <Input
-                                required
-                                min={1}
                                 type="number"
                                 value={newStudent.idade}
                                 onChange={(e) =>
@@ -365,18 +456,28 @@ export function AddStudentDialog({
                                     })
                                 }
                                 placeholder="10"
+                                required
+                                min={1}
+                                className="
+          h-11
+
+          rounded-xl
+
+          border-white/40
+
+          bg-white
+        "
                             />
 
                         </div>
 
-                        <div className="grid gap-2">
+                        <div className="space-y-2">
 
                             <Label>
                                 Turma *
                             </Label>
 
                             <Input
-                                required
                                 value={newStudent.turma}
                                 onChange={(e) =>
                                     setNewStudent({
@@ -387,15 +488,30 @@ export function AddStudentDialog({
                                     })
                                 }
                                 placeholder="6º A"
+                                required
+                                className="
+          h-11
+
+          rounded-xl
+
+          border-white/40
+
+          bg-white
+        "
                             />
 
                         </div>
 
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="
+    grid
+    gap-4
 
-                        <div className="grid gap-2">
+    sm:grid-cols-2
+  ">
+
+                        <div className="space-y-2">
 
                             <Label>
                                 Turno
@@ -415,29 +531,60 @@ export function AddStudentDialog({
                                 }
                             >
 
-                                <SelectTrigger>
+                                <SelectTrigger
+                                    className="
+            h-11
+
+            rounded-xl
+
+            border-white/40
+
+            bg-white
+          "
+                                >
 
                                     <SelectValue />
 
                                 </SelectTrigger>
 
-                                <SelectContent>
+                                <SelectContent className="
+    rounded-2xl
 
-                                    <SelectItem value="Manhã">
+    border
+    border-white/40
+
+    bg-[#eef1fb]/95
+
+    shadow-xl
+
+    backdrop-blur-2xl
+  ">
+
+                                    <SelectItem value="Manhã" className="
+  rounded-xl
+
+  focus:bg-white/80
+  focus:text-zinc-900
+">
                                         Manhã
                                     </SelectItem>
 
-                                    <SelectItem value="Tarde">
+                                    <SelectItem value="Tarde" className="
+  rounded-xl
+
+  focus:bg-white/80
+  focus:text-zinc-900
+">
                                         Tarde
                                     </SelectItem>
 
-                                </SelectContent>
+                                </SelectContent >
 
                             </Select>
 
                         </div>
 
-                        <div className="grid gap-2">
+                        <div className="space-y-2">
 
                             <Label>
                                 Nível
@@ -456,27 +603,68 @@ export function AddStudentDialog({
                                 }
                             >
 
-                                <SelectTrigger>
+                                <SelectTrigger
+                                    className="
+            h-11
+
+            rounded-xl
+
+            border-white/40
+
+            bg-white
+          "
+                                >
 
                                     <SelectValue />
 
                                 </SelectTrigger>
 
-                                <SelectContent>
+                                <SelectContent className="
+    rounded-2xl
 
-                                    <SelectItem value="Iniciante">
+    border
+    border-white/40
+
+    bg-[#eef1fb]/95
+
+    shadow-xl
+
+    backdrop-blur-2xl
+  ">
+
+                                    <SelectItem value="Iniciante" className="
+  rounded-xl
+
+  focus:bg-white/80
+  focus:text-zinc-900
+">
                                         Iniciante
                                     </SelectItem>
 
-                                    <SelectItem value="Básico">
+                                    <SelectItem value="Básico" className="
+  rounded-xl
+
+  focus:bg-white/80
+  focus:text-zinc-900
+">
                                         Básico
                                     </SelectItem>
 
-                                    <SelectItem value="Intermediário">
+                                    <SelectItem value="Intermediário" className="
+  rounded-xl
+
+  focus:bg-white/80
+  focus:text-zinc-900
+">
                                         Intermediário
                                     </SelectItem>
 
-                                    <SelectItem value="Avançado">
+                                    <SelectItem value="Avançado" className="
+  rounded-xl
+
+  focus:bg-white/80
+  focus:text-zinc-900
+">
                                         Avançado
                                     </SelectItem>
 
@@ -488,7 +676,7 @@ export function AddStudentDialog({
 
                     </div>
 
-                    <div className="grid gap-2">
+                    <div className="space-y-2">
 
                         <Label>
                             Responsável
@@ -508,11 +696,20 @@ export function AddStudentDialog({
                                 })
                             }
                             placeholder="Nome do responsável"
+                            className="
+        h-11
+
+        rounded-xl
+
+        border-white/40
+
+        bg-white
+      "
                         />
 
                     </div>
 
-                    <div className="grid gap-2">
+                    <div className="space-y-2">
 
                         <Label>
                             Contato
@@ -528,15 +725,28 @@ export function AddStudentDialog({
                                     ...newStudent,
 
                                     responsavel_contato:
-                                        e.target.value,
+                                        formatPhone(
+                                            e.target.value
+                                        ),
                                 })
                             }
                             placeholder="(47) 99999-9999"
+                            inputMode="numeric"
+                            maxLength={15}
+                            className="
+        h-11
+
+        rounded-xl
+
+        border-white/40
+
+        bg-white
+      "
                         />
 
                     </div>
 
-                    <div className="grid gap-2">
+                    <div className="space-y-2">
 
                         <Label>
                             Observações
@@ -556,6 +766,17 @@ export function AddStudentDialog({
                                 })
                             }
                             placeholder="Observações adicionais"
+                            className="
+        min-h-[120px]
+
+        rounded-xl
+
+        border-white/40
+
+        bg-white
+
+        resize-none
+      "
                         />
 
                     </div>
@@ -564,7 +785,7 @@ export function AddStudentDialog({
 
                 <DialogFooter>
 
-                    <Button
+                    <AppButton
                         onClick={handleSubmit}
                         disabled={loading}
                         className="
@@ -579,7 +800,7 @@ export function AddStudentDialog({
                             ? "Salvando..."
                             : "Cadastrar Aluno"}
 
-                    </Button>
+                    </AppButton>
 
                 </DialogFooter>
 

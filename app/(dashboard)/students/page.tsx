@@ -3,11 +3,11 @@
 import { useState }
     from "react"
 
-import { useStudents }
-    from "@/hooks/use-students"
-
 import type { Student }
     from "@/types/student"
+
+import { useStudents }
+    from "@/hooks/use-students"
 
 import {
     Card,
@@ -16,9 +16,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-
-import { StudentsTable }
-    from "@/components/students/students-table"
 
 import { AddStudentDialog }
     from "@/components/students/add-student-dialog"
@@ -40,6 +37,9 @@ import { StudentsToolbar }
 
 import { StudentsPagination }
     from "@/components/students/students-pagination"
+
+import { StudentsTable }
+    from "@/components/students/students-table"
 
 export default function StudentsPage() {
 
@@ -67,112 +67,257 @@ export default function StudentsPage() {
 
     return (
 
-        <div className="flex flex-col gap-6 p-6">
+        <main className="
+      min-h-screen
 
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      bg-[#e5e8f7]
 
-                <div>
+      bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.65),transparent_35%)]
+    ">
 
-                    <h1 className="text-3xl font-bold tracking-tight">
+            <div className="
+        flex
+        flex-col
+        gap-8
 
-                        Alunos
+        p-6
 
-                    </h1>
+        lg:p-10
+      ">
 
-                    <p className="text-muted-foreground">
+                <div className="
+          flex
+          flex-col
+          gap-6
 
-                        Gerencie os alunos do projeto
+          lg:flex-row
+          lg:items-center
+          lg:justify-between
+        ">
 
-                    </p>
+                    <div>
+
+
+
+                        <h1 className="
+              mt-2
+
+              text-4xl
+              font-black
+              tracking-tight
+
+              text-zinc-900
+            ">
+
+                            Alunos
+
+                        </h1>
+
+                        <p className="
+              mt-3
+
+              text-lg
+              text-zinc-600
+            ">
+
+                            Gerencie os alunos do projeto Skate no Cedin
+
+                        </p>
+
+                    </div>
+
+                    <AddStudentDialog
+                        onAddStudent={
+                            addStudent
+                        }
+                    />
 
                 </div>
 
-                <AddStudentDialog
-                    onAddStudent={
-                        addStudent
-                    }
+                <StudentsStats
+                    students={students}
                 />
 
+                <Card
+                    className="
+            rounded-[2rem]
+
+            border
+            border-white/40
+
+            bg-white/70
+
+            shadow-sm
+
+            backdrop-blur-xl
+          "
+                >
+
+                    <CardHeader className="pb-2">
+
+                        <div className="
+              flex
+              flex-col
+              gap-3
+
+              lg:flex-row
+              lg:items-center
+              lg:justify-between
+            ">
+
+                            <div>
+
+                                <CardTitle className="
+                  text-2xl
+                  font-black
+                  tracking-tight
+
+                  text-zinc-900
+                ">
+
+                                    Lista de Alunos
+
+                                </CardTitle>
+
+                                <CardDescription className="
+                  mt-1
+
+                  text-base
+                  text-zinc-500
+                ">
+
+                                    {total} alunos encontrados
+
+                                </CardDescription>
+
+                            </div>
+
+                        </div>
+
+                    </CardHeader>
+
+                    <CardContent className="space-y-6">
+
+                        <div className="
+              rounded-[1.5rem]
+
+              border
+              border-white/40
+
+              bg-white/60
+
+              p-5
+
+              backdrop-blur-xl
+            ">
+
+                            <StudentsFilters
+                                searchTerm={
+                                    searchTerm
+                                }
+                                onSearchChange={
+                                    setSearchTerm
+                                }
+                                filterShift={
+                                    filterShift
+                                }
+                                onFilterShiftChange={
+                                    setFilterShift
+                                }
+                                loading={loading}
+                                onRefresh={
+                                    fetchStudents
+                                }
+                            />
+
+                        </div>
+
+                        <div className="
+              rounded-[1.5rem]
+
+              border
+              border-white/40
+
+              bg-white/60
+
+              p-5
+
+              backdrop-blur-xl
+            ">
+
+                            <StudentsToolbar
+                                students={students}
+                            />
+
+                        </div>
+
+                        <div className="
+              overflow-hidden
+
+              rounded-[1.5rem]
+
+              border
+              border-white/40
+
+              bg-white/60
+
+              backdrop-blur-xl
+            ">
+
+                            {students.length === 0 ? (
+
+                                <div className="p-10">
+
+                                    <StudentsEmptyState
+                                        searchTerm={
+                                            searchTerm
+                                        }
+                                    />
+
+                                </div>
+
+                            ) : (
+
+                                <StudentsTable
+                                    students={students}
+                                    onSelectStudent={
+                                        setSelectedStudent
+                                    }
+                                />
+
+                            )}
+
+                        </div>
+
+                        <div className="
+              rounded-[1.5rem]
+
+              border
+              border-white/40
+
+              bg-white/60
+
+              p-5
+
+              backdrop-blur-xl
+            ">
+
+                            <StudentsPagination
+                                page={page}
+                                total={total}
+                                pageSize={pageSize}
+                                onPageChange={
+                                    setPage
+                                }
+                            />
+
+                        </div>
+
+                    </CardContent>
+
+                </Card>
+
             </div>
-
-            <StudentsStats
-                students={students}
-            />
-
-            <Card>
-
-                <CardHeader>
-
-                    <CardTitle>
-
-                        Lista de Alunos
-
-                    </CardTitle>
-
-                    <CardDescription>
-
-                        {total} alunos encontrados
-
-                    </CardDescription>
-
-                </CardHeader>
-
-                <CardContent>
-
-                    <StudentsFilters
-                        searchTerm={
-                            searchTerm
-                        }
-                        onSearchChange={
-                            setSearchTerm
-                        }
-                        filterShift={
-                            filterShift
-                        }
-                        onFilterShiftChange={
-                            setFilterShift
-                        }
-                        loading={loading}
-                        onRefresh={
-                            fetchStudents
-                        }
-                    />
-
-                    <StudentsToolbar
-                        students={students}
-                    />
-
-                    {students.length === 0 ? (
-
-                        <StudentsEmptyState
-                            searchTerm={
-                                searchTerm
-                            }
-                        />
-
-                    ) : (
-
-                        <StudentsTable
-                            students={students}
-                            onSelectStudent={
-                                setSelectedStudent
-                            }
-                        />
-
-                    )}
-
-                    <StudentsPagination
-                        page={page}
-                        total={total}
-                        pageSize={pageSize}
-                        onPageChange={
-                            setPage
-                        }
-                    />
-
-                </CardContent>
-
-            </Card>
 
             <StudentProfileModal
                 student={
@@ -188,6 +333,6 @@ export default function StudentsPage() {
                 }
             />
 
-        </div>
+        </main>
     )
 }

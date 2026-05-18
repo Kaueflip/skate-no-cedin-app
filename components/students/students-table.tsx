@@ -48,57 +48,120 @@ export function StudentsTable({
             .toUpperCase()
     }
 
-    function getLevelVariant(
+    function getLevelStyles(
         nivel: Student["nivel"]
     ) {
 
         switch (nivel) {
 
-            case "Avançado":
-                return "default"
+            case "Iniciante":
 
-            case "Intermediário":
-                return "secondary"
+                return `
+          bg-zinc-900
+          text-white
+
+          hover:bg-zinc-800
+        `
 
             case "Básico":
-                return "outline"
+
+                return `
+          border-transparent
+
+          bg-zinc-200
+
+          text-zinc-900
+
+          hover:bg-zinc-200
+        `
+
+            case "Intermediário":
+
+                return `
+          border-transparent
+
+          bg-zinc-300
+
+          text-zinc-900
+
+          hover:bg-zinc-300
+        `
+
+            case "Avançado":
+
+                return `
+          border-transparent
+
+          bg-zinc-800
+
+          text-white
+
+          hover:bg-zinc-700
+        `
 
             default:
-                return "secondary"
+
+                return `
+          bg-zinc-200
+          text-zinc-900
+        `
         }
     }
 
     return (
 
-        <div className="rounded-xl border">
+        <div
+            className="
+        overflow-hidden
 
-            <Table>
+        rounded-[1.5rem]
 
-                <TableHeader>
+        border
+        border-white/40
 
-                    <TableRow>
+        bg-white/60
 
-                        <TableHead>
+        backdrop-blur-xl
+      "
+        >
+
+            <Table className="overflow-hidden">
+
+                <TableHeader
+                    className="
+            bg-white/40
+          "
+                >
+
+                    <TableRow
+                        className="
+              border-white/40
+
+              hover:bg-transparent
+            "
+                    >
+
+                        <TableHead className="h-14 text-zinc-700">
                             Aluno
                         </TableHead>
 
-                        <TableHead>
+                        <TableHead className="text-zinc-700">
                             Idade
                         </TableHead>
 
-                        <TableHead>
+                        <TableHead className="text-zinc-700">
                             Turma
                         </TableHead>
 
-                        <TableHead>
+                        <TableHead className="text-zinc-700">
                             Turno
                         </TableHead>
 
-                        <TableHead>
+                        <TableHead className="text-zinc-700">
                             Nível
                         </TableHead>
 
-                        <TableHead>
+                        <TableHead className="text-zinc-700">
                             Início
                         </TableHead>
 
@@ -113,7 +176,15 @@ export function StudentsTable({
 
                             <TableRow
                                 key={student.id}
-                                className="cursor-pointer"
+                                className="
+                  cursor-pointer
+
+                  border-white/30
+
+                  transition-colors
+
+                  hover:bg-white/40
+                "
                                 onClick={() =>
                                     onSelectStudent?.(
                                         student
@@ -123,9 +194,21 @@ export function StudentsTable({
 
                                 <TableCell>
 
-                                    <div className="flex items-center gap-3">
+                                    <div className="
+                    flex
+                    items-center
+                    gap-3
+                  ">
 
-                                        <Avatar>
+                                        <Avatar
+                                            className="
+                        h-10
+                        w-10
+
+                        border
+                        border-white/40
+                      "
+                                        >
 
                                             <AvatarImage
                                                 src={
@@ -134,7 +217,13 @@ export function StudentsTable({
                                                 }
                                             />
 
-                                            <AvatarFallback>
+                                            <AvatarFallback
+                                                className="
+                          bg-white
+
+                          text-zinc-700
+                        "
+                                            >
 
                                                 {getInitials(
                                                     student.nome
@@ -146,7 +235,10 @@ export function StudentsTable({
 
                                         <div>
 
-                                            <p className="font-medium">
+                                            <p className="
+                        font-semibold
+                        text-zinc-900
+                      ">
 
                                                 {student.nome}
 
@@ -158,19 +250,19 @@ export function StudentsTable({
 
                                 </TableCell>
 
-                                <TableCell>
+                                <TableCell className="text-zinc-700">
 
                                     {student.idade} anos
 
                                 </TableCell>
 
-                                <TableCell>
+                                <TableCell className="text-zinc-700">
 
                                     {student.turma}
 
                                 </TableCell>
 
-                                <TableCell>
+                                <TableCell className="text-zinc-700">
 
                                     {student.turno}
 
@@ -179,9 +271,20 @@ export function StudentsTable({
                                 <TableCell>
 
                                     <Badge
-                                        variant={getLevelVariant(
+                                        className={`
+                      rounded-xl
+
+                      px-3
+                      py-1
+
+                      font-medium
+
+                      shadow-none
+
+                      ${getLevelStyles(
                                             student.nivel
                                         )}
+                    `}
                                     >
 
                                         {student.nivel}
@@ -190,7 +293,7 @@ export function StudentsTable({
 
                                 </TableCell>
 
-                                <TableCell>
+                                <TableCell className="text-zinc-700">
 
                                     {new Date(
                                         student.data_inicio

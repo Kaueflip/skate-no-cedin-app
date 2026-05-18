@@ -1,21 +1,19 @@
-"use client"
-
-import type { Student }
-    from "@/types/student"
+import {
+    Users,
+    Sun,
+    Moon,
+    Cake,
+    GraduationCap,
+    Trophy,
+} from "lucide-react"
 
 import {
     Card,
     CardContent,
 } from "@/components/ui/card"
 
-import {
-    Users,
-    Sun,
-    Moon,
-    GraduationCap,
-    Trophy,
-    Cake,
-} from "lucide-react"
+import type { Student }
+    from "@/types/student"
 
 type Props = {
     students: Student[]
@@ -25,19 +23,18 @@ export function StudentsStats({
     students,
 }: Props) {
 
-    const totalStudents =
-        students.length
-
-    const morningStudents =
+    const morning =
         students.filter(
             (student) =>
-                student.turno === "Manhã"
+                student.turno ===
+                "Manhã"
         ).length
 
-    const afternoonStudents =
+    const afternoon =
         students.filter(
             (student) =>
-                student.turno === "Tarde"
+                student.turno ===
+                "Tarde"
         ).length
 
     const beginners =
@@ -58,80 +55,159 @@ export function StudentsStats({
         students.length > 0
             ? Math.round(
                 students.reduce(
-                    (acc, student) =>
-                        acc + student.idade,
+                    (
+                        acc,
+                        student
+                    ) =>
+                        acc +
+                        student.idade,
                     0
-                ) / students.length
+                ) /
+                students.length
             )
             : 0
 
-    const items = [
+    const stats = [
         {
             title: "Total",
-            value: totalStudents,
+
+            value:
+                students.length,
+
             icon: Users,
         },
 
         {
             title: "Manhã",
-            value: morningStudents,
+
+            value:
+                morning,
+
             icon: Sun,
         },
 
         {
             title: "Tarde",
-            value: afternoonStudents,
+
+            value:
+                afternoon,
+
             icon: Moon,
         },
 
         {
             title: "Idade Média",
+
             value: `${averageAge} anos`,
+
             icon: Cake,
         },
 
         {
             title: "Iniciantes",
-            value: beginners,
+
+            value:
+                beginners,
+
             icon: GraduationCap,
         },
 
         {
             title: "Avançados",
-            value: advanced,
+
+            value:
+                advanced,
+
             icon: Trophy,
         },
     ]
 
     return (
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+        <div className="
+      grid
+      gap-4
 
-            {items.map((item) => (
+      sm:grid-cols-2
 
-                <Card key={item.title}>
+      xl:grid-cols-6
+    ">
 
-                    <CardContent className="flex items-center justify-between p-6">
+            {stats.map((stat) => (
 
-                        <div>
+                <Card
+                    key={stat.title}
+                    className="
+            overflow-hidden
 
-                            <p className="text-sm text-muted-foreground">
+            rounded-[2rem]
 
-                                {item.title}
+            border
+            border-white/40
 
-                            </p>
+            bg-white/70
 
-                            <h3 className="mt-1 text-2xl font-bold">
+            shadow-sm
 
-                                {item.value}
+            backdrop-blur-xl
+          "
+                >
 
-                            </h3>
+                    <CardContent className="p-6">
 
-                        </div>
+                        <div className="
+              flex
+              items-start
+              justify-between
+            ">
 
-                        <div className="rounded-xl bg-primary/10 p-3">
+                            <div>
 
-                            <item.icon className="h-5 w-5 text-primary" />
+                                <p className="
+                  text-sm
+                  text-zinc-500
+                ">
+
+                                    {stat.title}
+
+                                </p>
+
+                                <h3 className="
+                  mt-3
+
+                  text-4xl
+                  font-black
+                  tracking-tight
+
+                  text-zinc-900
+                ">
+
+                                    {stat.value}
+
+                                </h3>
+
+                            </div>
+
+                            <div
+                                className="
+                  rounded-2xl
+
+                  bg-zinc-900
+
+                  p-3
+
+                  text-white
+                "
+                            >
+
+                                <stat.icon
+                                    className="
+                    h-5
+                    w-5
+                  "
+                                />
+
+                            </div>
 
                         </div>
 
