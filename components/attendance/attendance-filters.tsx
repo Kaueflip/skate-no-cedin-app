@@ -149,18 +149,21 @@ export function AttendanceFilters({
 
                 <CalendarDays
                     className="
-            pointer-events-none
+             pointer-events-none
+      absolute
+      left-4
+      top-1/2
 
-            absolute
-            left-4
-            top-1/2
+      hidden
 
-            h-4
-            w-4
+      h-4
+      w-4
 
-            -translate-y-1/2
+      -translate-y-1/2
 
-            text-zinc-400
+      text-zinc-400
+
+      sm:block
           "
                 />
 
@@ -183,7 +186,8 @@ export function AttendanceFilters({
 
             bg-white
 
-            pl-11
+            pl-4
+            sm:pl-11
 
             [&::-webkit-calendar-picker-indicator]:absolute
             [&::-webkit-calendar-picker-indicator]:inset-0
