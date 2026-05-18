@@ -89,11 +89,11 @@ export default async function DashboardPage() {
 
                     <div className="flex gap-3">
 
-                        <AppButton>
+                        {/*  <AppButton>
 
                             Novo Aluno
 
-                        </AppButton>
+                        </AppButton> */}
 
                     </div>
 
