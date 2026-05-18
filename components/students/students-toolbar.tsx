@@ -27,43 +27,42 @@ export function StudentsToolbar({
             "Turma",
             "Turno",
             "Nível",
-            "Data Início",
+            "Responsável",
+            "Contato",
         ]
 
-        const rows =
-            students.map(
-                (student) => [
+        const rows = students.map(
+            (student) => [
+                student.nome,
 
-                    student.nome,
+                student.idade,
 
-                    student.idade,
+                student.turma,
 
-                    student.turma,
+                student.turno,
 
-                    student.turno,
+                student.nivel,
 
-                    student.nivel,
+                student.responsavel_nome || "",
 
-                    new Date(
-                        student.data_inicio
-                    ).toLocaleDateString(
-                        "pt-BR"
-                    ),
-                ]
-            )
+                student.responsavel_contato || "",
+            ]
+        )
 
         const csvContent = [
             headers.join(","),
 
-            ...rows.map(
-                (row) =>
-                    row.join(",")
+            ...rows.map((row) =>
+                row.join(",")
             ),
         ].join("\n")
 
         const blob =
             new Blob(
-                [csvContent],
+                [
+                    "\uFEFF",
+                    csvContent,
+                ],
                 {
                     type:
                         "text/csv;charset=utf-8;",
@@ -75,24 +74,20 @@ export function StudentsToolbar({
                 blob
             )
 
-        const link =
-            document.createElement("a")
+        const a =
+            document.createElement(
+                "a"
+            )
 
-        link.href = url
+        a.href = url
 
-        link.setAttribute(
-            "download",
+        a.download =
             "alunos.csv"
-        )
 
-        document.body.appendChild(
-            link
-        )
+        a.click()
 
-        link.click()
-
-        document.body.removeChild(
-            link
+        URL.revokeObjectURL(
+            url
         )
     }
 

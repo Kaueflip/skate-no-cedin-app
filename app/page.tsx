@@ -373,11 +373,45 @@ export default function LandingPage() {
 
           </div>
 
-          <p className="text-sm text-zinc-500">
+          <div className="
+  flex
+  flex-col
+  items-center
+  gap-1
 
-            © 2026 Skate no Cedin • Todos os direitos reservados
+  text-center
 
-          </p>
+  md:items-end
+  md:text-right
+">
+
+            <p className="text-sm text-zinc-500">
+
+              © 2026 Skate no Cedin • Todos os direitos reservados
+
+            </p>
+
+            <a
+              href="https://instagram.com/kauhaze"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="
+      text-sm
+      font-medium
+
+      text-zinc-700
+
+      transition-colors
+
+      hover:text-zinc-900
+    "
+            >
+
+              Desenvolvido por KF
+
+            </a>
+
+          </div>
 
         </div>
 
