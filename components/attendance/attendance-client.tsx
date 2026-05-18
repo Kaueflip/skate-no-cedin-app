@@ -44,6 +44,9 @@ export function AttendanceClient({
     const [saving, setSaving] =
         useState(false)
 
+    const [loadingDate, setLoadingDate] =
+        useState(false)
+
     const [search, setSearch] =
         useState("")
 
@@ -88,6 +91,70 @@ export function AttendanceClient({
             search,
             turno,
         ])
+
+    async function handleDateChange(
+        newDate: string
+    ) {
+
+        try {
+
+            setLoadingDate(true)
+
+            setDate(newDate)
+
+            const {
+                data,
+                error,
+            } = await supabase
+                .from("attendance")
+                .select("*")
+                .eq(
+                    "class_date",
+                    newDate
+                )
+
+            if (error)
+                throw error
+
+            const mapped =
+                (data || []).reduce(
+                    (
+                        acc,
+                        item
+                    ) => {
+
+                        acc[
+                            item.student_id
+                        ] =
+                            item.present
+
+                        return acc
+
+                    },
+
+                    {} as Record<
+                        string,
+                        boolean
+                    >
+                )
+
+            setAttendanceMap(
+                mapped
+            )
+
+        } catch (error) {
+
+            console.error(error)
+
+            toast.error(
+                "Erro ao carregar presença"
+            )
+
+        } finally {
+
+            setLoadingDate(false)
+        }
+    }
 
     function toggleAttendance(
         studentId: string
@@ -237,7 +304,7 @@ export function AttendanceClient({
                     }
                     date={date}
                     onDateChange={
-                        setDate
+                        handleDateChange
                     }
                 />
 
@@ -325,17 +392,34 @@ export function AttendanceClient({
 
                 </div>
 
-                <AttendanceList
-                    students={
-                        filteredStudents
-                    }
-                    attendanceMap={
-                        attendanceMap
-                    }
-                    onToggle={
-                        toggleAttendance
-                    }
-                />
+                {loadingDate ? (
+
+                    <div className="
+            py-20
+            text-center
+
+            text-zinc-500
+          ">
+
+                        Carregando presença...
+
+                    </div>
+
+                ) : (
+
+                    <AttendanceList
+                        students={
+                            filteredStudents
+                        }
+                        attendanceMap={
+                            attendanceMap
+                        }
+                        onToggle={
+                            toggleAttendance
+                        }
+                    />
+
+                )}
 
             </div>
 

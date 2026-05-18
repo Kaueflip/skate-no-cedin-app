@@ -75,7 +75,7 @@ export default async function AttendancePage() {
 
                 <div>
 
-                    <p className="
+                    {/*          <p className="
             text-sm
             font-semibold
             uppercase
@@ -87,7 +87,7 @@ export default async function AttendancePage() {
 
                         Controle de Presença
 
-                    </p>
+                    </p> */}
 
                     <h1 className="
             mt-2
