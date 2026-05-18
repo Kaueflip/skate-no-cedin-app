@@ -1,6 +1,6 @@
 import {
-  LandingHeader,
-} from "@/components/landing/landing-header"
+  AppNavbar,
+} from "@/components/navigation/app-navbar"
 
 import {
   LandingHero,
@@ -38,7 +38,7 @@ export default function LandingPage() {
       text-foreground
     ">
 
-      <LandingHeader />
+      <AppNavbar />
 
       <LandingHero />
 
