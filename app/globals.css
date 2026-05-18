@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@custom-variant dark (&:is(.dark *));
+
 :root {
   --background: 228 41% 94%;
 
@@ -39,6 +41,12 @@
   --radius: 1.25rem;
 }
 
+.dark {
+  --background: #09090b;
+
+  --foreground: #fafafa;
+}
+
 body {
   background: var(--background);
 
@@ -53,4 +61,8 @@ body {
       rgba(255, 255, 255, 0.45),
       transparent 35%
     );
+
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }

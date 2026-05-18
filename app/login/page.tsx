@@ -147,14 +147,37 @@ export default function LoginPage() {
                         className="flex items-center gap-3"
                     >
 
-                        <Image
-                            unoptimized
-                            src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo.svg"
-                            alt="Skate no Cedin"
-                            width={52}
-                            height={52}
-                            className="h-12 w-auto"
-                        />
+                        <>
+                            <Image
+                                unoptimized
+                                src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo.svg"
+                                alt="Skate no Cedin"
+                                width={52}
+                                height={52}
+                                className="
+      h-12
+      w-auto
+
+      dark:hidden
+    "
+                            />
+
+                            <Image
+                                unoptimized
+                                src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo-light-cedin.png"
+                                alt="Skate no Cedin"
+                                width={52}
+                                height={52}
+                                className="
+      hidden
+
+      h-12
+      w-auto
+
+      dark:block
+    "
+                            />
+                        </>
 
                         <div>
 

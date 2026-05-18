@@ -2,9 +2,6 @@
 
 import Image from "next/image"
 
-import { useTheme }
-  from "next-themes"
-
 import {
   LogOut,
   LayoutDashboard,
@@ -25,6 +22,9 @@ import {
   useRouter,
   usePathname,
 } from "next/navigation"
+
+import { useTheme }
+  from "next-themes"
 
 import { createClient }
   from "@/lib/supabase-browser"
@@ -99,7 +99,7 @@ export function AppSidebar() {
     createClient()
 
   const {
-    theme,
+    resolvedTheme,
     setTheme,
   } = useTheme()
 
@@ -121,6 +121,10 @@ export function AppSidebar() {
         bg-white/60
 
         backdrop-blur-2xl
+
+        dark:border-white/10
+
+        dark:bg-zinc-950/80
       "
     >
 
@@ -150,19 +154,48 @@ export function AppSidebar() {
                 transition-all
 
                 hover:bg-white/80
+
+                dark:border-white/10
+
+                dark:bg-zinc-900/70
+
+                dark:hover:bg-zinc-900
               "
             >
 
               <Link href="/dashboard">
 
-                <Image
-                  unoptimized
-                  src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo.svg"
-                  alt="Skate no Cedin"
-                  width={50}
-                  height={50}
-                  className="h-12 w-auto"
-                />
+                <>
+                  <Image
+                    unoptimized
+                    src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo.svg"
+                    alt="Skate no Cedin"
+                    width={52}
+                    height={52}
+                    className="
+      h-12
+      w-auto
+
+      dark:hidden
+    "
+                  />
+
+                  <Image
+                    unoptimized
+                    src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo-light-cedin.png"
+                    alt="Skate no Cedin"
+                    width={52}
+                    height={52}
+                    className="
+      hidden
+
+      h-12
+      w-auto
+
+      dark:block
+    "
+                  />
+                </>
 
                 <div className="
                   flex
@@ -175,6 +208,8 @@ export function AppSidebar() {
                     font-semibold
 
                     text-zinc-900
+
+                    dark:text-white
                   ">
 
                     Skate no Cedin
@@ -183,7 +218,10 @@ export function AppSidebar() {
 
                   <span className="
                     text-xs
+
                     text-zinc-500
+
+                    dark:text-zinc-400
                   ">
 
                     Sistema de Gestão
@@ -254,22 +292,32 @@ export function AppSidebar() {
 
                         ${active
                           ? `
-                            bg-zinc-900
-                            text-white
+                              bg-zinc-900
+                              text-white
 
-                            shadow-sm
+                              shadow-sm
 
-                            hover:bg-zinc-800
-                            hover:text-white
-                          `
+                              hover:bg-zinc-800
+                              hover:text-white
+
+                              dark:bg-white
+                              dark:text-zinc-900
+
+                              dark:hover:bg-zinc-200
+                            `
                           : `
-                            bg-transparent
+                              bg-transparent
 
-                            text-zinc-600
+                              text-zinc-600
 
-                            hover:bg-white/70
-                            hover:text-zinc-900
-                          `
+                              hover:bg-white/70
+                              hover:text-zinc-900
+
+                              dark:text-zinc-400
+
+                              dark:hover:bg-zinc-900
+                              dark:hover:text-white
+                            `
                         }
                       `}
                     >
@@ -335,6 +383,12 @@ export function AppSidebar() {
                     shadow-sm
 
                     hover:bg-white/80
+
+                    dark:border-white/10
+
+                    dark:bg-zinc-900/70
+
+                    dark:hover:bg-zinc-900
                   "
                 >
 
@@ -350,6 +404,10 @@ export function AppSidebar() {
                     bg-zinc-900
 
                     text-white
+
+                    dark:bg-white
+
+                    dark:text-zinc-900
                   ">
 
                     <User2
@@ -372,6 +430,8 @@ export function AppSidebar() {
                       font-semibold
 
                       text-zinc-900
+
+                      dark:text-white
                     ">
 
                       Professor
@@ -380,7 +440,10 @@ export function AppSidebar() {
 
                     <span className="
                       text-xs
+
                       text-zinc-500
+
+                      dark:text-zinc-400
                     ">
 
                       Administração
@@ -396,6 +459,8 @@ export function AppSidebar() {
                       w-4
 
                       text-zinc-500
+
+                      dark:text-zinc-400
                     "
                   />
 
@@ -417,6 +482,10 @@ export function AppSidebar() {
                   bg-white/90
 
                   backdrop-blur-xl
+
+                  dark:border-white/10
+
+                  dark:bg-zinc-900/95
                 "
               >
 
@@ -435,14 +504,14 @@ export function AppSidebar() {
                 <DropdownMenuItem
                   onClick={() =>
                     setTheme(
-                      theme === "dark"
+                      resolvedTheme === "dark"
                         ? "light"
                         : "dark"
                     )
                   }
                 >
 
-                  {theme === "dark"
+                  {resolvedTheme === "dark"
                     ? (
                       <Sun className="
                         mr-2
@@ -459,7 +528,7 @@ export function AppSidebar() {
                     )
                   }
 
-                  {theme === "dark"
+                  {resolvedTheme === "dark"
                     ? "Modo Claro"
                     : "Modo Escuro"
                   }
@@ -470,6 +539,8 @@ export function AppSidebar() {
                   onClick={handleLogout}
                   className="
                     text-red-500
+
+                    dark:text-red-400
                   "
                 >
 
