@@ -116,15 +116,11 @@ export function AppSidebar() {
     <Sidebar
       className="
         border-r
-        border-white/40
+        border-border
 
-        bg-white/60
+        bg-sidebar
 
         backdrop-blur-2xl
-
-        dark:border-white/10
-
-        dark:bg-[#0d0d10]/90
       "
     >
 
@@ -143,90 +139,92 @@ export function AppSidebar() {
                 rounded-2xl
 
                 border
-                border-white/40
+                border-border
 
-                bg-white/60
+                bg-card
 
                 p-4
 
                 shadow-sm
 
+                backdrop-blur-2xl
+
                 transition-all
 
-                hover:bg-white/80
+                hover:bg-white/70
 
-                dark:border-white/10
-
-                dark:bg-zinc-900/70
-
-                dark:hover:bg-zinc-900
+                dark:hover:bg-white/4
               "
             >
 
               <Link href="/dashboard">
 
-                <>
-                  <Image
-                    unoptimized
-                    src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo.svg"
-                    alt="Skate no Cedin"
-                    width={52}
-                    height={52}
-                    className="
-      h-12
-      w-auto
-
-      dark:hidden
-    "
-                  />
-
-                  <Image
-                    unoptimized
-                    src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo-light-cedin.png"
-                    alt="Skate no Cedin"
-                    width={52}
-                    height={52}
-                    className="
-      hidden
-
-      h-12
-      w-auto
-
-      dark:block
-    "
-                  />
-                </>
-
                 <div className="
                   flex
-                  flex-col
-                  gap-1
+                  items-center
+                  gap-3
                 ">
 
-                  <span className="
-                    text-sm
-                    font-semibold
+                  <>
+                    <Image
+                      unoptimized
+                      src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo.svg"
+                      alt="Skate no Cedin"
+                      width={52}
+                      height={52}
+                      className="
+                        h-12
+                        w-auto
 
-                    text-zinc-900
+                        dark:hidden
+                      "
+                    />
 
-                    dark:text-white
+                    <Image
+                      unoptimized
+                      src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo-light-cedin.png"
+                      alt="Skate no Cedin"
+                      width={52}
+                      height={52}
+                      className="
+                        hidden
+
+                        h-12
+                        w-auto
+
+                        dark:block
+                      "
+                    />
+                  </>
+
+                  <div className="
+                    flex
+                    flex-col
+                    gap-1
                   ">
 
-                    Skate no Cedin
+                    <span className="
+                      text-sm
+                      font-semibold
 
-                  </span>
+                      text-sidebar-foreground
+                    ">
 
-                  <span className="
-                    text-xs
+                      Skate no Cedin
 
-                    text-zinc-500
+                    </span>
 
-                    dark:text-zinc-400
-                  ">
+                    <span className="
+                      text-xs
 
-                    Sistema de Gestão
+                      text-muted
+                    ">
 
-                  </span>
+                      Sistema de Gestão
+
+                    </span>
+
+                  </div>
 
                 </div>
 
@@ -254,7 +252,7 @@ export function AppSidebar() {
 
               tracking-[0.2em]
 
-              text-zinc-400
+              text-muted
             "
           >
 
@@ -292,31 +290,23 @@ export function AppSidebar() {
 
                         ${active
                           ? `
-                              bg-zinc-900
-                              text-white
+                              bg-primary
+                              text-primary-foreground
 
                               shadow-sm
 
-                              hover:bg-zinc-800
-                              hover:text-white
-
-                              dark:bg-white
-                              dark:text-zinc-900
-
-                              dark:hover:bg-zinc-200
+                              hover:bg-accent-hover
+                              hover:text-primary-foreground
                             `
                           : `
                               bg-transparent
 
-                              text-zinc-600
+                              text-muted
 
                               hover:bg-white/70
-                              hover:text-zinc-900
+                              hover:text-foreground
 
-                              dark:text-zinc-400
-
-                              dark:hover:bg-zinc-900
-                              dark:hover:text-white
+                              dark:hover:bg-white/4
                             `
                         }
                       `}
@@ -374,21 +364,19 @@ export function AppSidebar() {
                     rounded-2xl
 
                     border
-                    border-white/40
+                    border-border
 
-                    bg-white/60
+                    bg-card
 
                     px-4
 
                     shadow-sm
 
-                    hover:bg-white/80
+                    backdrop-blur-2xl
 
-                    dark:border-white/10
+                    hover:bg-white/70
 
-                    dark:bg-zinc-900/70
-
-                    dark:hover:bg-zinc-900
+                    dark:hover:bg-white/4
                   "
                 >
 
@@ -401,13 +389,9 @@ export function AppSidebar() {
 
                     rounded-full
 
-                    bg-zinc-900
+                    bg-primary
 
-                    text-white
-
-                    dark:bg-white
-
-                    dark:text-zinc-900
+                    text-primary-foreground
                   ">
 
                     <User2
@@ -429,9 +413,7 @@ export function AppSidebar() {
                       text-sm
                       font-semibold
 
-                      text-zinc-900
-
-                      dark:text-white
+                      text-foreground
                     ">
 
                       Professor
@@ -441,9 +423,7 @@ export function AppSidebar() {
                     <span className="
                       text-xs
 
-                      text-zinc-500
-
-                      dark:text-zinc-400
+                      text-muted
                     ">
 
                       Administração
@@ -458,9 +438,7 @@ export function AppSidebar() {
                       h-4
                       w-4
 
-                      text-zinc-500
-
-                      dark:text-zinc-400
+                      text-muted
                     "
                   />
 
@@ -477,15 +455,11 @@ export function AppSidebar() {
                   rounded-2xl
 
                   border
-                  border-white/40
+                  border-border
 
-                  bg-white/90
+                  bg-card
 
-                  backdrop-blur-xl
-
-                  dark:border-white/10
-
-                  dark:bg-zinc-900/95
+                  backdrop-blur-2xl
                 "
               >
 
@@ -539,8 +513,6 @@ export function AppSidebar() {
                   onClick={handleLogout}
                   className="
                     text-red-500
-
-                    dark:text-red-400
                   "
                 >
 

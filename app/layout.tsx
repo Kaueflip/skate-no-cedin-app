@@ -8,7 +8,7 @@ import "./globals.css"
 
 import {
   ThemeProvider,
-} from "next-themes"
+} from "@/components/theme/theme-provider"
 
 import {
   TooltipProvider,
@@ -21,6 +21,9 @@ import {
 import {
   Analytics,
 } from "@vercel/analytics/react"
+import Script from "next/script"
+
+
 
 export const metadata:
   Metadata = {
@@ -66,8 +69,8 @@ export default function RootLayout({
 
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
+          enableSystem={false}
           disableTransitionOnChange
         >
 
@@ -131,7 +134,16 @@ export default function RootLayout({
           </TooltipProvider>
 
         </ThemeProvider>
+        <Script
+          id="suppress-next-theme-warning"
+          strategy="beforeInteractive"
+        >
 
+          {`
+    window.__NEXT_THEME_INITIALIZED = true;
+  `}
+
+        </Script>
       </body>
 
     </html>

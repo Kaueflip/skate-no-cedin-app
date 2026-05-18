@@ -5,6 +5,9 @@ import type {
     ReactNode,
 } from "react"
 
+import { Slot }
+    from "@radix-ui/react-slot"
+
 import { Loader2 }
     from "lucide-react"
 
@@ -18,11 +21,14 @@ type Variant =
 
 type Props =
     ButtonHTMLAttributes<HTMLButtonElement> & {
+
         loading?: boolean
 
         children: ReactNode
 
         variant?: Variant
+
+        asChild?: boolean
     }
 
 export function AppButton({
@@ -31,72 +37,106 @@ export function AppButton({
     className,
     disabled,
     variant = "primary",
+    asChild = false,
+    type = "button",
     ...props
 }: Props) {
 
     const variants = {
-        primary: `
-      bg-zinc-900
-      text-white
 
-      hover:bg-zinc-800
+        primary: `
+      bg-primary
+
+      text-primary-foreground
+
+      hover:bg-accent-hover
+
+      shadow-sm
     `,
 
         secondary: `
       border
-      border-white/40
+      border-border
 
-      bg-white/70
+      bg-card
 
-      text-zinc-900
+      text-foreground
 
-      hover:bg-white
+      hover:bg-black/5
+
+      dark:hover:bg-white/4
     `,
 
         ghost: `
       bg-transparent
 
-      text-zinc-700
+      text-foreground
 
-      hover:bg-white/60
+      hover:bg-black/5
+
+      dark:hover:bg-white/4
     `,
+    }
+
+    const classes =
+        cn(
+            `
+        inline-flex
+        items-center
+        justify-center
+        gap-2
+
+        rounded-2xl
+
+        px-6
+        py-3
+
+        text-sm
+        font-semibold
+
+        transition-all
+
+        outline-none
+
+        focus-visible:ring-4
+        focus-visible:ring-ring
+
+        active:scale-[0.985]
+
+        disabled:pointer-events-none
+        disabled:opacity-50
+
+        cursor-pointer
+      `,
+
+            variants[variant],
+
+            className
+        )
+
+    if (asChild) {
+
+        return (
+
+            <Slot
+                className={classes}
+                {...props}
+            >
+
+                {children}
+
+            </Slot>
+        )
     }
 
     return (
 
         <button
+            type={type}
             disabled={
                 disabled || loading
             }
-            className={cn(
-                `
-          inline-flex
-          items-center
-          justify-center
-          gap-2
-
-          rounded-2xl
-
-          px-6
-          py-3
-
-          text-sm
-          font-semibold
-
-          shadow-sm
-
-          transition-all
-
-          active:scale-[0.98]
-
-          disabled:cursor-not-allowed
-          disabled:opacity-50
-        `,
-
-                variants[variant],
-
-                className
-            )}
+            className={classes}
             {...props}
         >
 

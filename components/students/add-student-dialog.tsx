@@ -2,19 +2,34 @@
 
 import Image from "next/image"
 
-import { useState } from "react"
+import {
+    Camera,
+    Loader2,
+} from "lucide-react"
 
-import type { Student }
-    from "@/types/student"
+import {
+    useEffect,
+    useRef,
+    useState,
+} from "react"
+
+import { useRouter }
+    from "next/navigation"
 
 import { toast }
     from "sonner"
 
-import { Plus }
-    from "lucide-react"
+import { createClient }
+    from "@/lib/supabase-browser"
 
-import { AppButton }
-    from "@/components/ui/app-button"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 
 import { Input }
     from "@/components/ui/input"
@@ -26,16 +41,6 @@ import { Textarea }
     from "@/components/ui/textarea"
 
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
-
-import {
     Select,
     SelectContent,
     SelectItem,
@@ -43,42 +48,27 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 
-function formatPhone(
-    value: string
-) {
-
-    const numbers =
-        value.replace(/\D/g, "")
-
-    if (numbers.length <= 2) {
-
-        return numbers
-    }
-
-    if (numbers.length <= 7) {
-
-        return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`
-    }
-
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`
-}
-
+import { AppButton }
+    from "@/components/ui/app-button"
 
 type Props = {
-    onAddStudent: (
-        student: Omit<
-            Student,
-            "id" |
-            "created_at"
-        >,
 
-        foto: File | null
-    ) => Promise<void>
+    children:
+    React.ReactNode
 }
 
 export function AddStudentDialog({
-    onAddStudent,
+    children,
 }: Props) {
+
+    const router =
+        useRouter()
+
+    const supabase =
+        createClient()
+
+    const fileInputRef =
+        useRef<HTMLInputElement>(null)
 
     const [open, setOpen] =
         useState(false)
@@ -86,152 +76,15 @@ export function AddStudentDialog({
     const [loading, setLoading] =
         useState(false)
 
-    const [foto, setFoto] =
-        useState<File | null>(
-            null
-        )
+    const [photoPreview, setPhotoPreview] =
+        useState<string | null>(null)
 
-    const [newStudent, setNewStudent] =
+    const [photoFile, setPhotoFile] =
+        useState<File | null>(null)
+
+    const [form, setForm] =
         useState({
-            nome: "",
 
-            idade: "",
-
-            turma: "",
-
-            turno: "Manhã" as
-                "Manhã" |
-                "Tarde",
-
-            nivel: "Iniciante" as
-                Student["nivel"],
-
-            responsavel_nome: "",
-
-            responsavel_contato: "",
-
-            observacoes: "",
-        })
-
-    async function handleSubmit() {
-
-        /*
-        =========================
-        VALIDAÇÕES
-        =========================
-        */
-
-        if (!newStudent.nome.trim()) {
-
-            toast.error(
-                "Informe o nome do aluno"
-            )
-
-            return
-        }
-
-        if (!newStudent.idade) {
-
-            toast.error(
-                "Informe a idade"
-            )
-
-            return
-        }
-
-        if (!newStudent.turma.trim()) {
-
-            toast.error(
-                "Informe a turma"
-            )
-
-            return
-        }
-
-        if (
-            Number(newStudent.idade) <= 0
-        ) {
-
-            toast.error(
-                "Idade inválida"
-            )
-
-            return
-        }
-
-        try {
-
-            setLoading(true)
-
-            await onAddStudent(
-                {
-                    nome:
-                        newStudent.nome,
-
-                    idade:
-                        Number(
-                            newStudent.idade
-                        ),
-
-                    turma:
-                        newStudent.turma,
-
-                    turno:
-                        newStudent.turno,
-
-                    nivel:
-                        newStudent.nivel,
-
-                    responsavel_nome:
-                        newStudent
-                            .responsavel_nome,
-
-                    responsavel_contato:
-                        newStudent
-                            .responsavel_contato,
-
-                    observacoes:
-                        newStudent
-                            .observacoes,
-
-                    ativo: true,
-
-                    foto_url: null,
-
-                    data_inicio:
-                        new Date()
-                            .toISOString()
-                            .split("T")[0],
-                },
-
-                foto
-            )
-
-            toast.success(
-                "Aluno cadastrado"
-            )
-
-            resetForm()
-
-            setOpen(false)
-
-        } catch {
-
-            toast.error(
-                "Erro ao cadastrar aluno"
-            )
-
-        } finally {
-
-            setLoading(false)
-        }
-    }
-
-    function resetForm() {
-
-        setFoto(null)
-
-        setNewStudent({
             nome: "",
 
             idade: "",
@@ -248,6 +101,254 @@ export function AddStudentDialog({
 
             observacoes: "",
         })
+
+    function updateField(
+        field: keyof typeof form,
+        value: string
+    ) {
+
+        setForm((prev) => ({
+            ...prev,
+            [field]: value,
+        }))
+    }
+
+    function formatPhone(
+        value: string
+    ) {
+
+        const cleaned =
+            value
+                .replace(/\D/g, "")
+                .slice(0, 11)
+
+        if (
+            cleaned.length <= 2
+        ) {
+
+            return cleaned
+        }
+
+        if (
+            cleaned.length <= 7
+        ) {
+
+            return cleaned.replace(
+                /(\d{2})(\d+)/,
+                "($1) $2"
+            )
+        }
+
+        return cleaned.replace(
+            /(\d{2})(\d{5})(\d{0,4})/,
+            "($1) $2-$3"
+        )
+    }
+
+    function handlePhotoChange(
+        event:
+            React.ChangeEvent<HTMLInputElement>
+    ) {
+
+        const file =
+            event.target.files?.[0]
+
+        if (!file)
+            return
+
+        setPhotoFile(file)
+
+        const previewUrl =
+            URL.createObjectURL(file)
+
+        setPhotoPreview(
+            previewUrl
+        )
+    }
+
+    async function uploadPhoto(
+        studentId: string
+    ) {
+
+        if (!photoFile)
+            return null
+
+        const extension =
+            photoFile.name
+                .split(".")
+                .pop()
+
+        const filePath =
+            `${studentId}/perfil.${extension}`
+
+        const {
+            error: uploadError,
+        } = await supabase
+            .storage
+            .from("alunos")
+            .upload(
+                filePath,
+                photoFile,
+                {
+                    upsert: true,
+                }
+            )
+
+        if (uploadError)
+            throw uploadError
+
+        const { data } =
+            supabase.storage
+                .from("alunos")
+                .getPublicUrl(
+                    filePath
+                )
+
+        return data.publicUrl
+    }
+
+    async function handleSubmit() {
+
+        try {
+
+            setLoading(true)
+
+            if (
+                !form.nome.trim() ||
+                !form.idade.trim() ||
+                !form.turma.trim()
+            ) {
+
+                toast.error(
+                    "Preencha os campos obrigatórios"
+                )
+
+                return
+            }
+
+            const {
+                data: insertedStudent,
+                error: insertError,
+            } = await supabase
+                .from("students")
+                .insert({
+
+                    nome:
+                        form.nome.trim(),
+
+                    idade:
+                        Number(
+                            form.idade
+                        ),
+
+                    turma:
+                        form.turma.trim(),
+
+                    turno:
+                        form.turno,
+
+                    nivel:
+                        form.nivel,
+
+                    data_inicio:
+                        new Date()
+                            .toISOString(),
+
+                    responsavel_nome:
+                        form.responsavel_nome.trim(),
+
+                    responsavel_contato:
+                        form.responsavel_contato.trim(),
+
+                    observacoes:
+                        form.observacoes.trim(),
+                })
+                .select()
+                .single()
+
+            if (insertError)
+                throw insertError
+
+            if (!insertedStudent)
+                throw new Error(
+                    "Aluno não criado"
+                )
+
+            if (photoFile) {
+
+                const photoUrl =
+                    await uploadPhoto(
+                        insertedStudent.id
+                    )
+
+                if (photoUrl) {
+
+                    const {
+                        error: updateError,
+                    } = await supabase
+                        .from("students")
+                        .update({
+                            foto_url:
+                                photoUrl,
+                        })
+                        .eq(
+                            "id",
+                            insertedStudent.id
+                        )
+
+                    if (updateError)
+                        throw updateError
+                }
+            }
+
+            toast.success(
+                "Aluno cadastrado com sucesso"
+            )
+
+            setOpen(false)
+
+            router.refresh()
+
+            setForm({
+
+                nome: "",
+
+                idade: "",
+
+                turma: "",
+
+                turno: "Manhã",
+
+                nivel: "Iniciante",
+
+                responsavel_nome: "",
+
+                responsavel_contato: "",
+
+                observacoes: "",
+            })
+
+            setPhotoFile(null)
+
+            setPhotoPreview(null)
+
+        } catch (error: unknown) {
+
+            console.error(
+                "ADD_STUDENT_ERROR",
+                error
+            )
+
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "Erro ao cadastrar aluno"
+            )
+
+        } finally {
+
+            setLoading(false)
+        }
     }
 
     return (
@@ -259,186 +360,174 @@ export function AddStudentDialog({
 
             <DialogTrigger asChild>
 
-                <AppButton>
-
-                    <Plus className="mr-2 h-4 w-4" />
-
-                    Novo Aluno
-
-                </AppButton>
+                {children}
 
             </DialogTrigger>
 
             <DialogContent
                 className="
-                      max-h-[90vh]
-    overflow-y-auto
+          max-h-[90vh]
 
-    border-white/40
+          overflow-y-auto
 
-    bg-[#eef1fb]
-
-    shadow-2xl
-
-    backdrop-blur-2xl
-
-    sm:max-w-[520px]"
+          sm:max-w-[560px]
+        "
             >
 
                 <DialogHeader>
 
                     <DialogTitle>
 
-                        Adicionar Aluno
+                        Novo aluno
 
                     </DialogTitle>
 
                     <DialogDescription>
 
-                        Preencha os dados
-                        do novo aluno
+                        Cadastre um novo aluno
+                        no projeto Skate no Cedin
 
                     </DialogDescription>
 
                 </DialogHeader>
 
                 <div className="
-  grid
-  gap-6
-
-  py-4
-">
-
-                    <div className="
-    flex
-    flex-col
-    gap-4
-
-    sm:flex-row
-    sm:items-center
-  ">
-
-                        <div className="
-      flex
-      h-24
-      w-24
-      shrink-0
-      items-center
-      justify-center
-
-      overflow-hidden
-
-      rounded-full
-
-      border
-      border-white/40
-
-      bg-white
-
-      shadow-sm
-    ">
-
-                            {foto ? (
-
-                                <Image
-                                    src={URL.createObjectURL(foto)}
-                                    alt="Preview"
-                                    width={96}
-                                    height={96}
-                                    className="
-            h-full
-            w-full
-            object-cover
-          "
-                                />
-
-                            ) : (
-
-                                <span className="
-          text-xs
-          text-zinc-500
+          flex
+          flex-col
+          items-center
+          gap-4
         ">
 
-                                    Sem foto
+                    <button
+                        type="button"
+                        onClick={() =>
+                            fileInputRef.current?.click()
+                        }
+                        className="
+              relative
+
+              flex
+              h-28
+              w-28
+              items-center
+              justify-center
+
+              overflow-hidden
+
+              rounded-full
+
+              border
+              border-border
+
+              bg-input
+
+              transition-all
+
+              hover:scale-[1.02]
+
+              hover:border-primary/30
+
+              cursor-pointer
+            "
+                    >
+
+                        {photoPreview ? (
+
+                            <Image
+                                src={photoPreview}
+                                alt="Foto do aluno"
+                                fill
+                                sizes="112px"
+                                className="
+                  object-cover
+                "
+                            />
+
+                        ) : (
+
+                            <div className="
+                flex
+                flex-col
+                items-center
+                gap-2
+              ">
+
+                                <Camera
+                                    className="
+                    h-6
+                    w-6
+
+                    text-muted
+                  "
+                                />
+
+                                <span className="
+                  text-xs
+
+                  text-muted
+                ">
+
+                                    Adicionar foto
 
                                 </span>
-                            )}
 
-                        </div>
+                            </div>
+                        )}
+
+                    </button>
+
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={
+                            handlePhotoChange
+                        }
+                    />
+
+                </div>
+
+                <div className="
+          grid
+          gap-5
+        ">
+
+                    <div className="
+            grid
+            gap-5
+
+            md:grid-cols-2
+          ">
 
                         <div className="
-      flex-1
-      space-y-2
-    ">
+              space-y-2
+
+              md:col-span-2
+            ">
 
                             <Label>
-                                Foto do aluno
+                                Nome completo *
                             </Label>
 
                             <Input
-                                type="file"
-                                accept="image/*"
-                                capture="environment"
-                                className="
-          h-11
-
-          rounded-xl
-
-          border-white/40
-
-          bg-white
-        "
+                                value={form.nome}
                                 onChange={(e) =>
-                                    setFoto(
-                                        e.target.files?.[0] ||
-                                        null
+                                    updateField(
+                                        "nome",
+                                        e.target.value
                                     )
                                 }
+                                placeholder="
+                  Nome do aluno
+                "
                             />
 
                         </div>
 
-                    </div>
-
-                    <div className="space-y-2">
-
-                        <Label>
-                            Nome Completo *
-                        </Label>
-
-                        <Input
-                            value={newStudent.nome}
-                            onChange={(e) =>
-                                setNewStudent({
-                                    ...newStudent,
-
-                                    nome:
-                                        e.target.value,
-                                })
-                            }
-                            placeholder="Nome do aluno"
-                            required
-                            className="
-        h-11
-
-        rounded-xl
-
-        border-white/40
-
-        bg-white
-      "
-                        />
-
-                    </div>
-
-                    <div className="
-    grid
-    gap-4
-
-    sm:grid-cols-2
-  ">
-
-                        <div className="space-y-2">
+                        <div className="
+              space-y-2
+            ">
 
                             <Label>
                                 Idade *
@@ -446,226 +535,75 @@ export function AddStudentDialog({
 
                             <Input
                                 type="number"
-                                value={newStudent.idade}
+                                value={form.idade}
                                 onChange={(e) =>
-                                    setNewStudent({
-                                        ...newStudent,
-
-                                        idade:
-                                            e.target.value,
-                                    })
+                                    updateField(
+                                        "idade",
+                                        e.target.value
+                                    )
                                 }
-                                placeholder="10"
-                                required
-                                min={1}
-                                className="
-          h-11
-
-          rounded-xl
-
-          border-white/40
-
-          bg-white
-        "
+                                placeholder="12"
                             />
 
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="
+              space-y-2
+            ">
 
                             <Label>
                                 Turma *
                             </Label>
 
                             <Input
-                                value={newStudent.turma}
+                                value={form.turma}
                                 onChange={(e) =>
-                                    setNewStudent({
-                                        ...newStudent,
-
-                                        turma:
-                                            e.target.value,
-                                    })
+                                    updateField(
+                                        "turma",
+                                        e.target.value
+                                    )
                                 }
-                                placeholder="6º A"
-                                required
-                                className="
-          h-11
-
-          rounded-xl
-
-          border-white/40
-
-          bg-white
-        "
+                                placeholder="6A"
                             />
 
                         </div>
 
-                    </div>
-
-                    <div className="
-    grid
-    gap-4
-
-    sm:grid-cols-2
-  ">
-
-                        <div className="space-y-2">
+                        <div className="
+              space-y-2
+            ">
 
                             <Label>
                                 Turno
                             </Label>
 
                             <Select
-                                value={newStudent.turno}
+                                value={form.turno}
                                 onValueChange={(value) =>
-                                    setNewStudent({
-                                        ...newStudent,
-
-                                        turno:
-                                            value as
-                                            "Manhã" |
-                                            "Tarde",
-                                    })
+                                    updateField(
+                                        "turno",
+                                        value
+                                    )
                                 }
                             >
 
-                                <SelectTrigger
-                                    className="
-            h-11
-
-            rounded-xl
-
-            border-white/40
-
-            bg-white
-          "
-                                >
+                                <SelectTrigger>
 
                                     <SelectValue />
 
                                 </SelectTrigger>
 
-                                <SelectContent className="
-    rounded-2xl
+                                <SelectContent>
 
-    border
-    border-white/40
+                                    <SelectItem value="Manhã">
 
-    bg-[#eef1fb]/95
-
-    shadow-xl
-
-    backdrop-blur-2xl
-  ">
-
-                                    <SelectItem value="Manhã" className="
-  rounded-xl
-
-  focus:bg-white/80
-  focus:text-zinc-900
-">
                                         Manhã
+
                                     </SelectItem>
 
-                                    <SelectItem value="Tarde" className="
-  rounded-xl
+                                    <SelectItem value="Tarde">
 
-  focus:bg-white/80
-  focus:text-zinc-900
-">
                                         Tarde
-                                    </SelectItem>
 
-                                </SelectContent >
-
-                            </Select>
-
-                        </div>
-
-                        <div className="space-y-2">
-
-                            <Label>
-                                Nível
-                            </Label>
-
-                            <Select
-                                value={newStudent.nivel}
-                                onValueChange={(value) =>
-                                    setNewStudent({
-                                        ...newStudent,
-
-                                        nivel:
-                                            value as
-                                            Student["nivel"],
-                                    })
-                                }
-                            >
-
-                                <SelectTrigger
-                                    className="
-            h-11
-
-            rounded-xl
-
-            border-white/40
-
-            bg-white
-          "
-                                >
-
-                                    <SelectValue />
-
-                                </SelectTrigger>
-
-                                <SelectContent className="
-    rounded-2xl
-
-    border
-    border-white/40
-
-    bg-[#eef1fb]/95
-
-    shadow-xl
-
-    backdrop-blur-2xl
-  ">
-
-                                    <SelectItem value="Iniciante" className="
-  rounded-xl
-
-  focus:bg-white/80
-  focus:text-zinc-900
-">
-                                        Iniciante
-                                    </SelectItem>
-
-                                    <SelectItem value="Básico" className="
-  rounded-xl
-
-  focus:bg-white/80
-  focus:text-zinc-900
-">
-                                        Básico
-                                    </SelectItem>
-
-                                    <SelectItem value="Intermediário" className="
-  rounded-xl
-
-  focus:bg-white/80
-  focus:text-zinc-900
-">
-                                        Intermediário
-                                    </SelectItem>
-
-                                    <SelectItem value="Avançado" className="
-  rounded-xl
-
-  focus:bg-white/80
-  focus:text-zinc-900
-">
-                                        Avançado
                                     </SelectItem>
 
                                 </SelectContent>
@@ -674,135 +612,171 @@ export function AddStudentDialog({
 
                         </div>
 
-                    </div>
+                        <div className="
+              space-y-2
+            ">
 
-                    <div className="space-y-2">
+                            <Label>
+                                Nível
+                            </Label>
 
-                        <Label>
-                            Responsável
-                        </Label>
+                            <Select
+                                value={form.nivel}
+                                onValueChange={(value) =>
+                                    updateField(
+                                        "nivel",
+                                        value
+                                    )
+                                }
+                            >
 
-                        <Input
-                            value={
-                                newStudent
-                                    .responsavel_nome
-                            }
-                            onChange={(e) =>
-                                setNewStudent({
-                                    ...newStudent,
+                                <SelectTrigger>
 
-                                    responsavel_nome:
-                                        e.target.value,
-                                })
-                            }
-                            placeholder="Nome do responsável"
-                            className="
-        h-11
+                                    <SelectValue />
 
-        rounded-xl
+                                </SelectTrigger>
 
-        border-white/40
+                                <SelectContent>
 
-        bg-white
-      "
-                        />
+                                    <SelectItem value="Iniciante">
 
-                    </div>
+                                        Iniciante
 
-                    <div className="space-y-2">
+                                    </SelectItem>
 
-                        <Label>
-                            Contato
-                        </Label>
+                                    <SelectItem value="Básico">
 
-                        <Input
-                            value={
-                                newStudent
-                                    .responsavel_contato
-                            }
-                            onChange={(e) =>
-                                setNewStudent({
-                                    ...newStudent,
+                                        Básico
 
-                                    responsavel_contato:
+                                    </SelectItem>
+
+                                    <SelectItem value="Intermediário">
+
+                                        Intermediário
+
+                                    </SelectItem>
+
+                                    <SelectItem value="Avançado">
+
+                                        Avançado
+
+                                    </SelectItem>
+
+                                </SelectContent>
+
+                            </Select>
+
+                        </div>
+
+                        <div className="
+              space-y-2
+
+              md:col-span-2
+            ">
+
+                            <Label>
+                                Responsável
+                            </Label>
+
+                            <Input
+                                value={
+                                    form.responsavel_nome
+                                }
+                                onChange={(e) =>
+                                    updateField(
+                                        "responsavel_nome",
+                                        e.target.value
+                                    )
+                                }
+                                placeholder="
+                  Nome do responsável
+                "
+                            />
+
+                        </div>
+
+                        <div className="
+              space-y-2
+
+              md:col-span-2
+            ">
+
+                            <Label>
+                                Contato
+                            </Label>
+
+                            <Input
+                                inputMode="numeric"
+                                value={
+                                    form.responsavel_contato
+                                }
+                                onChange={(e) =>
+                                    updateField(
+                                        "responsavel_contato",
                                         formatPhone(
                                             e.target.value
-                                        ),
-                                })
-                            }
-                            placeholder="(47) 99999-9999"
-                            inputMode="numeric"
-                            maxLength={15}
-                            className="
-        h-11
+                                        )
+                                    )
+                                }
+                                placeholder="
+                  (47) 99999-9999
+                "
+                            />
 
-        rounded-xl
+                        </div>
 
-        border-white/40
+                        <div className="
+              space-y-2
 
-        bg-white
-      "
-                        />
+              md:col-span-2
+            ">
 
-                    </div>
+                            <Label>
+                                Observações
+                            </Label>
 
-                    <div className="space-y-2">
+                            <Textarea
+                                value={
+                                    form.observacoes
+                                }
+                                onChange={(e) =>
+                                    updateField(
+                                        "observacoes",
+                                        e.target.value
+                                    )
+                                }
+                                placeholder="
+                  Observações adicionais...
+                "
+                            />
 
-                        <Label>
-                            Observações
-                        </Label>
-
-                        <Textarea
-                            value={
-                                newStudent
-                                    .observacoes
-                            }
-                            onChange={(e) =>
-                                setNewStudent({
-                                    ...newStudent,
-
-                                    observacoes:
-                                        e.target.value,
-                                })
-                            }
-                            placeholder="Observações adicionais"
-                            className="
-        min-h-[120px]
-
-        rounded-xl
-
-        border-white/40
-
-        bg-white
-
-        resize-none
-      "
-                        />
+                        </div>
 
                     </div>
-
-                </div>
-
-                <DialogFooter>
 
                     <AppButton
+                        loading={loading}
                         onClick={handleSubmit}
-                        disabled={loading}
-                        className="
-                                        h-11
-                                        w-full
-                                        text-base
-                                        font-medium
-                                    "
                     >
 
-                        {loading
-                            ? "Salvando..."
-                            : "Cadastrar Aluno"}
+                        {loading && (
+
+                            <Loader2
+                                className="
+                  h-4
+                  w-4
+
+                  animate-spin
+                "
+                            />
+
+                        )}
+
+                        Salvar aluno
 
                     </AppButton>
 
-                </DialogFooter>
+                </div>
 
             </DialogContent>
 

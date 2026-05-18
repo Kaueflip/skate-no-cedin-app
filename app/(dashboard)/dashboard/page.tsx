@@ -1,14 +1,36 @@
+import {
+    Users,
+    CalendarCheck,
+    TrendingUp,
+    BarChart3,
+} from "lucide-react"
+
 import { createClient }
     from "@/lib/supabase-server"
 
-import { DashboardHeader }
-    from "@/components/dashboard/dashboard-header"
+import { PageShell }
+    from "@/components/layout/page-shell"
 
-import { DashboardStats }
-    from "@/components/dashboard/dashboard-stats"
+import { PageHeader }
+    from "@/components/layout/page-header"
 
-import { AppButton }
-    from "@/components/ui/app-button"
+import { StatCard }
+    from "@/components/dashboard/stat-card"
+
+import { GlassCard }
+    from "@/components/ui/glass-card"
+
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table"
+
+import { Badge }
+    from "@/components/ui/badge"
 
 export default async function DashboardPage() {
 
@@ -16,341 +38,241 @@ export default async function DashboardPage() {
         await createClient()
 
     const {
+        count: studentsCount,
+    } = await supabase
+        .from("students")
+        .select("*", {
+            count: "exact",
+            head: true,
+        })
+
+    const {
+        count: attendanceCount,
+    } = await supabase
+        .from("attendance")
+        .select("*", {
+            count: "exact",
+            head: true,
+        })
+
+    const {
         data: students,
-        error,
     } = await supabase
         .from("students")
         .select("*")
-
-    if (error) {
-
-        console.error(error)
-    }
-
-    const data =
-        students || []
-
-    const stats = {
-        totalStudents:
-            data.length,
-
-        activeStudents:
-            data.filter(
-                (student) =>
-                    student.ativo
-            ).length,
-
-        beginners:
-            data.filter(
-                (student) =>
-                    student.nivel ===
-                    "Iniciante"
-            ).length,
-
-        advanced:
-            data.filter(
-                (student) =>
-                    student.nivel ===
-                    "Avançado"
-            ).length,
-    }
+        .limit(5)
+        .order("created_at", {
+            ascending: false,
+        })
 
     return (
 
-        <main className="
-      min-h-screen
+        <PageShell>
 
-      bg-background
-    ">
+            <PageHeader
+                title="Dashboard"
+                description="
+          Visão geral do projeto
+          Skate no Cedin
+        "
+            />
 
-            <div className="
-        flex
-        flex-col
-        gap-8
+            <section className="
+        grid
+        gap-5
 
-        p-6
+        md:grid-cols-2
 
-        lg:p-10
+        xl:grid-cols-4
       ">
 
-                <div className="
-          flex
-          flex-col
-          gap-6
+                <StatCard
+                    title="Alunos"
 
-          lg:flex-row
-          lg:items-center
-          lg:justify-between
+                    value={
+                        studentsCount || 0
+                    }
+
+                    icon={
+                        <Users className="
+              h-5
+              w-5
+            " />
+                    }
+                />
+
+                <StatCard
+                    title="Presenças"
+
+                    value={
+                        attendanceCount || 0
+                    }
+
+                    icon={
+                        <CalendarCheck className="
+              h-5
+              w-5
+            " />
+                    }
+                />
+
+                <StatCard
+                    title="Evolução"
+
+                    value="87%"
+
+                    description="
+            média geral
+          "
+
+                    icon={
+                        <TrendingUp className="
+              h-5
+              w-5
+            " />
+                    }
+                />
+
+                <StatCard
+                    title="Relatórios"
+
+                    value="12"
+
+                    description="
+            este mês
+          "
+
+                    icon={
+                        <BarChart3 className="
+              h-5
+              w-5
+            " />
+                    }
+                />
+
+            </section>
+
+            <GlassCard
+                className="
+          mt-8
+
+          overflow-hidden
+
+          p-0
+        "
+            >
+
+                <div className="
+          border-b
+          border-border
+
+          p-6
         ">
 
-                    <DashboardHeader />
+                    <h2 className="
+            text-xl
+            font-bold
 
-                    <div className="flex gap-3">
+            text-foreground
+          ">
 
-                        {/*  <AppButton>
+                        Últimos alunos
 
-                            Novo Aluno
+                    </h2>
 
-                        </AppButton> */}
+                    <p className="
+            mt-1
 
-                    </div>
+            text-sm
+
+            text-muted
+          ">
+
+                        Alunos cadastrados recentemente
+
+                    </p>
 
                 </div>
 
-                <DashboardStats
-                    stats={stats}
-                />
+                <Table>
 
-                <section className="
-          grid
-          gap-6
+                    <TableHeader>
 
-          lg:grid-cols-3
-        ">
+                        <TableRow>
 
-                    <div className="
-            rounded-[2rem]
+                            <TableHead>
+                                Nome
+                            </TableHead>
 
-            border
-            border-white/40 dark:border-white/10
+                            <TableHead>
+                                Turma
+                            </TableHead>
 
-            bg-white/70
+                            <TableHead>
+                                Turno
+                            </TableHead>
 
-            p-8
+                            <TableHead>
+                                Nível
+                            </TableHead>
 
-            shadow-sm
+                        </TableRow>
 
-            backdrop-blur-xl
+                    </TableHeader>
 
-            lg:col-span-2
-          ">
+                    <TableBody>
 
-                        <div className="
-              flex
-              items-center
-              justify-between
-            ">
+                        {students?.map(
+                            (student) => (
 
-                            <div>
+                                <TableRow
+                                    key={student.id}
+                                >
 
-                                <h2 className="
-                  text-2xl
-                  font-black
-                  tracking-tight
-
-                  text-zinc-900 dark:text-white
-                ">
-
-                                    Atividade recente
-
-                                </h2>
-
-                                <p className="
-                  mt-1
-                  text-zinc-500 dark:text-zinc-400
-                ">
-
-                                    Últimos alunos cadastrados
-
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                        <div className="
-              mt-8
-              flex
-              flex-col
-              gap-4
-            ">
-
-                            {data
-                                .slice(0, 5)
-                                .map((student) => (
-
-                                    <div
-                                        key={student.id}
+                                    <TableCell
                                         className="
-                      flex
-                      items-center
-                      justify-between
-
-                      rounded-2xl
-
-                      border
-                      border-white/40 dark:border-white/10
-
-                      bg-white/60 dark:bg-[#111114]/80
-
-                      p-4
-
-                      backdrop-blur-xl
+                      font-medium
                     "
                                     >
 
-                                        <div>
+                                        {student.nome}
 
-                                            <p className="
-                        font-semibold
-                        text-zinc-900 dark:text-white
-                      ">
+                                    </TableCell>
 
-                                                {student.nome}
+                                    <TableCell>
 
-                                            </p>
+                                        {student.turma}
 
-                                            <p className="
-                        text-sm
-                        text-zinc-500 dark:text-zinc-400
-                      ">
+                                    </TableCell>
 
-                                                {student.nivel}
+                                    <TableCell>
 
-                                            </p>
+                                        {student.turno}
 
-                                        </div>
+                                    </TableCell>
 
-                                        <div className="
-                      rounded-xl
+                                    <TableCell>
 
-                      bg-zinc-900
+                                        <Badge
+                                            variant="secondary"
+                                        >
 
-                      px-3
-                      py-1
+                                            {student.nivel}
 
-                      text-sm
-                      font-medium
+                                        </Badge>
 
-                      text-white
-                    ">
+                                    </TableCell>
 
-                                            {student.turno}
+                                </TableRow>
+                            )
+                        )}
 
-                                        </div>
+                    </TableBody>
 
-                                    </div>
-                                ))}
+                </Table>
 
-                        </div>
+            </GlassCard>
 
-                    </div>
-
-                    <div className="
-            rounded-[2rem]
-
-            border
-            border-white/40 dark:border-white/10
-
-            bg-white/70
-
-            p-8
-
-            shadow-sm
-
-            backdrop-blur-xl
-          ">
-
-                        <h2 className="
-              text-2xl
-              font-black
-              tracking-tight
-
-              text-zinc-900 dark:text-white
-            ">
-
-                            Resumo
-
-                        </h2>
-
-                        <p className="
-              mt-1
-              text-zinc-500 dark:text-zinc-400
-            ">
-
-                            Informações rápidas
-
-                        </p>
-
-                        <div className="
-              mt-8
-              flex
-              flex-col
-              gap-4
-            ">
-
-                            <div className="
-                rounded-2xl
-
-                bg-white/60 dark:bg-zinc-900/70
-
-                p-5
-              ">
-
-                                <p className="
-                  text-sm
-                  text-zinc-500 dark:text-zinc-400
-                ">
-
-                                    Total de alunos
-
-                                </p>
-
-                                <h3 className="
-                  mt-2
-
-                  text-4xl
-                  font-black
-
-                   dark:text-white
-                ">
-
-                                    {stats.totalStudents}
-
-                                </h3>
-
-                            </div>
-
-                            <div className="
-                rounded-2xl
-
-                bg-white/60 dark:bg-zinc-900/70
-
-                p-5
-              ">
-
-                                <p className="
-                  text-sm
-                  text-zinc-500 dark:text-zinc-400
-                ">
-
-                                    Alunos ativos
-
-                                </p>
-
-                                <h3 className="
-                  mt-2
-
-                  text-4xl
-                  font-black
-
-                  text-zinc-900 dark:text-white
-                ">
-
-                                    {stats.activeStudents}
-
-                                </h3>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-            </div>
-
-        </main>
+        </PageShell>
     )
 }

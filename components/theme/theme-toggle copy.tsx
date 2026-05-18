@@ -6,18 +6,52 @@ import {
 } from "lucide-react"
 
 import {
+    useEffect,
+    useState,
+} from "react"
+
+import {
     useTheme,
 } from "next-themes"
 
 export function ThemeToggle() {
 
     const {
-        resolvedTheme,
+        theme,
         setTheme,
     } = useTheme()
 
+    const [
+        mounted,
+        setMounted,
+    ] = useState(false)
+
+    useEffect(() => {
+
+        setMounted(true)
+
+    }, [])
+
+    if (!mounted) {
+
+        return (
+
+            <div className="
+        h-11
+        w-11
+
+        rounded-2xl
+
+        border
+        border-border
+
+        bg-card/80
+      " />
+        )
+    }
+
     const isDark =
-        resolvedTheme === "dark"
+        theme === "dark"
 
     return (
 
@@ -54,7 +88,6 @@ export function ThemeToggle() {
             aria-label="
         Alternar tema
       "
-            suppressHydrationWarning
         >
 
             {isDark ? (
