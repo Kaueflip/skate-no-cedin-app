@@ -73,26 +73,49 @@ export function DashboardStats({
                 <Card
                     key={item.title}
                     className="
-            border-zinc-200/70
+            overflow-hidden
+
+            rounded-[2rem]
+
+            border
+            border-white/40
+
             bg-white/70
+
             shadow-sm
+
             backdrop-blur-xl
           "
                 >
 
                     <CardContent className="p-6">
 
-                        <div className="flex items-start justify-between">
+                        <div className="
+              flex
+              items-start
+              justify-between
+            ">
 
                             <div>
 
-                                <p className="text-sm text-zinc-500">
+                                <p className="
+                  text-sm
+                  text-zinc-500
+                ">
 
                                     {item.title}
 
                                 </p>
 
-                                <h3 className="mt-3 text-4xl font-black tracking-tight">
+                                <h3 className="
+                  mt-3
+
+                  text-4xl
+                  font-black
+                  tracking-tight
+
+                  text-zinc-900
+                ">
 
                                     {item.value}
 
@@ -103,8 +126,11 @@ export function DashboardStats({
                             <div
                                 className="
                   rounded-2xl
+
                   bg-zinc-900
+
                   p-3
+
                   text-white
                 "
                             >
