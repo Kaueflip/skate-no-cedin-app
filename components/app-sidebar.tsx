@@ -124,7 +124,7 @@ export function AppSidebar() {
 
         dark:border-white/10
 
-        dark:bg-zinc-950/80
+        dark:bg-[#0d0d10]/90
       "
     >
 

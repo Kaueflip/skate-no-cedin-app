@@ -58,9 +58,7 @@ export default async function AttendancePage() {
         <main className="
       min-h-screen
 
-      bg-[#e5e8f7]
-
-      bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.65),transparent_35%)]
+     bg-background
     ">
 
             <div className="

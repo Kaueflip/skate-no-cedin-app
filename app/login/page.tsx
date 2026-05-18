@@ -136,7 +136,7 @@ export default function LoginPage() {
 
         <main className="relative flex min-h-screen flex-col overflow-hidden bg-[#e5e8f7]">
 
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.65),transparent_35%)]" />
+            <div className="absolute inset-0 bg-background" />
 
             <header className="relative z-10 border-b border-zinc-200/70 bg-white/50 backdrop-blur-xl">
 

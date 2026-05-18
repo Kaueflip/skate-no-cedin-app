@@ -89,7 +89,7 @@ export default function LandingPage() {
         </div>
       </header>
       <section className="relative overflow-hidden border-b border-zinc-200/80">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_50%)]" />
+        <div className="absolute inset-0 bg-background" />
 
         <div className="relative mx-auto flex max-w-7xl flex-col items-center px-6 py-24 text-center lg:py-36">
           <div className="mb-6 inline-flex items-center rounded-full border border-zinc-200/80 bg-white/70 px-4 py-2 text-sm backdrop-blur">
@@ -373,9 +373,30 @@ export default function LandingPage() {
               unoptimized
               src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo.svg"
               alt="Skate no Cedin"
-              width={48}
-              height={48}
-              className="h-10 w-auto"
+              width={52}
+              height={52}
+              className="
+      h-12
+      w-auto
+
+      dark:hidden
+    "
+            />
+
+            <Image
+              unoptimized
+              src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo-light-cedin.png"
+              alt="Skate no Cedin"
+              width={52}
+              height={52}
+              className="
+      hidden
+
+      h-12
+      w-auto
+
+      dark:block
+    "
             />
 
             <div>

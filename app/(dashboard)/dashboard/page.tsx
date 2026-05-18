@@ -60,9 +60,7 @@ export default async function DashboardPage() {
         <main className="
       min-h-screen
 
-      bg-[#e5e8f7]
-
-      bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.65),transparent_35%)]
+      bg-background
     ">
 
             <div className="
@@ -114,7 +112,7 @@ export default async function DashboardPage() {
             rounded-[2rem]
 
             border
-            border-white/40
+            border-white/40 dark:border-white/10
 
             bg-white/70
 
@@ -140,7 +138,7 @@ export default async function DashboardPage() {
                   font-black
                   tracking-tight
 
-                  text-zinc-900
+                  text-zinc-900 dark:text-white
                 ">
 
                                     Atividade recente
@@ -149,7 +147,7 @@ export default async function DashboardPage() {
 
                                 <p className="
                   mt-1
-                  text-zinc-500
+                  text-zinc-500 dark:text-zinc-400
                 ">
 
                                     Últimos alunos cadastrados
@@ -181,9 +179,9 @@ export default async function DashboardPage() {
                       rounded-2xl
 
                       border
-                      border-white/40
+                      border-white/40 dark:border-white/10
 
-                      bg-white/60
+                      bg-white/60 dark:bg-[#111114]/80
 
                       p-4
 
@@ -195,7 +193,7 @@ export default async function DashboardPage() {
 
                                             <p className="
                         font-semibold
-                        text-zinc-900
+                        text-zinc-900 dark:text-white
                       ">
 
                                                 {student.nome}
@@ -204,7 +202,7 @@ export default async function DashboardPage() {
 
                                             <p className="
                         text-sm
-                        text-zinc-500
+                        text-zinc-500 dark:text-zinc-400
                       ">
 
                                                 {student.nivel}
@@ -242,7 +240,7 @@ export default async function DashboardPage() {
             rounded-[2rem]
 
             border
-            border-white/40
+            border-white/40 dark:border-white/10
 
             bg-white/70
 
@@ -258,7 +256,7 @@ export default async function DashboardPage() {
               font-black
               tracking-tight
 
-              text-zinc-900
+              text-zinc-900 dark:text-white
             ">
 
                             Resumo
@@ -267,7 +265,7 @@ export default async function DashboardPage() {
 
                         <p className="
               mt-1
-              text-zinc-500
+              text-zinc-500 dark:text-zinc-400
             ">
 
                             Informações rápidas
@@ -284,14 +282,14 @@ export default async function DashboardPage() {
                             <div className="
                 rounded-2xl
 
-                bg-white/60
+                bg-white/60 dark:bg-zinc-900/70
 
                 p-5
               ">
 
                                 <p className="
                   text-sm
-                  text-zinc-500
+                  text-zinc-500 dark:text-zinc-400
                 ">
 
                                     Total de alunos
@@ -304,7 +302,7 @@ export default async function DashboardPage() {
                   text-4xl
                   font-black
 
-                  text-zinc-900
+                   dark:text-white
                 ">
 
                                     {stats.totalStudents}
@@ -316,14 +314,14 @@ export default async function DashboardPage() {
                             <div className="
                 rounded-2xl
 
-                bg-white/60
+                bg-white/60 dark:bg-zinc-900/70
 
                 p-5
               ">
 
                                 <p className="
                   text-sm
-                  text-zinc-500
+                  text-zinc-500 dark:text-zinc-400
                 ">
 
                                     Alunos ativos
@@ -336,7 +334,7 @@ export default async function DashboardPage() {
                   text-4xl
                   font-black
 
-                  text-zinc-900
+                  text-zinc-900 dark:text-white
                 ">
 
                                     {stats.activeStudents}
