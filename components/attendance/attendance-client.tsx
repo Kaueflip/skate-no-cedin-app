@@ -5,25 +5,32 @@ import {
     useState,
 } from "react"
 
-import { toast }
-    from "sonner"
+import {
+    toast,
+} from "sonner"
 
-import { createClient }
-    from "@/lib/supabase-browser"
+import {
+    createClient,
+} from "@/lib/supabase-browser"
 
-import type { Student }
-    from "@/types/student"
+import type {
+    Student,
+} from "@/types/student"
 
-import { AppButton }
-    from "@/components/ui/app-button"
+import {
+    AppButton,
+} from "@/components/ui/app-button"
 
-import { AttendanceList }
-    from "@/components/attendance/attendance-list"
+import {
+    AttendanceList,
+} from "@/components/attendance/attendance-list"
 
-import { AttendanceFilters }
-    from "@/components/attendance/attendance-filters"
+import {
+    AttendanceFilters,
+} from "@/components/attendance/attendance-filters"
 
 type Props = {
+
     students: Student[]
 
     initialAttendanceMap:
@@ -86,6 +93,7 @@ export function AttendanceClient({
                     )
                 }
             )
+
         }, [
             students,
             search,
@@ -176,10 +184,12 @@ export function AttendanceClient({
             filteredStudents.reduce(
                 (acc, student) => {
 
-                    acc[student.id] =
-                        true
+                    acc[
+                        student.id
+                    ] = true
 
                     return acc
+
                 },
 
                 {
@@ -273,25 +283,25 @@ export function AttendanceClient({
     return (
 
         <div className="
-      flex
-      flex-col
-      gap-6
-    ">
+            flex
+            flex-col
+            gap-6
+        ">
 
             <div className="
-        rounded-[2rem]
+                rounded-[2rem]
 
-        border
-        border-white/40
+                border
+                border-border
 
-        bg-white/60
+                bg-card/80
 
-        p-5
+                p-5
 
-        shadow-sm
+                shadow-sm
 
-        backdrop-blur-xl
-      ">
+                backdrop-blur-xl
+            ">
 
                 <AttendanceFilters
                     search={search}
@@ -311,10 +321,10 @@ export function AttendanceClient({
             </div>
 
             <div className="
-        flex
-        flex-wrap
-        gap-3
-      ">
+                flex
+                flex-wrap
+                gap-3
+            ">
 
                 <AppButton
                     variant="secondary"
@@ -341,45 +351,47 @@ export function AttendanceClient({
             </div>
 
             <div className="
-        rounded-[2rem]
+                rounded-[2rem]
 
-        border
-        border-white/40
+                border
+                border-border
 
-        bg-white/60
+                bg-card/80
 
-        p-5
+                p-5
 
-        shadow-sm
+                shadow-sm
 
-        backdrop-blur-xl
-      ">
+                backdrop-blur-xl
+            ">
 
                 <div className="
-          mb-6
-          flex
-          items-center
-          justify-between
-        ">
+                    mb-6
+
+                    flex
+                    items-center
+                    justify-between
+                ">
 
                     <div>
 
                         <h2 className="
-              text-2xl
-              font-black
-              tracking-tight
+                            text-2xl
+                            font-black
+                            tracking-tight
 
-              text-zinc-900
-            ">
+                            text-foreground
+                        ">
 
                             Lista de Presença
 
                         </h2>
 
                         <p className="
-              mt-1
-              text-zinc-500
-            ">
+                            mt-1
+
+                            text-muted
+                        ">
 
                             {
                                 filteredStudents.length
@@ -395,11 +407,12 @@ export function AttendanceClient({
                 {loadingDate ? (
 
                     <div className="
-            py-20
-            text-center
+                        py-20
 
-            text-zinc-500
-          ">
+                        text-center
+
+                        text-muted
+                    ">
 
                         Carregando presença...
 

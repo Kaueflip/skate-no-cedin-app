@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select"
 
 type Props = {
+
     search: string
 
     onSearchChange: (
@@ -48,27 +49,27 @@ export function AttendanceFilters({
     return (
 
         <div className="
-      grid
-      gap-4
+            grid
+            gap-4
 
-      lg:grid-cols-3
-    ">
+            lg:grid-cols-3
+        ">
 
             <div className="relative">
 
                 <Search
                     className="
-            absolute
-            left-4
-            top-1/2
+                        absolute
+                        left-4
+                        top-1/2
 
-            h-4
-            w-4
+                        h-4
+                        w-4
 
-            -translate-y-1/2
+                        -translate-y-1/2
 
-            text-zinc-400
-          "
+                        text-muted
+                    "
                 />
 
                 <Input
@@ -80,16 +81,18 @@ export function AttendanceFilters({
                     }
                     placeholder="Buscar aluno..."
                     className="
-            h-12
+                        h-12
 
-            rounded-2xl
+                        rounded-2xl
 
-            border-white/40
+                        border-border
 
-            bg-white
+                        bg-card
 
-            pl-11
-          "
+                        pl-11
+
+                        shadow-sm
+                    "
                 />
 
             </div>
@@ -103,14 +106,16 @@ export function AttendanceFilters({
 
                 <SelectTrigger
                     className="
-            h-12
+                        h-12
 
-            rounded-2xl
+                        rounded-2xl
 
-            border-white/40
+                        border-border
 
-            bg-white
-          "
+                        bg-card
+
+                        shadow-sm
+                    "
                 >
 
                     <SelectValue placeholder="Turno" />
@@ -119,41 +124,56 @@ export function AttendanceFilters({
 
                 <SelectContent
                     className="
-            rounded-xl
+                        rounded-2xl
 
-            border-white/40
+                        border-border
 
-            bg-[#eef1fb]
+                        bg-popover
 
-            backdrop-blur-2xl
-          "
+                        backdrop-blur-xl
+                    "
                 >
 
-                    <SelectItem value="all" className="
-  rounded-xl
+                    <SelectItem
+                        value="all"
+                        className="
+                            rounded-xl
 
-  focus:bg-white/80
-  focus:text-zinc-900
-">
+                            focus:bg-accent
+                            focus:text-foreground
+                        "
+                    >
+
                         Todos os turnos
+
                     </SelectItem>
 
-                    <SelectItem value="Manhã" className="
-  rounded-xl
+                    <SelectItem
+                        value="Manhã"
+                        className="
+                            rounded-xl
 
-  focus:bg-white/80
-  focus:text-zinc-900
-">
+                            focus:bg-accent
+                            focus:text-foreground
+                        "
+                    >
+
                         Manhã
+
                     </SelectItem>
 
-                    <SelectItem value="Tarde" className="
-  rounded-xl
+                    <SelectItem
+                        value="Tarde"
+                        className="
+                            rounded-xl
 
-  focus:bg-white/80
-  focus:text-zinc-900
-">
+                            focus:bg-accent
+                            focus:text-foreground
+                        "
+                    >
+
                         Tarde
+
                     </SelectItem>
 
                 </SelectContent>
@@ -164,22 +184,23 @@ export function AttendanceFilters({
 
                 <CalendarDays
                     className="
-             pointer-events-none
-      absolute
-      left-4
-      top-1/2
+                        pointer-events-none
 
-      hidden
+                        absolute
+                        left-4
+                        top-1/2
 
-      h-4
-      w-4
+                        hidden
 
-      -translate-y-1/2
+                        h-4
+                        w-4
 
-      text-zinc-400
+                        -translate-y-1/2
 
-      sm:block
-          "
+                        text-muted
+
+                        sm:block
+                    "
                 />
 
                 <Input
@@ -191,29 +212,31 @@ export function AttendanceFilters({
                         )
                     }
                     className="
-            h-12
+                        h-12
 
-            cursor-pointer
+                        cursor-pointer
 
-            rounded-2xl
+                        rounded-2xl
 
-            border-white/40
+                        border-border
 
-            bg-white
+                        bg-card
 
-            pl-4
-            sm:pl-11
+                        pl-4
+                        sm:pl-11
 
-            [&::-webkit-calendar-picker-indicator]:absolute
-            [&::-webkit-calendar-picker-indicator]:inset-0
+                        shadow-sm
 
-            [&::-webkit-calendar-picker-indicator]:h-full
-            [&::-webkit-calendar-picker-indicator]:w-full
+                        [&::-webkit-calendar-picker-indicator]:absolute
+                        [&::-webkit-calendar-picker-indicator]:inset-0
 
-            [&::-webkit-calendar-picker-indicator]:cursor-pointer
+                        [&::-webkit-calendar-picker-indicator]:h-full
+                        [&::-webkit-calendar-picker-indicator]:w-full
 
-            [&::-webkit-calendar-picker-indicator]:opacity-0
-          "
+                        [&::-webkit-calendar-picker-indicator]:cursor-pointer
+
+                        [&::-webkit-calendar-picker-indicator]:opacity-0
+                    "
                 />
 
             </div>

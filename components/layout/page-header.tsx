@@ -4,38 +4,68 @@ import type {
 
 type Props = {
 
-    title: string
+    title:
+    string
 
-    description?: string
+    description?:
+    string
 
-    action?: ReactNode
+    action?:
+    ReactNode
+
+    icon?:
+    ReactNode
 }
 
 export function PageHeader({
     title,
     description,
     action,
+    icon,
 }: Props) {
 
     return (
 
         <div className="
-      mb-8
-
       flex
       flex-col
-      gap-4
+      gap-6
 
-      md:flex-row
-      md:items-start
-      md:justify-between
+      lg:flex-row
+      lg:items-center
+      lg:justify-between
     ">
 
             <div>
 
+                {icon && (
+
+                    <div className="
+            mb-4
+
+            flex
+            h-12
+            w-12
+            items-center
+            justify-center
+
+            rounded-2xl
+
+            bg-primary/10
+
+            text-primary
+          ">
+
+                        {icon}
+
+                    </div>
+
+                )}
+
                 <h1 className="
           text-4xl
           font-black
+
           tracking-tight
 
           text-foreground
@@ -48,9 +78,12 @@ export function PageHeader({
                 {description && (
 
                     <p className="
-            mt-2
+            mt-3
 
-            text-base
+            max-w-2xl
+
+            text-lg
+            leading-relaxed
 
             text-muted
           ">
@@ -65,9 +98,7 @@ export function PageHeader({
 
             {action && (
 
-                <div className="
-          shrink-0
-        ">
+                <div>
 
                     {action}
 

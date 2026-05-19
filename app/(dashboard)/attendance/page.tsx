@@ -1,8 +1,22 @@
-import { createClient }
-    from "@/lib/supabase-server"
+import {
+    CalendarDays,
+} from "lucide-react"
 
-import { AttendanceClient }
-    from "@/components/attendance/attendance-client"
+import {
+    createClient,
+} from "@/lib/supabase-server"
+
+import {
+    AttendanceClient,
+} from "@/components/attendance/attendance-client"
+
+import {
+    PageShell,
+} from "@/components/layout/page-shell"
+
+import {
+    PageHeader,
+} from "@/components/layout/page-header"
 
 export default async function AttendancePage() {
 
@@ -38,13 +52,13 @@ export default async function AttendancePage() {
 
     const attendanceMap =
         (attendance || []).reduce(
+
             (acc, item) => {
 
                 acc[item.student_id] =
                     item.present
 
                 return acc
-
             },
 
             {} as Record<
@@ -55,64 +69,27 @@ export default async function AttendancePage() {
 
     return (
 
-        <main className="
-      min-h-screen
+        <PageShell>
 
-     bg-background
-    ">
+            <PageHeader
+                title="Frequência"
+                description="
+          Marque os alunos presentes
+          nas aulas do projeto
+        "
+                icon={
+                    <CalendarDays
+                        className="
+              h-5
+              w-5
+            "
+                    />
+                }
+            />
 
             <div className="
-        flex
-        flex-col
-        gap-8
-
-        p-6
-
-        lg:p-10
+        mt-8
       ">
-
-                <div>
-
-                    {/*          <p className="
-            text-sm
-            font-semibold
-            uppercase
-
-            tracking-[0.25em]
-
-            text-zinc-500
-          ">
-
-                        Controle de Presença
-
-                    </p> */}
-
-                    <h1 className="
-            mt-2
-
-            text-4xl
-            font-black
-            tracking-tight
-
-            text-zinc-900
-          ">
-
-                        Frequência
-
-                    </h1>
-
-                    <p className="
-            mt-3
-
-            text-lg
-            text-zinc-600
-          ">
-
-                        Marque os alunos presentes no dia
-
-                    </p>
-
-                </div>
 
                 <AttendanceClient
                     students={
@@ -126,6 +103,6 @@ export default async function AttendancePage() {
 
             </div>
 
-        </main>
+        </PageShell>
     )
 }
