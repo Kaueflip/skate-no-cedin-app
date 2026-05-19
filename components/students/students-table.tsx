@@ -1,7 +1,12 @@
 "use client"
 
-import type { Student }
-    from "@/types/student"
+import {
+    useRouter,
+} from "next/navigation"
+
+import type {
+    Student,
+} from "@/types/student"
 
 import {
     Table,
@@ -18,21 +23,21 @@ import {
     AvatarImage,
 } from "@/components/ui/avatar"
 
-import { Badge }
-    from "@/components/ui/badge"
+import {
+    Badge,
+} from "@/components/ui/badge"
 
 type Props = {
-    students: Student[]
 
-    onSelectStudent?: (
-        student: Student
-    ) => void
+    students: Student[]
 }
 
 export function StudentsTable({
     students,
-    onSelectStudent,
 }: Props) {
+
+    const router =
+        useRouter()
 
     function getInitials(
         nome: string
@@ -40,8 +45,9 @@ export function StudentsTable({
 
         return nome
             .split(" ")
-            .map((word) =>
-                word[0]
+            .map(
+                (word) =>
+                    word[0]
             )
             .join("")
             .slice(0, 2)
@@ -57,111 +63,114 @@ export function StudentsTable({
             case "Iniciante":
 
                 return `
-          bg-zinc-900
-          text-white
+                    bg-zinc-900
+                    text-white
 
-          hover:bg-zinc-800
-        `
+                    hover:bg-zinc-800
+
+                    dark:bg-zinc-100
+                    dark:text-zinc-900
+                `
 
             case "Básico":
 
                 return `
-          border-transparent
+                    border-transparent
 
-          bg-zinc-200
+                    bg-blue-500/10
 
-          text-zinc-900
+                    text-blue-600
 
-          hover:bg-zinc-200
-        `
+                    dark:text-blue-400
+                `
 
             case "Intermediário":
 
                 return `
-          border-transparent
+                    border-transparent
 
-          bg-zinc-300
+                    bg-amber-500/10
 
-          text-zinc-900
+                    text-amber-600
 
-          hover:bg-zinc-300
-        `
+                    dark:text-amber-400
+                `
 
             case "Avançado":
 
                 return `
-          border-transparent
+                    border-transparent
 
-          bg-zinc-800
+                    bg-emerald-500/10
 
-          text-white
+                    text-emerald-600
 
-          hover:bg-zinc-700
-        `
+                    dark:text-emerald-400
+                `
 
             default:
 
                 return `
-          bg-zinc-200
-          text-zinc-900
-        `
+                    bg-secondary
+                    text-secondary-foreground
+                `
         }
     }
 
     return (
 
-        <div
-            className="
-        overflow-hidden
+        <div className="
+            overflow-hidden
 
-        rounded-[1.5rem]
+            rounded-[2rem]
 
-        border
-        border-white/40
+            border
+            border-border
 
-        bg-white/60
+            bg-card/80
 
-        backdrop-blur-xl
-      "
-        >
+            shadow-sm
 
-            <Table className="overflow-hidden">
+            backdrop-blur-xl
+        ">
+
+            <Table>
 
                 <TableHeader
                     className="
-            bg-white/40
-          "
+                        bg-muted/40
+                    "
                 >
 
                     <TableRow
                         className="
-              border-white/40
+                            border-border
 
-              hover:bg-transparent
-            "
+                            hover:bg-transparent
+                        "
                     >
 
-                        <TableHead className="h-14 text-zinc-700">
+                        <TableHead>
                             Aluno
                         </TableHead>
 
-                        <TableHead className="text-zinc-700">
+                        <TableHead>
                             Idade
                         </TableHead>
 
-                        <TableHead className="text-zinc-700">
+                        <TableHead>
                             Turma
                         </TableHead>
 
-                        <TableHead className="text-zinc-700">
+                        <TableHead>
                             Turno
                         </TableHead>
 
-                        <TableHead className="text-zinc-700">
+                        <TableHead>
                             Nível
                         </TableHead>
 
-                        <TableHead className="text-zinc-700">
+                        <TableHead>
                             Início
                         </TableHead>
 
@@ -176,38 +185,38 @@ export function StudentsTable({
 
                             <TableRow
                                 key={student.id}
-                                className="
-                  cursor-pointer
-
-                  border-white/30
-
-                  transition-colors
-
-                  hover:bg-white/40
-                "
                                 onClick={() =>
-                                    onSelectStudent?.(
-                                        student
+                                    router.push(
+                                        `/students/${student.id}`
                                     )
                                 }
+                                className="
+                                    cursor-pointer
+
+                                    border-border
+
+                                    transition-colors
+
+                                    hover:bg-muted/40
+                                "
                             >
 
                                 <TableCell>
 
                                     <div className="
-                    flex
-                    items-center
-                    gap-3
-                  ">
+                                        flex
+                                        items-center
+                                        gap-3
+                                    ">
 
                                         <Avatar
                                             className="
-                        h-10
-                        w-10
+                                                h-11
+                                                w-11
 
-                        border
-                        border-white/40
-                      "
+                                                border
+                                                border-border
+                                            "
                                         >
 
                                             <AvatarImage
@@ -219,10 +228,12 @@ export function StudentsTable({
 
                                             <AvatarFallback
                                                 className="
-                          bg-white
+                                                    bg-muted
 
-                          text-zinc-700
-                        "
+                                                    font-semibold
+
+                                                    text-foreground
+                                                "
                                             >
 
                                                 {getInitials(
@@ -236,9 +247,10 @@ export function StudentsTable({
                                         <div>
 
                                             <p className="
-                        font-semibold
-                        text-zinc-900
-                      ">
+                                                font-semibold
+
+                                                text-foreground
+                                            ">
 
                                                 {student.nome}
 
@@ -250,19 +262,31 @@ export function StudentsTable({
 
                                 </TableCell>
 
-                                <TableCell className="text-zinc-700">
+                                <TableCell
+                                    className="
+                                        text-muted
+                                    "
+                                >
 
                                     {student.idade} anos
 
                                 </TableCell>
 
-                                <TableCell className="text-zinc-700">
+                                <TableCell
+                                    className="
+                                        text-muted
+                                    "
+                                >
 
                                     {student.turma}
 
                                 </TableCell>
 
-                                <TableCell className="text-zinc-700">
+                                <TableCell
+                                    className="
+                                        text-muted
+                                    "
+                                >
 
                                     {student.turno}
 
@@ -272,19 +296,19 @@ export function StudentsTable({
 
                                     <Badge
                                         className={`
-                      rounded-xl
+                                            rounded-xl
 
-                      px-3
-                      py-1
+                                            px-3
+                                            py-1
 
-                      font-medium
+                                            font-medium
 
-                      shadow-none
+                                            shadow-none
 
-                      ${getLevelStyles(
+                                            ${getLevelStyles(
                                             student.nivel
                                         )}
-                    `}
+                                        `}
                                     >
 
                                         {student.nivel}
@@ -293,7 +317,11 @@ export function StudentsTable({
 
                                 </TableCell>
 
-                                <TableCell className="text-zinc-700">
+                                <TableCell
+                                    className="
+                                        text-muted
+                                    "
+                                >
 
                                     {new Date(
                                         student.data_inicio

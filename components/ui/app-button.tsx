@@ -18,6 +18,7 @@ type Variant =
     | "primary"
     | "secondary"
     | "ghost"
+    | "danger"
 
 type Props =
     ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -75,6 +76,17 @@ export function AppButton({
       hover:bg-black/5
 
       dark:hover:bg-white/4
+    `,
+
+        danger: `
+        bg-red-500
+
+        text-white
+
+        hover:bg-red-600
+
+        dark:bg-red-500
+        dark:hover:bg-red-600
     `,
     }
 

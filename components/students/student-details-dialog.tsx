@@ -4,12 +4,17 @@ import Image
     from "next/image"
 
 import {
-    Phone,
-    User,
-    Calendar,
-    GraduationCap,
+    useState,
+} from "react"
+
+import {
+    CalendarDays,
     Clock3,
-    Activity,
+    GraduationCap,
+    Phone,
+    Trash2,
+    User,
+    Pencil,
 } from "lucide-react"
 
 import type {
@@ -19,14 +24,18 @@ import type {
 import {
     Dialog,
     DialogContent,
-} from "@/components/ui/dialog"
-
-import { Badge }
-    from "@/components/ui/badge"
-
-import {
+    DialogDescription,
+    DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog"
+
+import {
+    AppButton,
+} from "@/components/ui/app-button"
+
+import {
+    DeleteStudentDialog,
+} from "@/components/students/delete-student-dialog"
 
 type Props = {
 
@@ -35,436 +44,405 @@ type Props = {
 
     open: boolean
 
-    onOpenChange:
-    (open: boolean) => void
+    onOpenChange: (
+        open: boolean
+    ) => void
+
+    onDeleted: (
+        studentId: string
+    ) => void
+
+    onEdit: (
+        student: Student
+    ) => void
 }
 
 export function StudentDetailsDialog({
     student,
     open,
     onOpenChange,
+    onDeleted,
+    onEdit,
 }: Props) {
+
+    const [
+        deleteOpen,
+        setDeleteOpen,
+    ] = useState(false)
 
     if (!student)
         return null
 
-    const attendance = 92
-
     return (
 
-        <Dialog
-            open={open}
-            onOpenChange={
-                onOpenChange
-            }
-        >
+        <>
 
-            <DialogContent
-                className="
-    max-h-[92vh]
-
-    overflow-y-auto
-
-    p-0
-
-    sm:max-w-2xl
-  "
+            <Dialog
+                open={open}
+                onOpenChange={
+                    onOpenChange
+                }
             >
 
-                <DialogTitle
-                    className="sr-only"
+                <DialogContent
+                    className="
+                        overflow-hidden
+
+                        rounded-[2rem]
+
+                        border-border
+
+                        bg-card
+
+                        p-0
+
+                        shadow-2xl
+
+                        sm:max-w-2xl
+                    "
                 >
 
-                    Detalhes do aluno
+                    <DialogHeader
+                        className="
+                            sr-only
+                        "
+                    >
 
-                </DialogTitle>
+                        <DialogTitle>
 
-                <div className="
-          relative
+                            Detalhes do aluno
 
-          overflow-hidden
-        ">
+                        </DialogTitle>
+
+                        <DialogDescription>
+
+                            Informações completas do aluno
+
+                        </DialogDescription>
+
+                    </DialogHeader>
 
                     <div className="
-            absolute
-            inset-0
+                        relative
 
-            bg-gradient-to-b
-            from-primary/10
-            to-transparent
-          " />
+                        h-40
 
-                    <div className="
-            relative
-
-            flex
-            flex-col
-            items-center
-
-            px-6
-            pt-8
-            pb-6
-
-            text-center
-          ">
-
-                        <div className="
-              relative
-
-              h-35
-              w-35
-
-              overflow-hidden
-
-              rounded-full
-
-              border-4
-              border-background
-
-              bg-input
-
-              shadow-xl
-            ">
-
-                            {student.foto_url ? (
-
-                                <Image
-                                    src={
-                                        student.foto_url
-                                    }
-                                    alt={
-                                        student.nome
-                                    }
-                                    fill
-                                    sizes="152px"
-                                    className="
-                    object-cover
-                  "
-                                />
-
-                            ) : (
-
-                                <div className="
-                  flex
-                  h-full
-                  w-full
-                  items-center
-                  justify-center
-
-                  text-4xl
-                  font-bold
-
-                  text-muted
-                ">
-
-                                    {
-                                        student.nome?.[0]
-                                    }
-
-                                </div>
-                            )}
-
-                        </div>
-
-                        <div className="
-              mt-5
-              space-y-2
-            ">
-
-                            <h2 className="
-                text-2xl
-                font-semibold
-
-                tracking-tight
-              ">
-
-                                {student.nome}
-
-                            </h2>
-
-                            <div className="
-                flex
-                flex-wrap
-                items-center
-                justify-center
-                gap-2
-              ">
-
-                                <Badge
-                                    variant="secondary"
-                                >
-
-                                    {student.nivel}
-
-                                </Badge>
-
-                                <Badge
-                                    variant="outline"
-                                >
-
-                                    Turma {student.turma}
-
-                                </Badge>
-
-                            </div>
-
-                        </div>
-
-                        <div className="
-              mt-6
-
-              flex
-              w-full
-              max-w-sm
-              items-center
-              gap-3
-            ">
-
-                            <div className="
-                flex-1
-
-                rounded-2xl
-
-                border
-                border-border
-
-                bg-card/60
-
-                p-4
-
-                backdrop-blur
-              ">
-
-                                <div className="
-                  flex
-                  items-center
-                  justify-between
-                ">
-
-                                    <div className="
-                    text-left
-                  ">
-
-                                        <p className="
-                      text-xs
-
-                      text-muted
+                        bg-gradient-to-br
+                        from-primary
+                        to-primary/70
                     ">
 
-                                            Frequência
+                        <div className="
+                            absolute
+                            inset-0
 
-                                        </p>
-
-                                        <p className="
-                      mt-1
-
-                      text-2xl
-                      font-semibold
-                    ">
-
-                                            {attendance}%
-
-                                        </p>
-
-                                    </div>
-
-                                    <div className="
-                    flex
-                    h-11
-                    w-11
-                    items-center
-                    justify-center
-
-                    rounded-2xl
-
-                    bg-primary/10
-
-                    text-primary
-                  ">
-
-                                        <Activity
-                                            className="
-                        h-5
-                        w-5
-                      "
-                                        />
-
-                                    </div>
-
-                                </div>
-
-                                <div className="
-                  mt-4
-
-                  h-2
-
-                  overflow-hidden
-
-                  rounded-full
-
-                  bg-border
-                ">
-
-                                    <div
-                                        className="
-                      h-full
-
-                      rounded-full
-
-                      bg-primary
-                    "
-                                        style={{
-                                            width:
-                                                `${attendance}%`,
-                                        }}
-                                    />
-
-                                </div>
-
-                            </div>
-
-                        </div>
+                            bg-black/10
+                        " />
 
                     </div>
 
-                </div>
-
-                <div className="
-          px-6
-          pb-6
-        ">
-
                     <div className="
-            grid
-            gap-4
+                        relative
 
-            sm:grid-cols-2
-          ">
+                        px-6
+                        pb-6
+                    ">
 
-                        <InfoCard
-                            icon={
-                                <Calendar
-                                    className="
-                    h-5
-                    w-5
-                  "
-                                />
-                            }
-                            label="Idade"
-                            value={
-                                `${student.idade} anos`
-                            }
-                        />
+                        <div className="
+                            -mt-16
 
-                        <InfoCard
-                            icon={
-                                <Clock3
-                                    className="
-                    h-5
-                    w-5
-                  "
-                                />
-                            }
-                            label="Turno"
-                            value={student.turno}
-                        />
+                            flex
+                            flex-col
+                            gap-5
 
-                        <InfoCard
-                            icon={
-                                <User
-                                    className="
-                    h-5
-                    w-5
-                  "
-                                />
-                            }
-                            label="Responsável"
-                            value={
-                                student.responsavel_nome ||
-                                "-"
-                            }
-                        />
+                            sm:flex-row
+                            sm:items-end
+                            sm:justify-between
+                        ">
 
-                        <InfoCard
-                            icon={
-                                <Phone
-                                    className="
-                    h-5
-                    w-5
-                  "
-                                />
-                            }
-                            label="Contato"
-                            value={
-                                student.responsavel_contato ||
-                                "-"
-                            }
-                        />
+                            <div className="
+                                flex
+                                items-end
+                                gap-5
+                            ">
 
-                        <InfoCard
-                            icon={
-                                <GraduationCap
-                                    className="
-                    h-5
-                    w-5
-                  "
-                                />
-                            }
-                            label="Data de início"
-                            value={
-                                student.data_inicio
-                                    ? new Date(
+                                <div className="
+                                    relative
+
+                                    h-32
+                                    w-32
+
+                                    overflow-hidden
+
+                                    rounded-[2rem]
+
+                                    border-4
+                                    border-card
+
+                                    bg-background
+
+                                    shadow-xl
+                                ">
+
+                                    {student.foto_url ? (
+
+                                        <Image
+                                            src={
+                                                student.foto_url
+                                            }
+                                            alt={
+                                                student.nome
+                                            }
+                                            fill
+                                            className="
+                                                object-cover
+                                            "
+                                        />
+
+                                    ) : (
+
+                                        <div className="
+                                            flex
+                                            h-full
+                                            w-full
+                                            items-center
+                                            justify-center
+
+                                            text-4xl
+                                            font-black
+
+                                            text-muted
+                                        ">
+
+                                            {student.nome
+                                                .charAt(0)
+                                                .toUpperCase()}
+
+                                        </div>
+
+                                    )}
+
+                                </div>
+
+                                <div>
+
+                                    <h2 className="
+                                        text-3xl
+                                        font-black
+                                        tracking-tight
+                                    ">
+
+                                        {student.nome}
+
+                                    </h2>
+
+                                    <p className="
+                                        mt-2
+
+                                        text-muted
+                                    ">
+
+                                        {student.nivel}
+                                        {" • "}
+                                        {student.turno}
+
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                            <div className="
+                                flex
+                                gap-3
+                            ">
+
+                                <AppButton
+                                    variant="secondary"
+                                    onClick={() =>
+                                        onEdit(
+                                            student
+                                        )
+                                    }
+                                >
+
+                                    <Pencil
+                                        className="
+                                            h-4
+                                            w-4
+                                        "
+                                    />
+
+                                    Editar
+
+                                </AppButton>
+
+                                <AppButton
+                                    variant="danger"
+                                    onClick={() =>
+                                        setDeleteOpen(
+                                            true
+                                        )
+                                    }
+                                >
+
+                                    <Trash2
+                                        className="
+                                            h-4
+                                            w-4
+                                        "
+                                    />
+
+                                    Remover
+
+                                </AppButton>
+
+                            </div>
+
+                        </div>
+
+                        <div className="
+                            mt-8
+
+                            grid
+                            gap-4
+
+                            sm:grid-cols-2
+                        ">
+
+                            <InfoCard
+                                icon={
+                                    <GraduationCap
+                                        className="
+                                            h-5
+                                            w-5
+                                        "
+                                    />
+                                }
+                                label="Turma"
+                                value={
+                                    student.turma
+                                }
+                            />
+
+                            <InfoCard
+                                icon={
+                                    <Clock3
+                                        className="
+                                            h-5
+                                            w-5
+                                        "
+                                    />
+                                }
+                                label="Turno"
+                                value={
+                                    student.turno
+                                }
+                            />
+
+                            <InfoCard
+                                icon={
+                                    <CalendarDays
+                                        className="
+                                            h-5
+                                            w-5
+                                        "
+                                    />
+                                }
+                                label="
+                                    Data de início
+                                "
+                                value={
+                                    new Date(
                                         student.data_inicio
                                     ).toLocaleDateString(
                                         "pt-BR"
                                     )
-                                    : "-"
-                            }
-                            className="
-                sm:col-span-2
-              "
-                        />
+                                }
+                            />
 
-                    </div>
+                            <InfoCard
+                                icon={
+                                    <User
+                                        className="
+                                            h-5
+                                            w-5
+                                        "
+                                    />
+                                }
+                                label="
+                                    Responsável
+                                "
+                                value={
+                                    student.responsavel_nome ||
+                                    "Não informado"
+                                }
+                            />
 
-                    {student.observacoes && (
+                            <InfoCard
+                                icon={
+                                    <Phone
+                                        className="
+                                            h-5
+                                            w-5
+                                        "
+                                    />
+                                }
+                                label="Contato"
+                                value={
+                                    student.responsavel_contato ||
+                                    "Não informado"
+                                }
+                            />
 
-                        <div className="
-              mt-6
-            ">
+                            <InfoCard
+                                icon={
+                                    <GraduationCap
+                                        className="
+                                            h-5
+                                            w-5
+                                        "
+                                    />
+                                }
+                                label="Idade"
+                                value={
+                                    `${student.idade} anos`
+                                }
+                            />
+
+                        </div>
+
+                        {student.observacoes && (
 
                             <div className="
-                rounded-3xl
+                                mt-6
 
-                border
-                border-border
+                                rounded-3xl
 
-                bg-card/60
+                                border
+                                border-border
 
-                p-5
+                                bg-background/80
 
-                backdrop-blur
-              ">
+                                p-5
+                            ">
 
                                 <p className="
-                  text-sm
-                  font-medium
-                ">
+                                    mb-2
+
+                                    text-sm
+                                    font-semibold
+
+                                    text-muted
+                                ">
 
                                     Observações
 
                                 </p>
 
                                 <p className="
-                  mt-3
-
-                  whitespace-pre-line
-
-                  text-sm
-                  leading-relaxed
-
-                  text-muted
-                ">
+                                    leading-relaxed
+                                ">
 
                                     {
                                         student.observacoes
@@ -474,14 +452,26 @@ export function StudentDetailsDialog({
 
                             </div>
 
-                        </div>
-                    )}
+                        )}
 
-                </div>
+                    </div>
 
-            </DialogContent>
+                </DialogContent>
 
-        </Dialog>
+            </Dialog>
+
+            <DeleteStudentDialog
+                student={student}
+                open={deleteOpen}
+                onOpenChange={
+                    setDeleteOpen
+                }
+                onDeleted={
+                    onDeleted
+                }
+            />
+
+        </>
     )
 }
 
@@ -492,87 +482,73 @@ type InfoCardProps = {
 
     label: string
 
-    value:
-    React.ReactNode
-
-    className?: string
+    value: string
 }
 
 function InfoCard({
     icon,
     label,
     value,
-    className,
 }: InfoCardProps) {
 
     return (
 
-        <div className={`
-      rounded-3xl
+        <div className="
+            rounded-3xl
 
-      border
-      border-border
+            border
+            border-border
 
-      bg-card/60
+            bg-background/70
 
-      p-5
-
-      backdrop-blur
-
-      ${className || ""}
-    `}>
+            p-5
+        ">
 
             <div className="
-        flex
-        items-start
-        gap-4
-      ">
+                flex
+                items-center
+                gap-3
+            ">
 
                 <div className="
-          flex
-          h-11
-          w-11
-          items-center
-          justify-center
+                    flex
+                    h-10
+                    w-10
+                    items-center
+                    justify-center
 
-          rounded-2xl
+                    rounded-2xl
 
-          bg-primary/10
+                    bg-primary/10
 
-          text-primary
-        ">
+                    text-primary
+                ">
 
                     {icon}
 
                 </div>
 
-                <div className="
-          min-w-0
-
-          flex-1
-        ">
+                <div>
 
                     <p className="
-            text-sm
+                        text-sm
 
-            text-muted
-          ">
+                        text-muted
+                    ">
 
                         {label}
 
                     </p>
 
-                    <div className="
-            mt-1
+                    <p className="
+                        mt-1
 
-            wrap-break-word
-
-            font-medium
-          ">
+                        font-semibold
+                    ">
 
                         {value}
 
-                    </div>
+                    </p>
 
                 </div>
 
