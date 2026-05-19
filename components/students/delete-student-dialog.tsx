@@ -5,6 +5,10 @@ import {
 } from "react"
 
 import {
+    useRouter,
+} from "next/navigation"
+
+import {
     Trash2,
 } from "lucide-react"
 
@@ -42,10 +46,6 @@ type Props = {
     onOpenChange: (
         open: boolean
     ) => void
-
-    onDeleted: (
-        studentId: string
-    ) => void
 }
 
 const supabase =
@@ -55,8 +55,10 @@ export function DeleteStudentDialog({
     student,
     open,
     onOpenChange,
-    onDeleted,
 }: Props) {
+
+    const router =
+        useRouter()
 
     const [
         loading,
@@ -103,11 +105,13 @@ export function DeleteStudentDialog({
                 "Aluno removido com sucesso"
             )
 
-            onDeleted(
-                student.id
+            onOpenChange(false)
+
+            router.push(
+                "/students"
             )
 
-            onOpenChange(false)
+            router.refresh()
 
         } catch (error) {
 

@@ -4,18 +4,6 @@ import {
     useState,
 } from "react"
 
-import {
-    useRouter,
-} from "next/navigation"
-
-import {
-    toast,
-} from "sonner"
-
-import {
-    createClient,
-} from "@/lib/supabase-browser"
-
 import type {
     Student,
 } from "@/types/student"
@@ -28,20 +16,18 @@ import {
     EditStudentDialog,
 } from "@/components/students/edit-student-dialog"
 
+import {
+    DeleteStudentDialog,
+} from "@/components/students/delete-student-dialog"
+
 type Props = {
 
     student: Student
 }
 
-const supabase =
-    createClient()
-
 export function StudentPageActions({
     student,
 }: Props) {
-
-    const router =
-        useRouter()
 
     const [
         editOpen,
@@ -49,71 +35,9 @@ export function StudentPageActions({
     ] = useState(false)
 
     const [
-        deleting,
-        setDeleting,
+        deleteOpen,
+        setDeleteOpen,
     ] = useState(false)
-
-    async function handleDelete() {
-
-        const confirmed =
-            window.confirm(
-                `Remover ${student.nome}?`
-            )
-
-        if (!confirmed)
-            return
-
-        try {
-
-            setDeleting(true)
-
-            await supabase
-                .from("attendance")
-                .delete()
-                .eq(
-                    "student_id",
-                    student.id
-                )
-
-            const {
-                error,
-            } = await supabase
-                .from("students")
-                .delete()
-                .eq(
-                    "id",
-                    student.id
-                )
-
-            if (error)
-                throw error
-
-            toast.success(
-                "Aluno removido"
-            )
-
-            router.push(
-                "/students"
-            )
-
-            router.refresh()
-
-        } catch (error) {
-
-            console.error(
-                "DELETE_STUDENT_ERROR",
-                error
-            )
-
-            toast.error(
-                "Erro ao remover aluno"
-            )
-
-        } finally {
-
-            setDeleting(false)
-        }
-    }
 
     return (
 
@@ -139,9 +63,10 @@ export function StudentPageActions({
 
                 <AppButton
                     variant="danger"
-                    loading={deleting}
-                    onClick={
-                        handleDelete
+                    onClick={() =>
+                        setDeleteOpen(
+                            true
+                        )
                     }
                 >
 
@@ -156,6 +81,14 @@ export function StudentPageActions({
                 open={editOpen}
                 onOpenChange={
                     setEditOpen
+                }
+            />
+
+            <DeleteStudentDialog
+                student={student}
+                open={deleteOpen}
+                onOpenChange={
+                    setDeleteOpen
                 }
             />
 

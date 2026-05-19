@@ -203,21 +203,55 @@ function DialogFooter({
 }: React.ComponentProps<"div"> & {
   showCloseButton?: boolean
 }) {
+
   return (
+
     <div
       data-slot="dialog-footer"
       className={cn(
-        "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t bg-muted/50 p-4 sm:flex-row sm:justify-end",
+        `
+          -mx-4
+          -mb-4
+
+          flex
+          flex-col-reverse
+          gap-3
+
+          rounded-b-[1.75rem]
+
+          border-t
+          border-border
+
+          bg-transparent
+
+          p-4
+
+          backdrop-blur-2xl
+
+          sm:flex-row
+          sm:justify-end
+        `,
         className
       )}
       {...props}
     >
+
       {children}
+
       {showCloseButton && (
+
         <DialogPrimitive.Close asChild>
-          <Button variant="outline">Close</Button>
+
+          <Button variant="outline">
+
+            Fechar
+
+          </Button>
+
         </DialogPrimitive.Close>
+
       )}
+
     </div>
   )
 }
