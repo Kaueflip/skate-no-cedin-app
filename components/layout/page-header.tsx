@@ -30,7 +30,7 @@ export function PageHeader({
       flex
       flex-col
       gap-6
-
+      mb-5
       lg:flex-row
       lg:items-center
       lg:justify-between

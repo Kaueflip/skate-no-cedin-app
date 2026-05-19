@@ -94,7 +94,7 @@ export default async function StudentPage({
             <div className="
                 overflow-hidden
 
-                rounded-[2rem]
+                rounded-4xl
 
                 border
                 border-border
@@ -104,40 +104,18 @@ export default async function StudentPage({
                 shadow-sm
             ">
 
-                <div className="
-                    relative
 
-               
-                    h-32
-
-                    bg-gradient-to-br
-                    from-primary
-                    to-primary/70
-                ">
-
-                    <div className="
-                        absolute
-                        inset-0
-
-                        bg-black/10
-                    " />
-
-                </div>
 
                 <div className="
                     relative
-
-                    px-6
+                    p-6
                     pb-8
                 ">
 
                     <div className="
-                        -mt-16
-
                         flex
                         flex-col
                         gap-6
-
                         lg:flex-row
                         lg:items-end
                         lg:justify-between
@@ -147,7 +125,6 @@ export default async function StudentPage({
                             flex
                             flex-col
                             gap-5
-
                             sm:flex-row
                             sm:items-end
                         ">
@@ -160,7 +137,7 @@ export default async function StudentPage({
 
                                 overflow-hidden
 
-                                rounded-[2rem]
+                                rounded-4xl
 
                                 border-4
                                 border-card
@@ -379,7 +356,7 @@ export default async function StudentPage({
                         <div className="
                             mt-6
 
-                            rounded-[2rem]
+                            rounded-4xl
 
                             border
                             border-border
@@ -443,7 +420,7 @@ function InfoCard({
     return (
 
         <div className="
-            rounded-[2rem]
+            rounded-4xl
 
             border
             border-border

@@ -29,7 +29,7 @@ export function AddStudentButton() {
           items-center
           justify-center
           gap-2
-
+          mb-5
           rounded-2xl
 
           bg-primary
