@@ -29,6 +29,8 @@ import {
     AppButton,
 } from "@/components/ui/app-button"
 
+import { StudentPageActions } from "@/components/students/student-page-actions"
+
 type Props = {
 
     params: Promise<{
@@ -105,7 +107,8 @@ export default async function StudentPage({
                 <div className="
                     relative
 
-                    h-48
+               
+                    h-32
 
                     bg-gradient-to-br
                     from-primary
@@ -253,27 +256,9 @@ export default async function StudentPage({
 
                         </div>
 
-                        <div className="
-                            flex
-                            flex-wrap
-                            gap-3
-                        ">
-
-                            <AppButton>
-
-                                Editar aluno
-
-                            </AppButton>
-
-                            <AppButton
-                                variant="danger"
-                            >
-
-                                Remover aluno
-
-                            </AppButton>
-
-                        </div>
+                        <StudentPageActions
+                            student={student}
+                        />
 
                     </div>
 
