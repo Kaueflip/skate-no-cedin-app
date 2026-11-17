@@ -204,23 +204,11 @@ export function AttendanceClient({
 
             setSaving(true)
 
-            const payload =
-                Object.entries(
-                    attendanceMap
-                ).map(
-                    ([
-                        studentId,
-                        present,
-                    ]) => ({
-                        student_id:
-                            studentId,
-
-                        class_date:
-                            date,
-
-                        present,
-                    })
-                )
+            const payload = filteredStudents.map((student) => ({
+                student_id: student.id,
+                class_date: date,
+                present: attendanceMap[student.id] === true,
+            }))
 
             if (
                 payload.length === 0

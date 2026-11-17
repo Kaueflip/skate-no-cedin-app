@@ -34,6 +34,10 @@ import { StudentPageActions } from "@/components/students/student-page-actions"
 
 import { calculateAge } from "@/lib/calculate-age"
 
+import {
+    StudentAttendanceHistory,
+} from "@/components/students/student-attendance-history"
+
 type Props = {
 
     params: Promise<{
@@ -62,6 +66,24 @@ export default async function StudentPage({
 
     if (!student)
         notFound()
+
+    const {
+        data: attendance,
+        error: attendanceError,
+    } = await supabase
+        .from("attendance")
+        .select("id, class_date, present")
+        .eq("student_id", id)
+        .order("class_date", {
+            ascending: false,
+        })
+
+    if (attendanceError) {
+        console.error(
+            "Erro ao carregar frequência:",
+            attendanceError
+        )
+    }
 
     return (
 
@@ -369,6 +391,10 @@ export default async function StudentPage({
 
                     </div>
 
+                    <StudentAttendanceHistory
+                        attendance={attendance || []}
+                    />
+
                     <div className="
     mt-6
     rounded-4xl
@@ -377,6 +403,9 @@ export default async function StudentPage({
     bg-background/80
     p-6
 ">
+
+
+
                         <h2 className="
         mb-3
         text-lg
