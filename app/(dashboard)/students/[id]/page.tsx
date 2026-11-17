@@ -369,47 +369,29 @@ export default async function StudentPage({
 
                     </div>
 
-                    {student.observacoes && (
+                    <div className="
+    mt-6
+    rounded-4xl
+    border
+    border-border
+    bg-background/80
+    p-6
+">
+                        <h2 className="
+        mb-3
+        text-lg
+        font-bold
+    ">
+                            Observações
+                        </h2>
 
-                        <div className="
-                            mt-6
-
-                            rounded-4xl
-
-                            border
-                            border-border
-
-                            bg-background/80
-
-                            p-6
-                        ">
-
-                            <h2 className="
-                                mb-3
-
-                                text-lg
-                                font-bold
-                            ">
-
-                                Observações
-
-                            </h2>
-
-                            <p className="
-                                leading-relaxed
-
-                                text-muted
-                            ">
-
-                                {
-                                    student.observacoes
-                                }
-
-                            </p>
-
-                        </div>
-
-                    )}
+                        <p className="
+        leading-relaxed
+        text-muted
+    ">
+                            {student.observacoes?.trim() || "Nenhuma observação registrada."}
+                        </p>
+                    </div>
 
                 </div>
 
