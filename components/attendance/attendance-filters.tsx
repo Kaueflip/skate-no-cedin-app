@@ -176,6 +176,17 @@ export function AttendanceFilters({
 
                     </SelectItem>
 
+                    <SelectItem
+                        value="Integral"
+                        className="
+                            rounded-xl
+                            focus:bg-accent
+                            focus:text-foreground
+                        "
+                    >
+                        Integral
+                    </SelectItem>
+
                 </SelectContent>
 
             </Select>

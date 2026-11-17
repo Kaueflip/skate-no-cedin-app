@@ -3,6 +3,7 @@
 import {
     useMemo,
     useState,
+    useRef,
 } from "react"
 
 import {
@@ -68,6 +69,8 @@ export function AttendanceClient({
             initialAttendanceMap
         )
 
+    const dateRequest = useRef(0)
+
     const filteredStudents =
         useMemo(() => {
 
@@ -100,67 +103,52 @@ export function AttendanceClient({
             turno,
         ])
 
-    async function handleDateChange(
-        newDate: string
-    ) {
+    async function handleDateChange(newDate: string) {
+        if (!newDate) return
+
+        const requestId = ++dateRequest.current
 
         try {
-
             setLoadingDate(true)
-
             setDate(newDate)
 
-            const {
-                data,
-                error,
-            } = await supabase
+            // Limpa os dados anteriores imediatamente
+            setAttendanceMap({})
+
+            const { data, error } = await supabase
                 .from("attendance")
                 .select("*")
-                .eq(
-                    "class_date",
-                    newDate
-                )
+                .eq("class_date", newDate)
 
-            if (error)
-                throw error
+            if (requestId !== dateRequest.current) return
 
-            const mapped =
-                (data || []).reduce(
-                    (
-                        acc,
-                        item
-                    ) => {
+            if (error) throw error
 
-                        acc[
-                            item.student_id
-                        ] =
-                            item.present
+            const mapped = (data || []).reduce(
+                (acc, item) => {
+                    if (item.student_id) {
+                        acc[item.student_id] = item.present ?? false
+                    }
 
-                        return acc
-
-                    },
-
-                    {} as Record<
-                        string,
-                        boolean
-                    >
-                )
-
-            setAttendanceMap(
-                mapped
+                    return acc
+                },
+                {} as Record<string, boolean>
             )
+
+            setAttendanceMap(mapped)
 
         } catch (error) {
-
             console.error(error)
 
-            toast.error(
-                "Erro ao carregar presença"
-            )
+            if (requestId === dateRequest.current) {
+                setAttendanceMap({})
+                toast.error("Erro ao carregar presença")
+            }
 
         } finally {
-
-            setLoadingDate(false)
+            if (requestId === dateRequest.current) {
+                setLoadingDate(false)
+            }
         }
     }
 
@@ -206,6 +194,11 @@ export function AttendanceClient({
     }
 
     async function saveAttendance() {
+
+        if (loadingDate) {
+            toast.error("Aguarde o carregamento das presenças")
+            return
+        }
 
         try {
 
