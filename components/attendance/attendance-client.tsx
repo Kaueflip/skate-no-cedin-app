@@ -30,6 +30,10 @@ import {
     AttendanceFilters,
 } from "@/components/attendance/attendance-filters"
 
+import {
+    ConfirmAbsencesDialog,
+} from "@/components/attendance/confirm-absences-dialog"
+
 type Props = {
 
     students: Student[]
@@ -102,6 +106,9 @@ export function AttendanceClient({
             search,
             turno,
         ])
+
+    const [confirmAbsencesOpen, setConfirmAbsencesOpen] =
+        useState(false)
 
     async function handleDateChange(newDate: string) {
         if (!newDate) return
@@ -193,12 +200,26 @@ export function AttendanceClient({
         )
     }
 
-    async function saveAttendance() {
+    async function handleSaveAttendance() {
 
         if (loadingDate) {
             toast.error("Aguarde o carregamento das presenças")
             return
         }
+
+        const presentCount = filteredStudents.filter(
+            (student) => attendanceMap[student.id] === true
+        ).length
+
+        if (presentCount === 0 && filteredStudents.length > 0) {
+            setConfirmAbsencesOpen(true)
+            return
+        }
+
+        await saveAttendance()
+    }
+
+    async function saveAttendance() {
 
         try {
 
@@ -210,50 +231,31 @@ export function AttendanceClient({
                 present: attendanceMap[student.id] === true,
             }))
 
-            if (
-                payload.length === 0
-            ) {
-
-                toast.error(
-                    "Nenhum aluno marcado"
-                )
-
+            if (payload.length === 0) {
+                toast.error("Nenhum aluno encontrado")
                 return
             }
 
-            const { error } =
-                await supabase
-                    .from("attendance")
-                    .upsert(
-                        payload,
-                        {
-                            onConflict:
-                                "student_id,class_date",
-                        }
-                    )
-
-            if (error) {
-
-                console.error(error)
-
-                toast.error(
-                    error.message
+            const { error } = await supabase
+                .from("attendance")
+                .upsert(
+                    payload,
+                    {
+                        onConflict: "student_id,class_date",
+                    }
                 )
 
-                return
-            }
+            if (error) throw error
 
-            toast.success(
-                "Presença salva"
-            )
+            toast.success("Presença salva")
+
+            setConfirmAbsencesOpen(false)
 
         } catch (error) {
 
             console.error(error)
 
-            toast.error(
-                "Erro ao salvar"
-            )
+            toast.error("Erro ao salvar presença")
 
         } finally {
 
@@ -319,14 +321,10 @@ export function AttendanceClient({
                 </AppButton>
 
                 <AppButton
-                    onClick={
-                        saveAttendance
-                    }
+                    onClick={handleSaveAttendance}
                     loading={saving}
                 >
-
                     Salvar Presença
-
                 </AppButton>
 
             </div>
@@ -416,6 +414,14 @@ export function AttendanceClient({
                 )}
 
             </div>
+
+            <ConfirmAbsencesDialog
+                open={confirmAbsencesOpen}
+                onOpenChange={setConfirmAbsencesOpen}
+                onConfirm={saveAttendance}
+                loading={saving}
+                studentCount={filteredStudents.length}
+            />
 
         </div>
     )

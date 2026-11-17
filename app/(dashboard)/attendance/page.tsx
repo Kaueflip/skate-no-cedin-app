@@ -77,15 +77,17 @@ export default async function AttendancePage() {
           Marque os alunos presentes
           nas aulas do projeto
         "
-                icon={
-                    <CalendarDays
-                        className="
-              h-5
-              w-5
-            "
-                    />
-                }
             />
+
+            <div className="leading-relaxed text-muted">
+                <p className="font-black">ATENÇÃO:</p>
+                <ul>
+                    <li>- Se você filtrar por turno, somente os alunos exibidos naquele filtro serão registrados.</li>
+                    <li>- Se você não marcar ninguém e clicar em salvar, todos os alunos exibidos serão registrados como faltantes após confirmação. </li>
+                    <li>- Pelo menos um presente: salva normalmente, sem confirmação.</li>
+
+                </ul>
+            </div>
 
             <div className="
         mt-8
@@ -103,6 +105,6 @@ export default async function AttendancePage() {
 
             </div>
 
-        </PageShell>
+        </PageShell >
     )
 }
