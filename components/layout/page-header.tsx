@@ -63,7 +63,7 @@ export function PageHeader({
                 )}
 
                 <h1 className="
-          text-4xl
+          text-2xl
           font-black
 
           tracking-tight
@@ -79,12 +79,8 @@ export function PageHeader({
 
                     <p className="
             mt-3
-
             max-w-2xl
-
-            text-lg
             leading-relaxed
-
             text-muted
           ">
 
