@@ -48,9 +48,6 @@ type Props = {
         open: boolean
     ) => void
 
-    onDeleted: (
-        studentId: string
-    ) => void
 
     onEdit: (
         student: Student
@@ -61,7 +58,6 @@ export function StudentDetailsDialog({
     student,
     open,
     onOpenChange,
-    onDeleted,
     onEdit,
 }: Props) {
 
@@ -463,12 +459,7 @@ export function StudentDetailsDialog({
             <DeleteStudentDialog
                 student={student}
                 open={deleteOpen}
-                onOpenChange={
-                    setDeleteOpen
-                }
-                onDeleted={
-                    onDeleted
-                }
+                onOpenChange={setDeleteOpen}
             />
 
         </>
