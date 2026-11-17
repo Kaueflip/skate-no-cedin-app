@@ -8,7 +8,6 @@ import {
 } from "lucide-react"
 
 import {
-    useEffect,
     useRef,
     useState,
 } from "react"
@@ -52,20 +51,16 @@ import { AppButton }
     from "@/components/ui/app-button"
 
 type Props = {
-
-    children:
-    React.ReactNode
+    children: React.ReactNode
 }
 
 export function AddStudentDialog({
     children,
 }: Props) {
 
-    const router =
-        useRouter()
+    const router = useRouter()
 
-    const supabase =
-        createClient()
+    const supabase = createClient()
 
     const fileInputRef =
         useRef<HTMLInputElement>(null)
@@ -82,25 +77,26 @@ export function AddStudentDialog({
     const [photoFile, setPhotoFile] =
         useState<File | null>(null)
 
-    const [form, setForm] =
-        useState({
+    const [form, setForm] = useState({
 
-            nome: "",
+        nome: "",
 
-            idade: "",
+        idade: "",
 
-            turma: "",
+        data_nascimento: "",
 
-            turno: "Manhã",
+        turma: "",
 
-            nivel: "Iniciante",
+        turno: "Manhã",
 
-            responsavel_nome: "",
+        nivel: "Iniciante",
 
-            responsavel_contato: "",
+        responsavel_nome: "",
 
-            observacoes: "",
-        })
+        responsavel_contato: "",
+
+        observacoes: "",
+    })
 
     function updateField(
         field: keyof typeof form,
@@ -113,26 +109,17 @@ export function AddStudentDialog({
         }))
     }
 
-    function formatPhone(
-        value: string
-    ) {
+    function formatPhone(value: string) {
 
-        const cleaned =
-            value
-                .replace(/\D/g, "")
-                .slice(0, 11)
+        const cleaned = value
+            .replace(/\D/g, "")
+            .slice(0, 11)
 
-        if (
-            cleaned.length <= 2
-        ) {
-
+        if (cleaned.length <= 2) {
             return cleaned
         }
 
-        if (
-            cleaned.length <= 7
-        ) {
-
+        if (cleaned.length <= 7) {
             return cleaned.replace(
                 /(\d{2})(\d+)/,
                 "($1) $2"
@@ -146,24 +133,24 @@ export function AddStudentDialog({
     }
 
     function handlePhotoChange(
-        event:
-            React.ChangeEvent<HTMLInputElement>
+        event: React.ChangeEvent<HTMLInputElement>
     ) {
 
-        const file =
-            event.target.files?.[0]
+        const file = event.target.files?.[0]
 
         if (!file)
             return
+
+        if (photoPreview) {
+            URL.revokeObjectURL(photoPreview)
+        }
 
         setPhotoFile(file)
 
         const previewUrl =
             URL.createObjectURL(file)
 
-        setPhotoPreview(
-            previewUrl
-        )
+        setPhotoPreview(previewUrl)
     }
 
     async function uploadPhoto(
@@ -174,9 +161,7 @@ export function AddStudentDialog({
             return null
 
         const extension =
-            photoFile.name
-                .split(".")
-                .pop()
+            photoFile.name.split(".").pop()
 
         const filePath =
             `${studentId}/perfil.${extension}`
@@ -200,22 +185,55 @@ export function AddStudentDialog({
         const { data } =
             supabase.storage
                 .from("alunos")
-                .getPublicUrl(
-                    filePath
-                )
+                .getPublicUrl(filePath)
 
         return data.publicUrl
+    }
+
+    function resetForm() {
+
+        setForm({
+
+            nome: "",
+
+            idade: "",
+
+            data_nascimento: "",
+
+            turma: "",
+
+            turno: "Manhã",
+
+            nivel: "Iniciante",
+
+            responsavel_nome: "",
+
+            responsavel_contato: "",
+
+            observacoes: "",
+        })
+
+        setPhotoFile(null)
+
+        if (photoPreview) {
+            URL.revokeObjectURL(photoPreview)
+        }
+
+        setPhotoPreview(null)
+
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ""
+        }
     }
 
     async function handleSubmit() {
 
         try {
 
-            setLoading(true)
-
             if (
                 !form.nome.trim() ||
                 !form.idade.trim() ||
+                !form.data_nascimento ||
                 !form.turma.trim()
             ) {
 
@@ -225,6 +243,32 @@ export function AddStudentDialog({
 
                 return
             }
+
+            if (
+                Number(form.idade) <= 0 ||
+                !Number.isInteger(Number(form.idade))
+            ) {
+
+                toast.error(
+                    "Informe uma idade válida"
+                )
+
+                return
+            }
+
+            if (
+                form.data_nascimento >
+                new Date().toLocaleDateString("en-CA")
+            ) {
+
+                toast.error(
+                    "A data de nascimento não pode ser futura"
+                )
+
+                return
+            }
+
+            setLoading(true)
 
             const {
                 data: insertedStudent,
@@ -237,9 +281,10 @@ export function AddStudentDialog({
                         form.nome.trim(),
 
                     idade:
-                        Number(
-                            form.idade
-                        ),
+                        Number(form.idade),
+
+                    data_nascimento:
+                        form.data_nascimento,
 
                     turma:
                         form.turma.trim(),
@@ -251,8 +296,8 @@ export function AddStudentDialog({
                         form.nivel,
 
                     data_inicio:
-                        new Date()
-                            .toISOString(),
+                        new Date().toISOString()
+                            .slice(0, 10),
 
                     responsavel_nome:
                         form.responsavel_nome.trim(),
@@ -288,8 +333,7 @@ export function AddStudentDialog({
                     } = await supabase
                         .from("students")
                         .update({
-                            foto_url:
-                                photoUrl,
+                            foto_url: photoUrl,
                         })
                         .eq(
                             "id",
@@ -307,30 +351,9 @@ export function AddStudentDialog({
 
             setOpen(false)
 
+            resetForm()
+
             router.refresh()
-
-            setForm({
-
-                nome: "",
-
-                idade: "",
-
-                turma: "",
-
-                turno: "Manhã",
-
-                nivel: "Iniciante",
-
-                responsavel_nome: "",
-
-                responsavel_contato: "",
-
-                observacoes: "",
-            })
-
-            setPhotoFile(null)
-
-            setPhotoPreview(null)
 
         } catch (error: unknown) {
 
@@ -355,48 +378,47 @@ export function AddStudentDialog({
 
         <Dialog
             open={open}
-            onOpenChange={setOpen}
+            onOpenChange={(value) => {
+
+                setOpen(value)
+
+                if (!value) {
+                    resetForm()
+                }
+            }}
         >
 
             <DialogTrigger asChild>
-
                 {children}
-
             </DialogTrigger>
 
             <DialogContent
                 className="
-          max-h-[90vh]
-
-          overflow-y-auto
-
-          sm:max-w-[560px]
-        "
+                    max-h-[90vh]
+                    overflow-y-auto
+                    sm:max-w-[560px]
+                "
             >
 
                 <DialogHeader>
 
                     <DialogTitle>
-
                         Novo aluno
-
                     </DialogTitle>
 
                     <DialogDescription>
-
                         Cadastre um novo aluno
                         no projeto Skate no Cedin
-
                     </DialogDescription>
 
                 </DialogHeader>
 
                 <div className="
-          flex
-          flex-col
-          items-center
-          gap-4
-        ">
+                    flex
+                    flex-col
+                    items-center
+                    gap-4
+                ">
 
                     <button
                         type="button"
@@ -404,31 +426,22 @@ export function AddStudentDialog({
                             fileInputRef.current?.click()
                         }
                         className="
-              relative
-
-              flex
-              h-28
-              w-28
-              items-center
-              justify-center
-
-              overflow-hidden
-
-              rounded-full
-
-              border
-              border-border
-
-              bg-input
-
-              transition-all
-
-              hover:scale-[1.02]
-
-              hover:border-primary/30
-
-              cursor-pointer
-            "
+                            relative
+                            flex
+                            h-28
+                            w-28
+                            items-center
+                            justify-center
+                            overflow-hidden
+                            rounded-full
+                            border
+                            border-border
+                            bg-input
+                            transition-all
+                            hover:scale-[1.02]
+                            hover:border-primary/30
+                            cursor-pointer
+                        "
                     >
 
                         {photoPreview ? (
@@ -438,37 +451,29 @@ export function AddStudentDialog({
                                 alt="Foto do aluno"
                                 fill
                                 sizes="112px"
-                                className="
-                  object-cover
-                "
+                                className="object-cover"
                             />
 
                         ) : (
 
                             <div className="
-                flex
-                flex-col
-                items-center
-                gap-2
-              ">
+                                flex
+                                flex-col
+                                items-center
+                                gap-2
+                            ">
 
-                                <Camera
-                                    className="
-                    h-6
-                    w-6
-
-                    text-muted
-                  "
-                                />
+                                <Camera className="
+                                    h-6
+                                    w-6
+                                    text-muted
+                                " />
 
                                 <span className="
-                  text-xs
-
-                  text-muted
-                ">
-
+                                    text-xs
+                                    text-muted
+                                ">
                                     Adicionar foto
-
                                 </span>
 
                             </div>
@@ -481,30 +486,23 @@ export function AddStudentDialog({
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={
-                            handlePhotoChange
-                        }
+                        onChange={handlePhotoChange}
                     />
 
                 </div>
 
-                <div className="
-          grid
-          gap-5
-        ">
+                <div className="grid gap-5">
 
                     <div className="
-            grid
-            gap-5
-
-            md:grid-cols-2
-          ">
+                        grid
+                        gap-5
+                        md:grid-cols-2
+                    ">
 
                         <div className="
-              space-y-2
-
-              md:col-span-2
-            ">
+                            space-y-2
+                            md:col-span-2
+                        ">
 
                             <Label>
                                 Nome completo *
@@ -518,16 +516,32 @@ export function AddStudentDialog({
                                         e.target.value
                                     )
                                 }
-                                placeholder="
-                  Nome do aluno
-                "
+                                placeholder="Nome do aluno"
                             />
 
                         </div>
 
-                        <div className="
-              space-y-2
-            ">
+                        <div className="space-y-2">
+
+                            <Label>
+                                Data de nascimento *
+                            </Label>
+
+                            <Input
+                                type="date"
+                                value={form.data_nascimento}
+                                max={new Date().toLocaleDateString("en-CA")}
+                                onChange={(e) =>
+                                    updateField(
+                                        "data_nascimento",
+                                        e.target.value
+                                    )
+                                }
+                            />
+
+                        </div>
+
+                        <div className="space-y-2">
 
                             <Label>
                                 Idade *
@@ -535,6 +549,7 @@ export function AddStudentDialog({
 
                             <Input
                                 type="number"
+                                min="1"
                                 value={form.idade}
                                 onChange={(e) =>
                                     updateField(
@@ -547,9 +562,7 @@ export function AddStudentDialog({
 
                         </div>
 
-                        <div className="
-              space-y-2
-            ">
+                        <div className="space-y-2">
 
                             <Label>
                                 Turma *
@@ -568,9 +581,7 @@ export function AddStudentDialog({
 
                         </div>
 
-                        <div className="
-              space-y-2
-            ">
+                        <div className="space-y-2">
 
                             <Label>
                                 Turno
@@ -587,23 +598,21 @@ export function AddStudentDialog({
                             >
 
                                 <SelectTrigger>
-
                                     <SelectValue />
-
                                 </SelectTrigger>
 
                                 <SelectContent>
 
                                     <SelectItem value="Manhã">
-
                                         Manhã
-
                                     </SelectItem>
 
                                     <SelectItem value="Tarde">
-
                                         Tarde
+                                    </SelectItem>
 
+                                    <SelectItem value="Integral">
+                                        Integral
                                     </SelectItem>
 
                                 </SelectContent>
@@ -612,9 +621,7 @@ export function AddStudentDialog({
 
                         </div>
 
-                        <div className="
-              space-y-2
-            ">
+                        <div className="space-y-2">
 
                             <Label>
                                 Nível
@@ -631,35 +638,25 @@ export function AddStudentDialog({
                             >
 
                                 <SelectTrigger>
-
                                     <SelectValue />
-
                                 </SelectTrigger>
 
                                 <SelectContent>
 
                                     <SelectItem value="Iniciante">
-
                                         Iniciante
-
                                     </SelectItem>
 
                                     <SelectItem value="Básico">
-
                                         Básico
-
                                     </SelectItem>
 
                                     <SelectItem value="Intermediário">
-
                                         Intermediário
-
                                     </SelectItem>
 
                                     <SelectItem value="Avançado">
-
                                         Avançado
-
                                     </SelectItem>
 
                                 </SelectContent>
@@ -669,37 +666,31 @@ export function AddStudentDialog({
                         </div>
 
                         <div className="
-              space-y-2
-
-              md:col-span-2
-            ">
+                            space-y-2
+                            md:col-span-2
+                        ">
 
                             <Label>
                                 Responsável
                             </Label>
 
                             <Input
-                                value={
-                                    form.responsavel_nome
-                                }
+                                value={form.responsavel_nome}
                                 onChange={(e) =>
                                     updateField(
                                         "responsavel_nome",
                                         e.target.value
                                     )
                                 }
-                                placeholder="
-                  Nome do responsável
-                "
+                                placeholder="Nome do responsável"
                             />
 
                         </div>
 
                         <div className="
-              space-y-2
-
-              md:col-span-2
-            ">
+                            space-y-2
+                            md:col-span-2
+                        ">
 
                             <Label>
                                 Contato
@@ -707,47 +698,36 @@ export function AddStudentDialog({
 
                             <Input
                                 inputMode="numeric"
-                                value={
-                                    form.responsavel_contato
-                                }
+                                value={form.responsavel_contato}
                                 onChange={(e) =>
                                     updateField(
                                         "responsavel_contato",
-                                        formatPhone(
-                                            e.target.value
-                                        )
+                                        formatPhone(e.target.value)
                                     )
                                 }
-                                placeholder="
-                  (47) 99999-9999
-                "
+                                placeholder="(47) 99999-9999"
                             />
 
                         </div>
 
                         <div className="
-              space-y-2
-
-              md:col-span-2
-            ">
+                            space-y-2
+                            md:col-span-2
+                        ">
 
                             <Label>
                                 Observações
                             </Label>
 
                             <Textarea
-                                value={
-                                    form.observacoes
-                                }
+                                value={form.observacoes}
                                 onChange={(e) =>
                                     updateField(
                                         "observacoes",
                                         e.target.value
                                     )
                                 }
-                                placeholder="
-                  Observações adicionais...
-                "
+                                placeholder="Observações adicionais..."
                             />
 
                         </div>
@@ -757,19 +737,15 @@ export function AddStudentDialog({
                     <AppButton
                         loading={loading}
                         onClick={handleSubmit}
+                        disabled={loading}
                     >
 
                         {loading && (
-
-                            <Loader2
-                                className="
-                  h-4
-                  w-4
-
-                  animate-spin
-                "
-                            />
-
+                            <Loader2 className="
+                                h-4
+                                w-4
+                                animate-spin
+                            " />
                         )}
 
                         Salvar aluno

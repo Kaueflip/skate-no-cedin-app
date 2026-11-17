@@ -41,8 +41,15 @@ import {
     Textarea,
 } from "@/components/ui/textarea"
 
-type Props = {
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
+type Props = {
     student: Student
 
     open: boolean
@@ -52,8 +59,7 @@ type Props = {
     ) => void
 }
 
-const supabase =
-    createClient()
+const supabase = createClient()
 
 export function EditStudentDialog({
     student,
@@ -61,8 +67,7 @@ export function EditStudentDialog({
     onOpenChange,
 }: Props) {
 
-    const router =
-        useRouter()
+    const router = useRouter()
 
     const [
         loading,
@@ -78,18 +83,19 @@ export function EditStudentDialog({
             student.nome || "",
 
         idade:
-            String(
-                student.idade || ""
-            ),
+            String(student.idade || ""),
+
+        data_nascimento:
+            student.data_nascimento || "",
 
         turma:
             student.turma || "",
 
         turno:
-            student.turno || "",
+            student.turno || "Manhã",
 
         nivel:
-            student.nivel || "",
+            student.nivel || "Iniciante",
 
         responsavel_nome:
             student.responsavel_nome || "",
@@ -101,27 +107,58 @@ export function EditStudentDialog({
             student.observacoes || "",
     }))
 
-
-
     function updateField(
-        field: string,
+        field: keyof typeof formData,
         value: string
     ) {
 
-        setFormData(
-            (prev) => ({
-
-                ...prev,
-
-                [field]:
-                    value,
-            })
-        )
+        setFormData((prev) => ({
+            ...prev,
+            [field]: value,
+        }))
     }
 
     async function handleSubmit() {
 
         try {
+
+            if (
+                !formData.nome.trim() ||
+                !formData.idade.trim() ||
+                !formData.data_nascimento ||
+                !formData.turma.trim()
+            ) {
+
+                toast.error(
+                    "Preencha os campos obrigatórios"
+                )
+
+                return
+            }
+
+            if (
+                Number(formData.idade) <= 0 ||
+                !Number.isInteger(Number(formData.idade))
+            ) {
+
+                toast.error(
+                    "Informe uma idade válida"
+                )
+
+                return
+            }
+
+            if (
+                formData.data_nascimento >
+                new Date().toLocaleDateString("en-CA")
+            ) {
+
+                toast.error(
+                    "A data de nascimento não pode ser futura"
+                )
+
+                return
+            }
 
             setLoading(true)
 
@@ -132,15 +169,16 @@ export function EditStudentDialog({
                 .update({
 
                     nome:
-                        formData.nome,
+                        formData.nome.trim(),
 
                     idade:
-                        Number(
-                            formData.idade
-                        ),
+                        Number(formData.idade),
+
+                    data_nascimento:
+                        formData.data_nascimento,
 
                     turma:
-                        formData.turma,
+                        formData.turma.trim(),
 
                     turno:
                         formData.turno,
@@ -149,13 +187,13 @@ export function EditStudentDialog({
                         formData.nivel,
 
                     responsavel_nome:
-                        formData.responsavel_nome,
+                        formData.responsavel_nome.trim(),
 
                     responsavel_contato:
-                        formData.responsavel_contato,
+                        formData.responsavel_contato.trim(),
 
                     observacoes:
-                        formData.observacoes,
+                        formData.observacoes.trim(),
                 })
                 .eq(
                     "id",
@@ -166,14 +204,14 @@ export function EditStudentDialog({
                 throw error
 
             toast.success(
-                "Aluno atualizado"
+                "Aluno atualizado com sucesso"
             )
 
             router.refresh()
 
             onOpenChange(false)
 
-        } catch (error) {
+        } catch (error: unknown) {
 
             console.error(
                 "EDIT_STUDENT_ERROR",
@@ -181,7 +219,9 @@ export function EditStudentDialog({
             )
 
             toast.error(
-                "Erro ao atualizar aluno"
+                error instanceof Error
+                    ? error.message
+                    : "Erro ao atualizar aluno"
             )
 
         } finally {
@@ -194,51 +234,35 @@ export function EditStudentDialog({
 
         <Dialog
             open={open}
-            onOpenChange={
-                onOpenChange
-            }
+            onOpenChange={onOpenChange}
         >
 
             <DialogContent
                 className="
                     max-h-[90vh]
-
                     overflow-y-auto
-
                     rounded-[2rem]
-
                     border-border
-
                     bg-card
-
                     sm:max-w-2xl
                 "
             >
 
                 <DialogHeader>
 
-                    <DialogTitle
-                        className="
-                            text-2xl
-                            font-black
-                            tracking-tight
-                        "
-                    >
-
+                    <DialogTitle className="
+                        text-2xl
+                        font-black
+                        tracking-tight
+                    ">
                         Editar aluno
-
                     </DialogTitle>
 
-                    <DialogDescription
-                        className="
-                            text-base
-
-                            text-muted
-                        "
-                    >
-
+                    <DialogDescription className="
+                        text-base
+                        text-muted
+                    ">
                         Atualize as informações do aluno.
-
                     </DialogDescription>
 
                 </DialogHeader>
@@ -246,25 +270,19 @@ export function EditStudentDialog({
                 <div className="
                     grid
                     gap-5
-
                     py-4
                 ">
 
                     <div className="
                         grid
                         gap-5
-
                         md:grid-cols-2
                     ">
 
-                        <Field
-                            label="Nome"
-                        >
+                        <Field label="Nome">
 
                             <Input
-                                value={
-                                    formData.nome
-                                }
+                                value={formData.nome}
                                 onChange={(e) =>
                                     updateField(
                                         "nome",
@@ -275,15 +293,28 @@ export function EditStudentDialog({
 
                         </Field>
 
-                        <Field
-                            label="Idade"
-                        >
+                        <Field label="Data de nascimento">
+
+                            <Input
+                                type="date"
+                                value={formData.data_nascimento}
+                                max={new Date().toLocaleDateString("en-CA")}
+                                onChange={(e) =>
+                                    updateField(
+                                        "data_nascimento",
+                                        e.target.value
+                                    )
+                                }
+                            />
+
+                        </Field>
+
+                        <Field label="Idade">
 
                             <Input
                                 type="number"
-                                value={
-                                    formData.idade
-                                }
+                                min="1"
+                                value={formData.idade}
                                 onChange={(e) =>
                                     updateField(
                                         "idade",
@@ -294,14 +325,10 @@ export function EditStudentDialog({
 
                         </Field>
 
-                        <Field
-                            label="Turma"
-                        >
+                        <Field label="Turma">
 
                             <Input
-                                value={
-                                    formData.turma
-                                }
+                                value={formData.turma}
                                 onChange={(e) =>
                                     updateField(
                                         "turma",
@@ -312,50 +339,86 @@ export function EditStudentDialog({
 
                         </Field>
 
-                        <Field
-                            label="Turno"
-                        >
+                        <Field label="Turno">
 
-                            <Input
-                                value={
-                                    formData.turno
-                                }
-                                onChange={(e) =>
+                            <Select
+                                value={formData.turno}
+                                onValueChange={(value) =>
                                     updateField(
                                         "turno",
-                                        e.target.value
+                                        value
                                     )
                                 }
-                            />
+                            >
+
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+
+                                <SelectContent>
+
+                                    <SelectItem value="Manhã">
+                                        Manhã
+                                    </SelectItem>
+
+                                    <SelectItem value="Tarde">
+                                        Tarde
+                                    </SelectItem>
+
+                                    <SelectItem value="Integral">
+                                        Integral
+                                    </SelectItem>
+
+                                </SelectContent>
+
+                            </Select>
 
                         </Field>
 
-                        <Field
-                            label="Nível"
-                        >
+                        <Field label="Nível">
 
-                            <Input
-                                value={
-                                    formData.nivel
-                                }
-                                onChange={(e) =>
+                            <Select
+                                value={formData.nivel}
+                                onValueChange={(value) =>
                                     updateField(
                                         "nivel",
-                                        e.target.value
+                                        value
                                     )
                                 }
-                            />
+                            >
+
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+
+                                <SelectContent>
+
+                                    <SelectItem value="Iniciante">
+                                        Iniciante
+                                    </SelectItem>
+
+                                    <SelectItem value="Básico">
+                                        Básico
+                                    </SelectItem>
+
+                                    <SelectItem value="Intermediário">
+                                        Intermediário
+                                    </SelectItem>
+
+                                    <SelectItem value="Avançado">
+                                        Avançado
+                                    </SelectItem>
+
+                                </SelectContent>
+
+                            </Select>
 
                         </Field>
 
-                        <Field
-                            label="Responsável"
-                        >
+                        <Field label="Responsável">
 
                             <Input
-                                value={
-                                    formData.responsavel_nome
-                                }
+                                value={formData.responsavel_nome}
                                 onChange={(e) =>
                                     updateField(
                                         "responsavel_nome",
@@ -366,35 +429,27 @@ export function EditStudentDialog({
 
                         </Field>
 
+                        <Field label="Contato">
+
+                            <Input
+                                value={formData.responsavel_contato}
+                                onChange={(e) =>
+                                    updateField(
+                                        "responsavel_contato",
+                                        e.target.value
+                                    )
+                                }
+                            />
+
+                        </Field>
+
                     </div>
 
-                    <Field
-                        label="Contato"
-                    >
-
-                        <Input
-                            value={
-                                formData.responsavel_contato
-                            }
-                            onChange={(e) =>
-                                updateField(
-                                    "responsavel_contato",
-                                    e.target.value
-                                )
-                            }
-                        />
-
-                    </Field>
-
-                    <Field
-                        label="Observações"
-                    >
+                    <Field label="Observações">
 
                         <Textarea
                             rows={5}
-                            value={
-                                formData.observacoes
-                            }
+                            value={formData.observacoes}
                             onChange={(e) =>
                                 updateField(
                                     "observacoes",
@@ -407,34 +462,24 @@ export function EditStudentDialog({
 
                 </div>
 
-                <DialogFooter
-                    className="
-                        mt-4
-                    "
-                >
+                <DialogFooter className="mt-4">
 
                     <AppButton
                         variant="secondary"
                         onClick={() =>
-                            onOpenChange(
-                                false
-                            )
+                            onOpenChange(false)
                         }
+                        disabled={loading}
                     >
-
                         Cancelar
-
                     </AppButton>
 
                     <AppButton
                         loading={loading}
-                        onClick={
-                            handleSubmit
-                        }
+                        onClick={handleSubmit}
+                        disabled={loading}
                     >
-
                         Salvar alterações
-
                     </AppButton>
 
                 </DialogFooter>
@@ -446,11 +491,8 @@ export function EditStudentDialog({
 }
 
 type FieldProps = {
-
     label: string
-
-    children:
-    React.ReactNode
+    children: React.ReactNode
 }
 
 function Field({
@@ -469,16 +511,13 @@ function Field({
             <label className="
                 text-sm
                 font-semibold
-
                 text-foreground
             ">
-
                 {label}
-
             </label>
 
             {children}
 
         </div>
     )
-}   
+}

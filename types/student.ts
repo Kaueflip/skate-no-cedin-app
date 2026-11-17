@@ -5,9 +5,11 @@ export type Student = {
 
   idade: number;
 
+  data_nascimento: string | null;
+
   turma: string;
 
-  turno: "Manhã" | "Tarde";
+  turno: "Manhã" | "Tarde" | "Integral";
 
   data_inicio: string;
 
