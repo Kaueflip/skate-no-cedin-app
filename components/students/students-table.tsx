@@ -27,6 +27,8 @@ import {
     Badge,
 } from "@/components/ui/badge"
 
+import { calculateAge } from "@/lib/calculate-age"
+
 type Props = {
 
     students: Student[]
@@ -263,13 +265,11 @@ export function StudentsTable({
                                 </TableCell>
 
                                 <TableCell
-                                    className="
-                                        text-muted
-                                    "
+                                    className="text-muted"
                                 >
-
-                                    {student.idade} anos
-
+                                    {calculateAge(student.data_nascimento) !== null
+                                        ? `${calculateAge(student.data_nascimento)} anos`
+                                        : "Não informado"}
                                 </TableCell>
 
                                 <TableCell

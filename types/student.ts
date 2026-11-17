@@ -3,8 +3,6 @@ export type Student = {
 
   nome: string;
 
-  idade: number;
-
   data_nascimento: string | null;
 
   turma: string;

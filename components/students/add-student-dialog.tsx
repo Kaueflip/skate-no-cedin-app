@@ -50,6 +50,8 @@ import {
 import { AppButton }
     from "@/components/ui/app-button"
 
+import { calculateAge } from "@/lib/calculate-age"
+
 type Props = {
     children: React.ReactNode
 }
@@ -80,8 +82,6 @@ export function AddStudentDialog({
     const [form, setForm] = useState({
 
         nome: "",
-
-        idade: "",
 
         data_nascimento: "",
 
@@ -196,8 +196,6 @@ export function AddStudentDialog({
 
             nome: "",
 
-            idade: "",
-
             data_nascimento: "",
 
             turma: "",
@@ -232,7 +230,6 @@ export function AddStudentDialog({
 
             if (
                 !form.nome.trim() ||
-                !form.idade.trim() ||
                 !form.data_nascimento ||
                 !form.turma.trim()
             ) {
@@ -243,28 +240,14 @@ export function AddStudentDialog({
 
                 return
             }
+            const idadeCalculada = calculateAge(
+                form.data_nascimento
+            )
 
-            if (
-                Number(form.idade) <= 0 ||
-                !Number.isInteger(Number(form.idade))
-            ) {
-
+            if (idadeCalculada === null) {
                 toast.error(
-                    "Informe uma idade válida"
+                    "Informe uma data de nascimento válida"
                 )
-
-                return
-            }
-
-            if (
-                form.data_nascimento >
-                new Date().toLocaleDateString("en-CA")
-            ) {
-
-                toast.error(
-                    "A data de nascimento não pode ser futura"
-                )
-
                 return
             }
 
@@ -279,9 +262,6 @@ export function AddStudentDialog({
 
                     nome:
                         form.nome.trim(),
-
-                    idade:
-                        Number(form.idade),
 
                     data_nascimento:
                         form.data_nascimento,
@@ -530,34 +510,13 @@ export function AddStudentDialog({
                             <Input
                                 type="date"
                                 value={form.data_nascimento}
-                                max={new Date().toLocaleDateString("en-CA")}
+                                max={new Date().toISOString().slice(0, 10)}
                                 onChange={(e) =>
                                     updateField(
                                         "data_nascimento",
                                         e.target.value
                                     )
                                 }
-                            />
-
-                        </div>
-
-                        <div className="space-y-2">
-
-                            <Label>
-                                Idade *
-                            </Label>
-
-                            <Input
-                                type="number"
-                                min="1"
-                                value={form.idade}
-                                onChange={(e) =>
-                                    updateField(
-                                        "idade",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="12"
                             />
 
                         </div>

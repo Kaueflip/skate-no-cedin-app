@@ -128,8 +128,6 @@ export function useStudents() {
 
         nome: studentData.nome,
 
-        idade: studentData.idade,
-
         turma: studentData.turma,
 
         turno: studentData.turno,

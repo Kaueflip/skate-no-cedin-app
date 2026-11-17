@@ -49,6 +49,8 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 
+import { calculateAge } from "@/lib/calculate-age"
+
 type Props = {
     student: Student
 
@@ -81,9 +83,6 @@ export function EditStudentDialog({
 
         nome:
             student.nome || "",
-
-        idade:
-            String(student.idade || ""),
 
         data_nascimento:
             student.data_nascimento || "",
@@ -124,7 +123,6 @@ export function EditStudentDialog({
 
             if (
                 !formData.nome.trim() ||
-                !formData.idade.trim() ||
                 !formData.data_nascimento ||
                 !formData.turma.trim()
             ) {
@@ -136,27 +134,14 @@ export function EditStudentDialog({
                 return
             }
 
-            if (
-                Number(formData.idade) <= 0 ||
-                !Number.isInteger(Number(formData.idade))
-            ) {
+            const idadeCalculada = calculateAge(
+                formData.data_nascimento
+            )
 
+            if (idadeCalculada === null) {
                 toast.error(
-                    "Informe uma idade válida"
+                    "Informe uma data de nascimento válida"
                 )
-
-                return
-            }
-
-            if (
-                formData.data_nascimento >
-                new Date().toLocaleDateString("en-CA")
-            ) {
-
-                toast.error(
-                    "A data de nascimento não pode ser futura"
-                )
-
                 return
             }
 
@@ -170,9 +155,6 @@ export function EditStudentDialog({
 
                     nome:
                         formData.nome.trim(),
-
-                    idade:
-                        Number(formData.idade),
 
                     data_nascimento:
                         formData.data_nascimento,
@@ -298,26 +280,10 @@ export function EditStudentDialog({
                             <Input
                                 type="date"
                                 value={formData.data_nascimento}
-                                max={new Date().toLocaleDateString("en-CA")}
+                                max={new Date().toISOString().slice(0, 10)}
                                 onChange={(e) =>
                                     updateField(
                                         "data_nascimento",
-                                        e.target.value
-                                    )
-                                }
-                            />
-
-                        </Field>
-
-                        <Field label="Idade">
-
-                            <Input
-                                type="number"
-                                min="1"
-                                value={formData.idade}
-                                onChange={(e) =>
-                                    updateField(
-                                        "idade",
                                         e.target.value
                                     )
                                 }

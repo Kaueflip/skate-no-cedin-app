@@ -256,7 +256,7 @@ export function AppSidebar() {
             "
           >
 
-            Navegação
+
 
           </SidebarGroupLabel>
 

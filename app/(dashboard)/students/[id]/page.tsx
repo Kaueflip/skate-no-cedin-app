@@ -11,6 +11,7 @@ import {
     GraduationCap,
     Phone,
     User,
+    Cake,
     ArrowLeft,
 } from "lucide-react"
 
@@ -30,6 +31,8 @@ import {
 } from "@/components/ui/app-button"
 
 import { StudentPageActions } from "@/components/students/student-page-actions"
+
+import { calculateAge } from "@/lib/calculate-age"
 
 type Props = {
 
@@ -282,15 +285,30 @@ export default async function StudentPage({
                         <InfoCard
                             icon={
                                 <User
-                                    className="
-                                        h-5
-                                        w-5
-                                    "
+                                    className="h-5 w-5"
                                 />
                             }
                             label="Idade"
                             value={
-                                `${student.idade} anos`
+                                calculateAge(student.data_nascimento) !== null
+                                    ? `${calculateAge(student.data_nascimento)} anos`
+                                    : "Não informada"
+                            }
+                        />
+
+                        <InfoCard
+                            icon={
+                                <Cake
+                                    className="h-5 w-5"
+                                />
+                            }
+                            label="Data de nascimento"
+                            value={
+                                student.data_nascimento
+                                    ? new Date(
+                                        `${student.data_nascimento}T12:00:00`
+                                    ).toLocaleDateString("pt-BR")
+                                    : "Não informada"
                             }
                         />
 

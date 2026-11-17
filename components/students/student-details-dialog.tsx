@@ -37,6 +37,8 @@ import {
     DeleteStudentDialog,
 } from "@/components/students/delete-student-dialog"
 
+import { calculateAge } from "@/lib/calculate-age"
+
 type Props = {
 
     student:
@@ -394,15 +396,14 @@ export function StudentDetailsDialog({
                             <InfoCard
                                 icon={
                                     <GraduationCap
-                                        className="
-                                            h-5
-                                            w-5
-                                        "
+                                        className="h-5 w-5"
                                     />
                                 }
                                 label="Idade"
                                 value={
-                                    `${student.idade} anos`
+                                    calculateAge(student.data_nascimento) !== null
+                                        ? `${calculateAge(student.data_nascimento)} anos`
+                                        : "Não informada"
                                 }
                             />
 
