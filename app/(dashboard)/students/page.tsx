@@ -35,8 +35,8 @@ export default async function StudentsPage() {
     } = await supabase
         .from("students")
         .select("*")
-        .order("created_at", {
-            ascending: false,
+        .order("nome", {
+            ascending: true,
         })
 
     const totalStudents =
