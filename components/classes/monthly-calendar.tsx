@@ -23,6 +23,7 @@ type Props = {
     date: string
     sessions: ClassSession[]
     onMonthChange: (date: string) => void
+    onDaySelect: (date: string) => void
 }
 
 const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
@@ -31,6 +32,7 @@ export function MonthlyCalendar({
     date,
     sessions,
     onMonthChange,
+    onDaySelect,
 }: Props) {
     const calendar = useMemo(() => {
         const [year, month] = date.split("-").map(Number)
@@ -151,21 +153,31 @@ export function MonthlyCalendar({
 
                     const dayStats = sessionsByDay[dayKey]
 
+                    const selected = date === dayKey
+
                     return (
-                        <div
+                        <button
                             key={dayKey}
+                            type="button"
+                            onClick={() => onDaySelect(dayKey)}
                             className={`
-                                min-h-[76px]
-                                rounded-xl
-                                border
-                                p-2
-                                ${dayStats?.realized
-                                    ? "border-emerald-500/30 bg-emerald-500/5"
-                                    : "border-border bg-background/50"
+            min-h-[76px]
+            rounded-xl
+            border
+            p-2
+            text-left
+            transition
+            hover:border-primary
+            ${selected
+                                    ? "border-primary bg-primary/10 ring-1 ring-primary"
+                                    : dayStats?.realized
+                                        ? "border-emerald-500/30 bg-emerald-500/5"
+                                        : "border-border bg-background/50"
                                 }
-                            `}
+        `}
                         >
-                            <p className="text-sm font-bold">
+                            <p className={`text-sm font-bold ${selected ? "text-primary" : ""
+                                }`}>
                                 {day}
                             </p>
 
@@ -186,7 +198,7 @@ export function MonthlyCalendar({
                                     )}
                                 </div>
                             )}
-                        </div>
+                        </button>
                     )
                 })}
             </div>

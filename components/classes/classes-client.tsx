@@ -16,6 +16,7 @@ import {
     CheckCircle2,
     XCircle,
     Loader2,
+    Trash2,
 } from "lucide-react"
 
 import {
@@ -33,6 +34,10 @@ import {
 import {
     MonthlyCalendar,
 } from "@/components/classes/monthly-calendar"
+
+import {
+    DeleteSessionDialog,
+} from "@/components/classes/delete-session-dialog"
 
 type ClassSession = {
     id: string
@@ -321,6 +326,34 @@ export function ClassesClient({
         }
     }
 
+    async function deleteSession(session: ClassSession) {
+        try {
+            setSaving(true)
+
+            const { error } = await supabase
+                .from("class_sessions")
+                .delete()
+                .eq("id", session.id)
+
+            if (error) throw error
+
+            setSessions((prev) =>
+                prev.filter((item) => item.id !== session.id)
+            )
+
+            await loadMonthlySessions(date)
+
+            toast.success("Aula excluída com sucesso")
+
+        } catch (error) {
+            console.error(error)
+            toast.error("Erro ao excluir aula")
+            throw error
+        } finally {
+            setSaving(false)
+        }
+    }
+
     return (
         <div className="flex flex-col gap-6">
 
@@ -511,6 +544,7 @@ export function ClassesClient({
                 date={date}
                 sessions={monthlySessions}
                 onMonthChange={handleDateChange}
+                onDaySelect={handleDateChange}
             />
 
             {/* Turnos */}
@@ -618,30 +652,39 @@ export function ClassesClient({
                                                         </p>
                                                     </div>
 
-                                                    <button
-                                                        type="button"
-                                                        disabled={saving}
-                                                        onClick={() =>
-                                                            toggleStatus(session)
-                                                        }
-                                                        className={`
-                                                            rounded-full
-                                                            px-3
-                                                            py-2
-                                                            text-xs
-                                                            font-bold
-                                                            transition
-                                                            disabled:opacity-50
-                                                            ${session.status === "realizada"
-                                                                ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
-                                                                : "bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                                                            }
-                                                        `}
-                                                    >
-                                                        {session.status === "realizada"
-                                                            ? "Realizada"
-                                                            : "Cancelada"}
-                                                    </button>
+                                                    <div className="flex items-center gap-2">
+
+                                                        <button
+                                                            type="button"
+                                                            disabled={saving}
+                                                            onClick={() => toggleStatus(session)}
+                                                            className={`
+            rounded-full
+            px-3
+            py-2
+            text-xs
+            font-bold
+            transition
+            disabled:opacity-50
+            ${session.status === "realizada"
+                                                                    ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
+                                                                    : "bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                                                                }
+        `}
+                                                        >
+                                                            {session.status === "realizada"
+                                                                ? "Realizada"
+                                                                : "Cancelada"}
+                                                        </button>
+
+                                                        <DeleteSessionDialog
+                                                            turno={session.turno}
+                                                            aulaNumero={session.aula_numero}
+                                                            onDelete={() => deleteSession(session)}
+                                                            disabled={saving}
+                                                        />
+
+                                                    </div>
                                                 </div>
                                             ))}
 
