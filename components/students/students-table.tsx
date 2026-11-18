@@ -140,7 +140,7 @@ export function StudentsTable({
 
                 <TableHeader
                     className="
-                        bg-muted/40
+                        bg-muted/10
                     "
                 >
 
@@ -199,7 +199,7 @@ export function StudentsTable({
 
                                     transition-colors
 
-                                    hover:bg-muted/40
+                                    hover:bg-muted/10
                                 "
                             >
 
