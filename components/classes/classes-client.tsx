@@ -30,6 +30,10 @@ import {
     AppButton,
 } from "@/components/ui/app-button"
 
+import {
+    MonthlyCalendar,
+} from "@/components/classes/monthly-calendar"
+
 type ClassSession = {
     id: string
     class_date: string
@@ -502,6 +506,12 @@ export function ClassesClient({
                 </div>
             </div>
 
+
+            <MonthlyCalendar
+                date={date}
+                sessions={monthlySessions}
+                onMonthChange={handleDateChange}
+            />
 
             {/* Turnos */}
 
