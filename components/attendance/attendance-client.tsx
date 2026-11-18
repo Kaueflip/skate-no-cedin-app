@@ -89,10 +89,12 @@ export function AttendanceClient({
                             )
 
                     const matchesTurno =
-                        turno === "all"
-                            ? true
-                            : student.turno ===
-                            turno
+                        turno === "all" ||
+                        student.turno === turno ||
+                        (
+                            turno === "Tarde" &&
+                            student.turno === "Integral"
+                        )
 
                     return (
                         matchesSearch &&
