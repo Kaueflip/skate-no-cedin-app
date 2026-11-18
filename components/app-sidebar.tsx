@@ -14,6 +14,8 @@ import {
   User2,
   Moon,
   Sun,
+  CalendarDays,
+  ClipboardCheck,
 } from "lucide-react"
 
 import Link from "next/link"
@@ -59,7 +61,7 @@ const menuItems = [
   {
     title: "Controle de Aulas",
     url: "/classes",
-    icon: CalendarCheck,
+    icon: CalendarDays,
   },
 
   {
@@ -71,7 +73,7 @@ const menuItems = [
   {
     title: "Frequência",
     url: "/attendance",
-    icon: CalendarCheck,
+    icon: ClipboardCheck,
   },
 
   /*   {

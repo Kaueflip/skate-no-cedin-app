@@ -1,9 +1,9 @@
 
 import {
     Users,
-    CalendarCheck,
-    TrendingUp,
-    BarChart3,
+    ClipboardCheck,
+    CalendarDays,
+    UserX,
 } from "lucide-react"
 
 import { createClient } from "@/lib/supabase-server"
@@ -69,7 +69,7 @@ export default async function DashboardPage() {
         }
     ).format(new Date())
 
-    // TOTAL DE ALUNOS
+    // TOTAL DE ALUNOS ATIVOS
 
     const {
         count: studentsCount,
@@ -79,6 +79,7 @@ export default async function DashboardPage() {
             count: "exact",
             head: true,
         })
+        .eq("ativo", true)
 
     // TOTAL DE PRESENÇAS
 
@@ -90,6 +91,45 @@ export default async function DashboardPage() {
             count: "exact",
             head: true,
         })
+        .eq("present", true)
+
+    // TOTAL DE FALTAS
+
+    const {
+        count: absencesCount,
+    } = await supabase
+        .from("attendance")
+        .select("*", {
+            count: "exact",
+            head: true,
+        })
+        .eq("present", false)
+
+    // AULAS REALIZADAS NO MÊS
+
+    const monthStart = `${currentYear}-${String(currentMonth).padStart(2, "0")}-01`
+
+    const nextMonthDate = new Date(
+        Date.UTC(currentYear, currentMonth, 1)
+    )
+
+    const nextMonthStart = [
+        nextMonthDate.getUTCFullYear(),
+        String(nextMonthDate.getUTCMonth() + 1).padStart(2, "0"),
+        "01",
+    ].join("-")
+
+    const {
+        count: classesCount,
+    } = await supabase
+        .from("class_sessions")
+        .select("*", {
+            count: "exact",
+            head: true,
+        })
+        .eq("status", "realizada")
+        .gte("class_date", monthStart)
+        .lt("class_date", nextMonthStart)
 
     // ÚLTIMOS ALUNOS
 
@@ -192,7 +232,7 @@ export default async function DashboardPage() {
             ">
 
                 <StatCard
-                    title="Alunos"
+                    title="Alunos ativos"
                     value={studentsCount || 0}
                     icon={
                         <Users className="h-5 w-5" />
@@ -202,26 +242,27 @@ export default async function DashboardPage() {
                 <StatCard
                     title="Presenças"
                     value={attendanceCount || 0}
+                    description="registros realizados"
                     icon={
-                        <CalendarCheck className="h-5 w-5" />
+                        <ClipboardCheck className="h-5 w-5" />
                     }
                 />
 
                 <StatCard
-                    title="Evolução"
-                    value="87%"
-                    description="média geral"
+                    title="Aulas realizadas"
+                    value={classesCount || 0}
+                    description="neste mês"
                     icon={
-                        <TrendingUp className="h-5 w-5" />
+                        <CalendarDays className="h-5 w-5" />
                     }
                 />
 
                 <StatCard
-                    title="Relatórios"
-                    value="12"
-                    description="este mês"
+                    title="Faltas"
+                    value={absencesCount || 0}
+                    description="registros de ausência"
                     icon={
-                        <BarChart3 className="h-5 w-5" />
+                        <UserX className="h-5 w-5" />
                     }
                 />
 
