@@ -57,6 +57,12 @@ const menuItems = [
   },
 
   {
+    title: "Controle de Aulas",
+    url: "/classes",
+    icon: CalendarCheck,
+  },
+
+  {
     title: "Alunos",
     url: "/students",
     icon: Users,
@@ -68,23 +74,23 @@ const menuItems = [
     icon: CalendarCheck,
   },
 
-  {
-    title: "Progressão Técnica",
-    url: "/progress",
-    icon: TrendingUp,
-  },
-
-  {
-    title: "Relatórios",
-    url: "/reports",
-    icon: BarChart3,
-  },
-
-  {
-    title: "Configurações",
-    url: "/settings",
-    icon: Settings,
-  },
+  /*   {
+      title: "Progressão Técnica",
+      url: "/progress",
+      icon: TrendingUp,
+    },
+  
+    {
+      title: "Relatórios",
+      url: "/reports",
+      icon: BarChart3,
+    },
+  
+    {
+      title: "Configurações",
+      url: "/settings",
+      icon: Settings,
+    }, */
 ]
 
 export function AppSidebar() {

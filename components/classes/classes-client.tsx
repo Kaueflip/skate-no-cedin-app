@@ -88,6 +88,13 @@ export function ClassesClient({
     const [monthlySessions, setMonthlySessions] =
         useState<ClassSession[]>([])
 
+    const [deleteDialog, setDeleteDialog] = useState<{
+        open: boolean
+        session: ClassSession | null
+    }>({
+        open: false,
+        session: null,
+    })
 
     useEffect(() => {
         async function fetchMonthlySessions() {
@@ -326,32 +333,20 @@ export function ClassesClient({
         }
     }
 
-    async function deleteSession(session: ClassSession) {
-        try {
-            setSaving(true)
 
-            const { error } = await supabase
-                .from("class_sessions")
-                .delete()
-                .eq("id", session.id)
+    function handleSessionDeleted(sessionId: string) {
+        setSessions((prev) =>
+            prev.filter((item) => item.id !== sessionId)
+        )
 
-            if (error) throw error
+        setMonthlySessions((prev) =>
+            prev.filter((item) => item.id !== sessionId)
+        )
 
-            setSessions((prev) =>
-                prev.filter((item) => item.id !== session.id)
-            )
-
-            await loadMonthlySessions(date)
-
-            toast.success("Aula excluída com sucesso")
-
-        } catch (error) {
-            console.error(error)
-            toast.error("Erro ao excluir aula")
-            throw error
-        } finally {
-            setSaving(false)
-        }
+        setDeleteDialog({
+            open: false,
+            session: null,
+        })
     }
 
     return (
@@ -677,12 +672,33 @@ export function ClassesClient({
                                                                 : "Cancelada"}
                                                         </button>
 
-                                                        <DeleteSessionDialog
-                                                            turno={session.turno}
-                                                            aulaNumero={session.aula_numero}
-                                                            onDelete={() => deleteSession(session)}
+                                                        <button
+                                                            type="button"
                                                             disabled={saving}
-                                                        />
+                                                            onClick={() =>
+                                                                setDeleteDialog({
+                                                                    open: true,
+                                                                    session,
+                                                                })
+                                                            }
+                                                            title="Excluir aula"
+                                                            aria-label="Excluir aula"
+                                                            className="
+                                                                        flex
+                                                                        h-9
+                                                                        w-9
+                                                                        items-center
+                                                                        justify-center
+                                                                        rounded-xl
+                                                                        text-muted
+                                                                        transition
+                                                                        hover:bg-red-500/10
+                                                                        hover:text-red-500
+                                                                        disabled:opacity-50
+                                                                    "
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </button>
 
                                                     </div>
                                                 </div>
@@ -704,6 +720,22 @@ export function ClassesClient({
                     </div>
                 )}
             </div>
+
+            {deleteDialog.session && (
+                <DeleteSessionDialog
+                    sessionId={deleteDialog.session.id}
+                    turno={deleteDialog.session.turno}
+                    aulaNumero={deleteDialog.session.aula_numero}
+                    open={deleteDialog.open}
+                    onOpenChange={(open) =>
+                        setDeleteDialog((prev) => ({
+                            ...prev,
+                            open,
+                        }))
+                    }
+                    onDeleted={handleSessionDeleted}
+                />
+            )}
 
         </div>
     )
