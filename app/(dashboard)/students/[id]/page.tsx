@@ -240,19 +240,36 @@ export default async function StudentPage({
 
                                 </h1>
 
-                                <p className="
-                                    mt-3
+                                <div className="
+    mt-3
+    flex
+    flex-wrap
+    items-center
+    gap-3
+">
+                                    <p className="
+        text-lg
+        text-muted
+    ">
+                                        {student.nivel}
+                                        {" • "}
+                                        {student.turno}
+                                    </p>
 
-                                    text-lg
-
-                                    text-muted
-                                ">
-
-                                    {student.nivel}
-                                    {" • "}
-                                    {student.turno}
-
-                                </p>
+                                    <span className={`
+        rounded-full
+        px-3
+        py-1
+        text-xs
+        font-semibold
+        ${student.ativo !== false
+                                            ? "bg-emerald-500/10 text-emerald-600"
+                                            : "bg-red-500/10 text-red-600"
+                                        }
+    `}>
+                                        {student.ativo !== false ? "Ativo" : "Inativo"}
+                                    </span>
+                                </div>
 
                             </div>
 
