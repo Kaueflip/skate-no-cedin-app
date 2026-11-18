@@ -17,6 +17,7 @@ import {
     XCircle,
     Loader2,
     Trash2,
+    Clock3,
 } from "lucide-react"
 
 import {
@@ -70,6 +71,29 @@ const shifts = [
         icon: Moon,
     },
 ]
+
+const classTimes = {
+    Manhã: {
+        1: "07:30 – 09:15",
+        2: "09:45 – 11:30",
+    },
+    Tarde: {
+        1: "13:00 – 14:45",
+        2: "15:15 – 17:00",
+    },
+}
+
+const CLASS_DURATION_MINUTES = 105
+
+function formatDuration(minutes: number) {
+    const hours = Math.floor(minutes / 60)
+    const remainingMinutes = minutes % 60
+
+    return `${hours}h${remainingMinutes > 0
+        ? ` ${remainingMinutes}min`
+        : ""
+        }`
+}
 
 export function ClassesClient({
     initialSessions,
@@ -139,16 +163,17 @@ export function ClassesClient({
     const stats = useMemo(() => {
         const realized = sessions.filter(
             (item) => item.status === "realizada"
-        ).length
+        )
 
         const cancelled = sessions.filter(
             (item) => item.status === "cancelada"
-        ).length
+        )
 
         return {
-            realized,
-            cancelled,
+            realized: realized.length,
+            cancelled: cancelled.length,
             total: sessions.length,
+            hours: realized.length * CLASS_DURATION_MINUTES,
         }
     }, [sessions])
 
@@ -171,6 +196,7 @@ export function ClassesClient({
             cancelled: cancelled.length,
             total: monthlySessions.length,
             activeDays: activeDays.size,
+            hours: realized.length * CLASS_DURATION_MINUTES,
         }
     }, [monthlySessions])
 
@@ -248,10 +274,18 @@ export function ClassesClient({
                 (item) => item.turno === turno
             )
 
-            const nextNumber = existingSessions.reduce(
-                (max, item) => Math.max(max, item.aula_numero),
-                0
-            ) + 1
+            const usedNumbers = existingSessions.map(
+                (item) => item.aula_numero
+            )
+
+            const nextNumber = ([1, 2] as const).find(
+                (number) => !usedNumbers.includes(number)
+            )
+
+            if (!nextNumber) {
+                toast.error("As duas aulas deste turno já foram registradas.")
+                return
+            }
 
             const { data, error } = await supabase
                 .from("class_sessions")
@@ -473,7 +507,7 @@ export function ClassesClient({
                     </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
 
                     <div className="rounded-2xl border border-border bg-card p-4">
                         <div className="mb-3 text-emerald-500">
@@ -528,6 +562,20 @@ export function ClassesClient({
 
                         <p className="mt-1 text-2xl font-black">
                             {monthlyStats.activeDays}
+                        </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-border bg-card p-4">
+                        <div className="mb-3 text-primary">
+                            <Clock3 className="h-5 w-5" />
+                        </div>
+
+                        <p className="text-sm text-muted">
+                            Carga horária
+                        </p>
+
+                        <p className="mt-1 text-2xl font-black">
+                            {formatDuration(monthlyStats.hours)}
                         </p>
                     </div>
 
@@ -608,8 +656,7 @@ export function ClassesClient({
                                             onClick={() =>
                                                 addSession(shift.name)
                                             }
-                                            disabled={saving}
-                                        >
+                                            disabled={saving || shiftSessions.length >= 2}                                        >
                                             <Plus className="mr-1 h-4 w-4" />
                                             Adicionar
                                         </AppButton>
@@ -638,6 +685,12 @@ export function ClassesClient({
                                                     <div>
                                                         <p className="font-semibold">
                                                             {session.aula_numero}ª aula
+                                                        </p>
+
+                                                        <p className="text-xs font-medium text-primary">
+                                                            {classTimes[session.turno as "Manhã" | "Tarde"]?.[
+                                                                session.aula_numero as 1 | 2
+                                                            ] || "Horário não definido"}
                                                         </p>
 
                                                         <p className="text-xs text-muted">
