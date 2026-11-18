@@ -1,3 +1,4 @@
+
 "use client"
 
 import {
@@ -9,7 +10,7 @@ import {
 } from "next/navigation"
 
 import {
-    Trash2,
+    UserX,
 } from "lucide-react"
 
 import {
@@ -38,18 +39,12 @@ import {
 } from "@/components/ui/dialog"
 
 type Props = {
-
     student: Student
-
     open: boolean
-
-    onOpenChange: (
-        open: boolean
-    ) => void
+    onOpenChange: (open: boolean) => void
 }
 
-const supabase =
-    createClient()
+const supabase = createClient()
 
 export function DeleteStudentDialog({
     student,
@@ -57,71 +52,49 @@ export function DeleteStudentDialog({
     onOpenChange,
 }: Props) {
 
-    const router =
-        useRouter()
+    const router = useRouter()
 
     const [
         loading,
         setLoading,
     ] = useState(false)
 
-    async function handleDelete() {
+    async function handleDeactivate() {
 
         try {
 
             setLoading(true)
 
             const {
-                error: attendanceError,
-            } = await supabase
-                .from("attendance")
-                .delete()
-                .eq(
-                    "student_id",
-                    student.id
-                )
-
-            if (
-                attendanceError
-            ) {
-
-                throw attendanceError
-            }
-
-            const {
                 error,
             } = await supabase
                 .from("students")
-                .delete()
-                .eq(
-                    "id",
-                    student.id
-                )
+                .update({
+                    ativo: false,
+                })
+                .eq("id", student.id)
 
-            if (error)
-                throw error
+            if (error) throw error
 
             toast.success(
-                "Aluno removido com sucesso"
+                "Aluno desativado com sucesso"
             )
 
             onOpenChange(false)
 
-            router.push(
-                "/students"
-            )
+            router.push("/students")
 
             router.refresh()
 
         } catch (error) {
 
             console.error(
-                "DELETE_STUDENT_ERROR",
+                "DEACTIVATE_STUDENT_ERROR",
                 error
             )
 
             toast.error(
-                "Erro ao remover aluno"
+                "Erro ao desativar aluno"
             )
 
         } finally {
@@ -134,19 +107,14 @@ export function DeleteStudentDialog({
 
         <Dialog
             open={open}
-            onOpenChange={
-                onOpenChange
-            }
+            onOpenChange={onOpenChange}
         >
 
             <DialogContent
                 className="
                     rounded-[2rem]
-
                     border-border
-
                     bg-card
-
                     sm:max-w-md
                 "
             >
@@ -155,57 +123,41 @@ export function DeleteStudentDialog({
 
                     <div className="
                         mb-4
-
                         flex
                         h-14
                         w-14
                         items-center
                         justify-center
-
                         rounded-2xl
-
-                        bg-red-500/10
-
-                        text-red-500
+                        bg-amber-500/10
+                        text-amber-500
                     ">
 
-                        <Trash2
-                            className="
-                                h-6
-                                w-6
-                            "
-                        />
+                        <UserX className="h-6 w-6" />
 
                     </div>
 
-                    <DialogTitle
-                        className="
-                            text-2xl
-                            font-black
-                            tracking-tight
-                        "
-                    >
+                    <DialogTitle className="
+                        text-2xl
+                        font-black
+                        tracking-tight
+                    ">
 
-                        Remover aluno
+                        Desativar aluno
 
                     </DialogTitle>
 
-                    <DialogDescription
-                        className="
-                            pt-2
+                    <DialogDescription className="
+                        pt-2
+                        text-base
+                        leading-relaxed
+                        text-muted
+                    ">
 
-                            text-base
-                            leading-relaxed
-
-                            text-muted
-                        "
-                    >
-
-                        Tem certeza que deseja remover{" "}
+                        Tem certeza que deseja desativar{" "}
 
                         <span className="
                             font-semibold
-
                             text-foreground
                         ">
 
@@ -218,35 +170,27 @@ export function DeleteStudentDialog({
                         <br />
                         <br />
 
-                        Essa ação não poderá ser desfeita.
+                        O aluno deixará de aparecer nas listas
+                        de atividades, mas seu cadastro,
+                        histórico de frequência e evolução
+                        serão preservados.
 
                     </DialogDescription>
 
                 </DialogHeader>
 
-                <DialogFooter
-                    className="
-                        mt-6
-
-                        flex-col-reverse
-                        gap-3
-
-                        sm:flex-row
-                    "
-                >
+                <DialogFooter className="
+                    mt-6
+                    flex-col-reverse
+                    gap-3
+                    sm:flex-row
+                ">
 
                     <AppButton
                         variant="secondary"
-                        onClick={() =>
-                            onOpenChange(
-                                false
-                            )
-                        }
-                        className="
-                            w-full
-
-                            sm:w-auto
-                        "
+                        onClick={() => onOpenChange(false)}
+                        disabled={loading}
+                        className="w-full sm:w-auto"
                     >
 
                         Cancelar
@@ -256,17 +200,11 @@ export function DeleteStudentDialog({
                     <AppButton
                         variant="danger"
                         loading={loading}
-                        onClick={
-                            handleDelete
-                        }
-                        className="
-                            w-full
-
-                            sm:w-auto
-                        "
+                        onClick={handleDeactivate}
+                        className="w-full sm:w-auto"
                     >
 
-                        Remover aluno
+                        Desativar aluno
 
                     </AppButton>
 

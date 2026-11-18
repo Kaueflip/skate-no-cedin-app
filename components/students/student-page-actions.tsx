@@ -70,7 +70,7 @@ export function StudentPageActions({
                     }
                 >
 
-                    Remover aluno
+                    Desativar aluno
 
                 </AppButton>
 
