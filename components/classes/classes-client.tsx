@@ -137,6 +137,27 @@ export function ClassesClient({
     }, [sessions])
 
 
+    const monthlyStats = useMemo(() => {
+        const realized = monthlySessions.filter(
+            (item) => item.status === "realizada"
+        )
+
+        const cancelled = monthlySessions.filter(
+            (item) => item.status === "cancelada"
+        )
+
+        const activeDays = new Set(
+            realized.map((item) => item.class_date)
+        )
+
+        return {
+            realized: realized.length,
+            cancelled: cancelled.length,
+            total: monthlySessions.length,
+            activeDays: activeDays.size,
+        }
+    }, [monthlySessions])
+
     async function handleDateChange(
         newDate: string
     ) {
@@ -239,6 +260,8 @@ export function ClassesClient({
 
             toast.success("Aula registrada com sucesso")
 
+            await loadMonthlySessions(date)
+
         } catch (error) {
             console.error(error)
             toast.error("Erro ao registrar aula")
@@ -283,6 +306,8 @@ export function ClassesClient({
                     ? "Aula marcada como realizada"
                     : "Aula marcada como cancelada"
             )
+
+            await loadMonthlySessions(date)
 
         } catch (error) {
             console.error(error)
@@ -401,6 +426,82 @@ export function ClassesClient({
                 </div>
 
             </div>
+
+
+            {/* Indicadores mensais */}
+
+            <div>
+                <div className="mb-4">
+                    <h2 className="text-lg font-bold">
+                        Resumo mensal
+                    </h2>
+
+                    <p className="mt-1 text-sm text-muted">
+                        Acompanhamento das atividades no mês selecionado.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+
+                    <div className="rounded-2xl border border-border bg-card p-4">
+                        <div className="mb-3 text-emerald-500">
+                            <CheckCircle2 className="h-5 w-5" />
+                        </div>
+
+                        <p className="text-sm text-muted">
+                            Aulas realizadas
+                        </p>
+
+                        <p className="mt-1 text-2xl font-black">
+                            {monthlyStats.realized}
+                        </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-border bg-card p-4">
+                        <div className="mb-3 text-red-500">
+                            <XCircle className="h-5 w-5" />
+                        </div>
+
+                        <p className="text-sm text-muted">
+                            Aulas canceladas
+                        </p>
+
+                        <p className="mt-1 text-2xl font-black">
+                            {monthlyStats.cancelled}
+                        </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-border bg-card p-4">
+                        <div className="mb-3 text-primary">
+                            <CalendarDays className="h-5 w-5" />
+                        </div>
+
+                        <p className="text-sm text-muted">
+                            Total registrado
+                        </p>
+
+                        <p className="mt-1 text-2xl font-black">
+                            {monthlyStats.total}
+                        </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-border bg-card p-4">
+                        <div className="mb-3 text-primary">
+                            <Sun className="h-5 w-5" />
+                        </div>
+
+                        <p className="text-sm text-muted">
+                            Dias com atividades
+                        </p>
+
+                        <p className="mt-1 text-2xl font-black">
+                            {monthlyStats.activeDays}
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
 
             {/* Turnos */}
 
