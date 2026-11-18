@@ -176,7 +176,7 @@ export function AttendanceFilters({
 
                     </SelectItem>
 
-                    <SelectItem
+                    {/*      <SelectItem
                         value="Integral"
                         className="
                             rounded-xl
@@ -185,7 +185,7 @@ export function AttendanceFilters({
                         "
                     >
                         Integral
-                    </SelectItem>
+                    </SelectItem> */}
 
                 </SelectContent>
 
