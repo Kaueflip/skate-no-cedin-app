@@ -16,6 +16,7 @@ import {
   Sun,
   CalendarDays,
   ClipboardCheck,
+  BookOpen,
 } from "lucide-react"
 
 import Link from "next/link"
@@ -74,6 +75,11 @@ const menuItems = [
     title: "Frequência",
     url: "/attendance",
     icon: ClipboardCheck,
+  },
+  {
+    title: "Manual do Sistema",
+    url: "/manual",
+    icon: BookOpen,
   },
 
   /*   {
