@@ -38,6 +38,10 @@ import {
     StudentAttendanceHistory,
 } from "@/components/students/student-attendance-history"
 
+import {
+    StudentPhotoGallery,
+} from "@/components/students/student-photo-gallery"
+
 type Props = {
 
     params: Promise<{
@@ -66,6 +70,26 @@ export default async function StudentPage({
 
     if (!student)
         notFound()
+
+    const { data: primaryPhoto } = await supabase
+        .from("student_photos")
+        .select("storage_path")
+        .eq("student_id", id)
+        .eq("is_primary", true)
+        .maybeSingle()
+
+    let profilePhotoUrl = student.foto_url
+
+    if (primaryPhoto?.storage_path) {
+        const { data: signedData, error: signedError } =
+            await supabase.storage
+                .from("student-photos")
+                .createSignedUrl(primaryPhoto.storage_path, 3600)
+
+        if (!signedError && signedData) {
+            profilePhotoUrl = signedData.signedUrl
+        }
+    }
 
     const {
         data: attendance,
@@ -172,19 +196,14 @@ export default async function StudentPage({
                                 shadow-xl
                             ">
 
-                                {student.foto_url ? (
+                                {profilePhotoUrl ? (
 
                                     <Image
-                                        src={
-                                            student.foto_url
-                                        }
-                                        alt={
-                                            student.nome
-                                        }
+                                        src={profilePhotoUrl}
+                                        alt={student.nome}
                                         fill
-                                        className="
-                                            object-cover
-                                        "
+                                        unoptimized
+                                        className="object-cover"
                                     />
 
                                 ) : (
@@ -406,6 +425,12 @@ export default async function StudentPage({
                             }
                         />
 
+                    </div>
+
+                    <div className="mt-8 rounded-4xl border border-border bg-background/80 p-6">
+                        <StudentPhotoGallery
+                            studentId={student.id}
+                        />
                     </div>
 
                     <StudentAttendanceHistory
