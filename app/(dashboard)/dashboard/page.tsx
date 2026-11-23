@@ -81,31 +81,8 @@ export default async function DashboardPage() {
         })
         .eq("ativo", true)
 
-    // TOTAL DE PRESENÇAS
 
-    const {
-        count: attendanceCount,
-    } = await supabase
-        .from("attendance")
-        .select("*", {
-            count: "exact",
-            head: true,
-        })
-        .eq("present", true)
-
-    // TOTAL DE FALTAS
-
-    const {
-        count: absencesCount,
-    } = await supabase
-        .from("attendance")
-        .select("*", {
-            count: "exact",
-            head: true,
-        })
-        .eq("present", false)
-
-    // AULAS REALIZADAS NO MÊS
+    // PERÍODO DO MÊS ATUAL
 
     const monthStart = `${currentYear}-${String(currentMonth).padStart(2, "0")}-01`
 
@@ -119,6 +96,36 @@ export default async function DashboardPage() {
         "01",
     ].join("-")
 
+    // TOTAL DE PRESENÇAS NO MÊS
+
+    const {
+        count: attendanceCount,
+    } = await supabase
+        .from("attendance")
+        .select("*", {
+            count: "exact",
+            head: true,
+        })
+        .eq("present", true)
+        .gte("class_date", monthStart)
+        .lt("class_date", nextMonthStart)
+
+    // TOTAL DE FALTAS NO MÊS
+
+    const {
+        count: absencesCount,
+    } = await supabase
+        .from("attendance")
+        .select("*", {
+            count: "exact",
+            head: true,
+        })
+        .eq("present", false)
+        .gte("class_date", monthStart)
+        .lt("class_date", nextMonthStart)
+
+    // AULAS REALIZADAS NO MÊS
+
     const {
         count: classesCount,
     } = await supabase
@@ -130,6 +137,8 @@ export default async function DashboardPage() {
         .eq("status", "realizada")
         .gte("class_date", monthStart)
         .lt("class_date", nextMonthStart)
+
+
 
     // ÚLTIMOS ALUNOS
 
