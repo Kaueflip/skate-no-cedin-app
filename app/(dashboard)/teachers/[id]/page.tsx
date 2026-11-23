@@ -31,6 +31,10 @@ import {
     AppButton,
 } from "@/components/ui/app-button"
 
+import {
+    TeacherPageActions,
+} from "@/components/teachers/teacher-page-actions"
+
 type Props = {
     params: Promise<{
         id: string
@@ -165,6 +169,7 @@ export default async function TeacherPage({
                         lg:justify-between
                     ">
 
+
                         <div className="
                             flex
                             flex-col
@@ -216,6 +221,7 @@ export default async function TeacherPage({
                                 )}
 
                             </div>
+
 
                             <div>
 
@@ -270,7 +276,14 @@ export default async function TeacherPage({
 
                         </div>
 
+                        <TeacherPageActions
+                            teacher={teacher}
+                            currentPhotoUrl={profilePhotoUrl}
+                        />
+
                     </div>
+
+
 
                     <div className="
                         mt-10
