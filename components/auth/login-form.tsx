@@ -5,7 +5,6 @@ import {
 } from "react"
 
 import {
-    Loader2,
     Mail,
     Lock,
 } from "lucide-react"
@@ -269,28 +268,11 @@ export function LoginForm() {
                     type="submit"
                     loading={loading}
                     className="
-            h-12
-            w-full
-          "
+        h-12
+        w-full
+    "
                 >
-
-                    {loading ? (
-
-                        <Loader2
-                            className="
-                h-4
-                w-4
-
-                animate-spin
-              "
-                        />
-
-                    ) : (
-
-                        "Entrar"
-
-                    )}
-
+                    Entrar
                 </AppButton>
 
             </form>

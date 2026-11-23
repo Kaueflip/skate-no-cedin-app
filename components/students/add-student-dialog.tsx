@@ -4,7 +4,6 @@ import Image from "next/image"
 
 import {
     Camera,
-    Loader2,
 } from "lucide-react"
 
 import {
@@ -698,14 +697,6 @@ export function AddStudentDialog({
                         onClick={handleSubmit}
                         disabled={loading}
                     >
-
-                        {loading && (
-                            <Loader2 className="
-                                h-4
-                                w-4
-                                animate-spin
-                            " />
-                        )}
 
                         Salvar aluno
 
