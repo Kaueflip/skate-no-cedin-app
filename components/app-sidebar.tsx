@@ -17,6 +17,10 @@ import {
   CalendarDays,
   ClipboardCheck,
   BookOpen,
+  UsersRoundCollaboration,
+  User,
+  BriefcaseBusiness
+
 } from "lucide-react"
 
 import Link from "next/link"
@@ -77,10 +81,16 @@ const menuItems = [
     icon: ClipboardCheck,
   },
   {
+    title: "Professores",
+    url: "/teachers",
+    icon: BriefcaseBusiness,
+  },
+  {
     title: "Manual do Sistema",
     url: "/manual",
     icon: BookOpen,
   },
+
 
   /*   {
       title: "Progressão Técnica",

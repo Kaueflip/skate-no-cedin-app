@@ -11,13 +11,14 @@ import {
     CalendarDays,
     Sun,
     Sunset,
-    Moon,
     Plus,
     CheckCircle2,
     XCircle,
     Loader2,
     Trash2,
     Clock3,
+    Users,
+    Moon,
 } from "lucide-react"
 
 import {
@@ -40,6 +41,10 @@ import {
     DeleteSessionDialog,
 } from "@/components/classes/delete-session-dialog"
 
+import {
+    SessionTeachersDialog,
+} from "@/components/classes/session-teachers-dialog"
+
 type ClassSession = {
     id: string
     class_date: string
@@ -48,6 +53,12 @@ type ClassSession = {
     status: "realizada" | "cancelada"
     observacoes: string | null
     created_at: string
+}
+
+type SessionTeacher = {
+    id: string
+    nome: string
+    funcao: string | null
 }
 
 type Props = {
@@ -72,7 +83,12 @@ const shifts = [
     },
 ]
 
-const classTimes = {
+const classTimes: Partial<
+    Record<
+        ClassSession["turno"],
+        Partial<Record<1 | 2, string>>
+    >
+> = {
     Manhã: {
         1: "07:30 – 09:15",
         2: "09:45 – 11:30",
@@ -108,9 +124,19 @@ export function ClassesClient({
 
     const [saving, setSaving] = useState(false)
 
-
     const [monthlySessions, setMonthlySessions] =
         useState<ClassSession[]>([])
+
+    const [sessionTeachers, setSessionTeachers] =
+        useState<Record<string, SessionTeacher[]>>({})
+
+    const [teachersDialog, setTeachersDialog] = useState<{
+        open: boolean
+        sessionId: string | null
+    }>({
+        open: false,
+        sessionId: null,
+    })
 
     const [deleteDialog, setDeleteDialog] = useState<{
         open: boolean
@@ -120,7 +146,92 @@ export function ClassesClient({
         session: null,
     })
 
+    async function fetchSessionTeachers(
+        sessionList: ClassSession[]
+    ): Promise<Record<string, SessionTeacher[]>> {
+        if (sessionList.length === 0) {
+            return {}
+        }
+
+        const sessionIds = sessionList.map(
+            (session) => session.id
+        )
+
+        const { data, error } = await supabase
+            .from("class_session_teachers")
+            .select(`
+                class_session_id,
+                teachers (
+                    id,
+                    nome,
+                    funcao
+                )
+            `)
+            .in("class_session_id", sessionIds)
+
+        if (error) throw error
+
+        const grouped: Record<string, SessionTeacher[]> = {}
+
+        for (const assignment of data || []) {
+            const teacher = Array.isArray(assignment.teachers)
+                ? assignment.teachers[0]
+                : assignment.teachers
+
+            if (!teacher) continue
+
+            if (!grouped[assignment.class_session_id]) {
+                grouped[assignment.class_session_id] = []
+            }
+
+            grouped[assignment.class_session_id].push({
+                id: teacher.id,
+                nome: teacher.nome,
+                funcao: teacher.funcao,
+            })
+        }
+
+        return grouped
+    }
+
+    // Carrega os professores vinculados às aulas
     useEffect(() => {
+        if (sessions.length === 0) return
+
+        let cancelled = false
+
+        async function load() {
+            try {
+                const grouped = await fetchSessionTeachers(sessions)
+
+                if (!cancelled) {
+                    setSessionTeachers(grouped)
+                }
+            } catch (error) {
+                console.error(
+                    "LOAD_SESSION_TEACHERS_ERROR",
+                    error
+                )
+
+                if (!cancelled) {
+                    toast.error(
+                        "Erro ao carregar professores das aulas."
+                    )
+                }
+            }
+        }
+
+        load()
+
+        return () => {
+            cancelled = true
+        }
+    }, [sessions])
+
+    // Carrega as aulas do mês selecionado
+    useEffect(() => {
+        let cancelled = false
+
         async function fetchMonthlySessions() {
             try {
                 const [year, month] = date.split("-")
@@ -147,17 +258,27 @@ export function ClassesClient({
 
                 if (error) throw error
 
-                setMonthlySessions(
-                    (data || []) as ClassSession[]
-                )
-
+                if (!cancelled) {
+                    setMonthlySessions(
+                        (data || []) as ClassSession[]
+                    )
+                }
             } catch (error) {
                 console.error(error)
-                toast.error("Erro ao carregar histórico mensal")
+
+                if (!cancelled) {
+                    toast.error(
+                        "Erro ao carregar histórico mensal"
+                    )
+                }
             }
         }
 
         fetchMonthlySessions()
+
+        return () => {
+            cancelled = true
+        }
     }, [date])
 
     const stats = useMemo(() => {
@@ -176,7 +297,6 @@ export function ClassesClient({
             hours: realized.length * CLASS_DURATION_MINUTES,
         }
     }, [sessions])
-
 
     const monthlyStats = useMemo(() => {
         const realized = monthlySessions.filter(
@@ -200,15 +320,14 @@ export function ClassesClient({
         }
     }, [monthlySessions])
 
-    async function handleDateChange(
-        newDate: string
-    ) {
+    async function handleDateChange(newDate: string) {
         if (!newDate) return
 
         try {
             setLoading(true)
             setDate(newDate)
             setSessions([])
+            setSessionTeachers({})
 
             const { data, error } = await supabase
                 .from("class_sessions")
@@ -220,7 +339,6 @@ export function ClassesClient({
             if (error) throw error
 
             setSessions((data || []) as ClassSession[])
-
         } catch (error) {
             console.error(error)
             toast.error("Erro ao carregar aulas")
@@ -229,9 +347,7 @@ export function ClassesClient({
         }
     }
 
-    async function loadMonthlySessions(
-        selectedDate: string
-    ) {
+    async function loadMonthlySessions(selectedDate: string) {
         try {
             const [year, month] = selectedDate.split("-")
 
@@ -243,30 +359,30 @@ export function ClassesClient({
                 0
             ).getDate()
 
-            const endDate = `${year}-${month}-${String(lastDay).padStart(2, "0")}`
+            const endDate =
+                `${year}-${month}-${String(lastDay).padStart(2, "0")}`
 
             const { data, error } = await supabase
                 .from("class_sessions")
                 .select("*")
                 .gte("class_date", startDate)
                 .lte("class_date", endDate)
-                .order("class_date", { ascending: false })
+                .order("class_date", {
+                    ascending: false,
+                })
 
             if (error) throw error
 
             setMonthlySessions(
                 (data || []) as ClassSession[]
             )
-
         } catch (error) {
             console.error(error)
             toast.error("Erro ao carregar histórico mensal")
         }
     }
 
-    async function addSession(
-        turno: ClassSession["turno"]
-    ) {
+    async function addSession(turno: ClassSession["turno"]) {
         try {
             setSaving(true)
 
@@ -283,7 +399,9 @@ export function ClassesClient({
             )
 
             if (!nextNumber) {
-                toast.error("As duas aulas deste turno já foram registradas.")
+                toast.error(
+                    "As duas aulas deste turno já foram registradas."
+                )
                 return
             }
 
@@ -300,8 +418,10 @@ export function ClassesClient({
 
             if (error) throw error
 
+            const newSession = data as ClassSession
+
             setSessions((prev) =>
-                [...prev, data as ClassSession].sort(
+                [...prev, newSession].sort(
                     (a, b) =>
                         a.turno.localeCompare(b.turno) ||
                         a.aula_numero - b.aula_numero
@@ -311,7 +431,6 @@ export function ClassesClient({
             toast.success("Aula registrada com sucesso")
 
             await loadMonthlySessions(date)
-
         } catch (error) {
             console.error(error)
             toast.error("Erro ao registrar aula")
@@ -320,9 +439,7 @@ export function ClassesClient({
         }
     }
 
-    async function toggleStatus(
-        session: ClassSession
-    ) {
+    async function toggleStatus(session: ClassSession) {
         const newStatus =
             session.status === "realizada"
                 ? "cancelada"
@@ -358,7 +475,6 @@ export function ClassesClient({
             )
 
             await loadMonthlySessions(date)
-
         } catch (error) {
             console.error(error)
             toast.error("Erro ao atualizar aula")
@@ -366,7 +482,6 @@ export function ClassesClient({
             setSaving(false)
         }
     }
-
 
     function handleSessionDeleted(sessionId: string) {
         setSessions((prev) =>
@@ -377,10 +492,32 @@ export function ClassesClient({
             prev.filter((item) => item.id !== sessionId)
         )
 
+        setSessionTeachers((prev) => {
+            const updated = { ...prev }
+            delete updated[sessionId]
+            return updated
+        })
+
         setDeleteDialog({
             open: false,
             session: null,
         })
+    }
+
+    async function handleTeachersSaved() {
+        try {
+            const grouped = await fetchSessionTeachers(sessions)
+            setSessionTeachers(grouped)
+        } catch (error) {
+            console.error(
+                "REFRESH_SESSION_TEACHERS_ERROR",
+                error
+            )
+
+            toast.error(
+                "Erro ao atualizar professores da aula."
+            )
+        }
     }
 
     return (
@@ -493,7 +630,6 @@ export function ClassesClient({
 
             </div>
 
-
             {/* Indicadores mensais */}
 
             <div>
@@ -582,7 +718,6 @@ export function ClassesClient({
                 </div>
             </div>
 
-
             <MonthlyCalendar
                 date={date}
                 sessions={monthlySessions}
@@ -600,6 +735,7 @@ export function ClassesClient({
                 p-5
                 shadow-sm
             ">
+
                 <div className="mb-6">
                     <h2 className="text-xl font-black tracking-tight">
                         Registro de aulas
@@ -611,11 +747,14 @@ export function ClassesClient({
                 </div>
 
                 {loading ? (
+
                     <div className="flex items-center justify-center gap-2 py-16 text-muted">
                         <Loader2 className="h-5 w-5 animate-spin" />
                         Carregando aulas...
                     </div>
+
                 ) : (
+
                     <div className="flex flex-col gap-6">
 
                         {shifts.map((shift) => {
@@ -630,9 +769,11 @@ export function ClassesClient({
                                     key={shift.name}
                                     className="rounded-2xl border border-border bg-background/50 p-4"
                                 >
+
                                     <div className="mb-4 flex items-center justify-between">
 
                                         <div className="flex items-center gap-3">
+
                                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                                                 <Icon className="h-5 w-5" />
                                             </div>
@@ -649,14 +790,14 @@ export function ClassesClient({
                                                         : "aulas registradas"}
                                                 </p>
                                             </div>
+
                                         </div>
 
                                         <AppButton
                                             variant="secondary"
-                                            onClick={() =>
-                                                addSession(shift.name)
-                                            }
-                                            disabled={saving || shiftSessions.length >= 2}                                        >
+                                            onClick={() => addSession(shift.name)}
+                                            disabled={saving || shiftSessions.length >= 2}
+                                        >
                                             <Plus className="mr-1 h-4 w-4" />
                                             Adicionar
                                         </AppButton>
@@ -664,79 +805,88 @@ export function ClassesClient({
                                     </div>
 
                                     {shiftSessions.length > 0 ? (
-                                        <div className="flex flex-col gap-2">
 
-                                            {shiftSessions.map((session) => (
-                                                <div
-                                                    key={session.id}
-                                                    className="
-                                                        flex
-                                                        flex-wrap
-                                                        items-center
-                                                        justify-between
-                                                        gap-3
-                                                        rounded-xl
-                                                        border
-                                                        border-border
-                                                        bg-card
-                                                        p-3
-                                                    "
-                                                >
-                                                    <div>
-                                                        <p className="font-semibold">
-                                                            {session.aula_numero}ª aula
-                                                        </p>
+                                        <div className="flex flex-col gap-3">
 
-                                                        <p className="text-xs font-medium text-primary">
-                                                            {classTimes[session.turno as "Manhã" | "Tarde"]?.[
-                                                                session.aula_numero as 1 | 2
-                                                            ] || "Horário não definido"}
-                                                        </p>
+                                            {shiftSessions.map((session) => {
+                                                const assignedTeachers =
+                                                    sessionTeachers[session.id] || []
 
-                                                        <p className="text-xs text-muted">
-                                                            {session.status === "realizada"
-                                                                ? "Atividade registrada"
-                                                                : "Aula cancelada"}
-                                                        </p>
-                                                    </div>
+                                                return (
+                                                    <div
+                                                        key={session.id}
+                                                        className="
+                                                            rounded-xl
+                                                            border
+                                                            border-border
+                                                            bg-card
+                                                            p-4
+                                                        "
+                                                    >
 
-                                                    <div className="flex items-center gap-2">
+                                                        <div className="
+                                                            flex
+                                                            flex-wrap
+                                                            items-center
+                                                            justify-between
+                                                            gap-3
+                                                        ">
 
-                                                        <button
-                                                            type="button"
-                                                            disabled={saving}
-                                                            onClick={() => toggleStatus(session)}
-                                                            className={`
-            rounded-full
-            px-3
-            py-2
-            text-xs
-            font-bold
-            transition
-            disabled:opacity-50
-            ${session.status === "realizada"
-                                                                    ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
-                                                                    : "bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                                                                }
-        `}
-                                                        >
-                                                            {session.status === "realizada"
-                                                                ? "Realizada"
-                                                                : "Cancelada"}
-                                                        </button>
+                                                            <div>
+                                                                <p className="font-semibold">
+                                                                    {session.aula_numero}ª aula
+                                                                </p>
 
-                                                        <button
-                                                            type="button"
-                                                            disabled={saving}
-                                                            onClick={() =>
-                                                                setDeleteDialog({
-                                                                    open: true,
-                                                                    session,
-                                                                })
-                                                            }
-                                                            title="Excluir aula"
-                                                            aria-label="Excluir aula"
-                                                            className="
+                                                                <p className="text-xs font-medium text-primary">
+                                                                    {classTimes[session.turno]?.[
+                                                                        session.aula_numero as 1 | 2
+                                                                    ] || "Horário não definido"}
+                                                                </p>
+
+                                                                <p className="text-xs text-muted">
+                                                                    {session.status === "realizada"
+                                                                        ? "Atividade registrada"
+                                                                        : "Aula cancelada"}
+                                                                </p>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-2">
+
+                                                                <button
+                                                                    type="button"
+                                                                    disabled={saving}
+                                                                    onClick={() => toggleStatus(session)}
+                                                                    className={`
+                                                                        rounded-full
+                                                                        px-3
+                                                                        py-2
+                                                                        text-xs
+                                                                        font-bold
+                                                                        transition
+                                                                        disabled:opacity-50
+                                                                        ${session.status === "realizada"
+                                                                            ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
+                                                                            : "bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                                                                        }
+                                                                    `}
+                                                                >
+                                                                    {session.status === "realizada"
+                                                                        ? "Realizada"
+                                                                        : "Cancelada"}
+                                                                </button>
+
+                                                                <button
+                                                                    type="button"
+                                                                    disabled={saving}
+                                                                    onClick={() =>
+                                                                        setDeleteDialog({
+                                                                            open: true,
+                                                                            session,
+                                                                        })
+                                                                    }
+                                                                    title="Excluir aula"
+                                                                    aria-label="Excluir aula"
+                                                                    className="
                                                                         flex
                                                                         h-9
                                                                         w-9
@@ -749,21 +899,99 @@ export function ClassesClient({
                                                                         hover:text-red-500
                                                                         disabled:opacity-50
                                                                     "
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </button>
+                                                                >
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                </button>
+
+                                                            </div>
+
+                                                        </div>
+
+                                                        <div className="
+                                                            mt-4
+                                                            flex
+                                                            flex-wrap
+                                                            items-center
+                                                            justify-between
+                                                            gap-3
+                                                            border-t
+                                                            border-border
+                                                            pt-3
+                                                        ">
+
+                                                            <div className="flex min-w-0 flex-1 items-center gap-2">
+
+                                                                <Users className="h-4 w-4 shrink-0 text-muted" />
+
+                                                                {assignedTeachers.length > 0 ? (
+
+                                                                    <div className="flex flex-wrap gap-2">
+
+                                                                        {assignedTeachers.map((teacher) => (
+                                                                            <span
+                                                                                key={teacher.id}
+                                                                                className="
+                                                                                    rounded-lg
+                                                                                    bg-primary/10
+                                                                                    px-2
+                                                                                    py-1
+                                                                                    text-xs
+                                                                                    font-medium
+                                                                                    text-primary
+                                                                                "
+                                                                            >
+                                                                                {teacher.nome}
+                                                                            </span>
+                                                                        ))}
+
+                                                                    </div>
+
+                                                                ) : (
+
+                                                                    <span className="text-xs text-muted">
+                                                                        Nenhum professor vinculado
+                                                                    </span>
+
+                                                                )}
+
+                                                            </div>
+
+                                                            <AppButton
+                                                                variant="secondary"
+                                                                onClick={() =>
+                                                                    setTeachersDialog({
+                                                                        open: true,
+                                                                        sessionId: session.id,
+                                                                    })
+                                                                }
+                                                            >
+                                                                <Users className="mr-2 h-4 w-4" />
+                                                                Professores
+                                                            </AppButton>
+
+                                                        </div>
 
                                                     </div>
-                                                </div>
-                                            ))}
+                                                )
+                                            })}
 
                                         </div>
+
                                     ) : (
-                                        <div className="rounded-xl border border-dashed border-border p-5 text-center">
+
+                                        <div className="
+                                            rounded-xl
+                                            border
+                                            border-dashed
+                                            border-border
+                                            p-5
+                                            text-center
+                                        ">
                                             <p className="text-sm text-muted">
                                                 Nenhuma aula registrada neste turno.
                                             </p>
                                         </div>
+
                                     )}
 
                                 </div>
@@ -771,7 +999,9 @@ export function ClassesClient({
                         })}
 
                     </div>
+
                 )}
+
             </div>
 
             {deleteDialog.session && (
@@ -787,6 +1017,20 @@ export function ClassesClient({
                         }))
                     }
                     onDeleted={handleSessionDeleted}
+                />
+            )}
+
+            {teachersDialog.sessionId && (
+                <SessionTeachersDialog
+                    sessionId={teachersDialog.sessionId}
+                    open={teachersDialog.open}
+                    onOpenChange={(open) =>
+                        setTeachersDialog((prev) => ({
+                            ...prev,
+                            open,
+                        }))
+                    }
+                    onSaved={handleTeachersSaved}
                 />
             )}
 
