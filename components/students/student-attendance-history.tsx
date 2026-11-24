@@ -77,12 +77,12 @@ export function StudentAttendanceHistory({
                 )
 
                 months[key] = {
-                    label: date.toLocaleDateString(
-                        "pt-BR",
-                        {
-                            month: "long",
-                            year: "numeric",
-                        }
+                    label: new Intl.DateTimeFormat("pt-BR", {
+                        month: "long",
+                        year: "numeric",
+                        timeZone: "UTC",
+                    }).format(
+                        new Date(Date.UTC(Number(year), Number(month) - 1, 1))
                     ),
                     present: 0,
                     absent: 0,

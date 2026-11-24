@@ -1,3 +1,4 @@
+
 "use client"
 
 import Image from "next/image"
@@ -7,6 +8,7 @@ import {
 } from "lucide-react"
 
 import {
+    useEffect,
     useRef,
     useState,
 } from "react"
@@ -55,6 +57,12 @@ type Props = {
     children: React.ReactNode
 }
 
+type SchoolClass = {
+    id: string
+    nome: string
+    turno: string
+}
+
 export function AddStudentDialog({
     children,
 }: Props) {
@@ -72,6 +80,12 @@ export function AddStudentDialog({
     const [loading, setLoading] =
         useState(false)
 
+    const [loadingClasses, setLoadingClasses] =
+        useState(false)
+
+    const [schoolClasses, setSchoolClasses] =
+        useState<SchoolClass[]>([])
+
     const [photoPreview, setPhotoPreview] =
         useState<string | null>(null)
 
@@ -84,9 +98,13 @@ export function AddStudentDialog({
 
         data_nascimento: "",
 
-        turma: "",
+        school_class_id: "",
 
-        turno: "Manhã",
+        matricula_escolar: "",
+
+        genero: "",
+
+        turno: "Integral",
 
         nivel: "Iniciante",
 
@@ -97,6 +115,59 @@ export function AddStudentDialog({
         observacoes: "",
     })
 
+    useEffect(() => {
+
+        if (!open)
+            return
+
+        let cancelled = false
+
+        async function loadSchoolClasses() {
+
+            setLoadingClasses(true)
+
+            const {
+                data,
+                error,
+            } = await supabase
+                .from("school_classes")
+                .select("id, nome, turno")
+                .eq("ativo", true)
+                .eq("ano_letivo", new Date().getFullYear())
+                .order("nome")
+
+            if (cancelled)
+                return
+
+            if (error) {
+
+                console.error(
+                    "LOAD_SCHOOL_CLASSES_ERROR",
+                    error
+                )
+
+                toast.error(
+                    "Erro ao carregar turmas escolares"
+                )
+
+                setSchoolClasses([])
+
+            } else {
+
+                setSchoolClasses(data ?? [])
+            }
+
+            setLoadingClasses(false)
+        }
+
+        loadSchoolClasses()
+
+        return () => {
+            cancelled = true
+        }
+
+    }, [open])
+
     function updateField(
         field: keyof typeof form,
         value: string
@@ -105,6 +176,32 @@ export function AddStudentDialog({
         setForm((prev) => ({
             ...prev,
             [field]: value,
+        }))
+    }
+
+    function handleSchoolClassChange(
+        schoolClassId: string
+    ) {
+
+        const selectedClass =
+            schoolClasses.find(
+                (item) => item.id === schoolClassId
+            )
+
+        if (!selectedClass)
+            return
+
+        const turnoMap: Record<string, string> = {
+            Matutino: "Manhã",
+            Vespertino: "Tarde",
+            "Matutino e Vespertino": "Integral",
+            Integral: "Integral",
+        }
+
+        setForm((prev) => ({
+            ...prev,
+            school_class_id: schoolClassId,
+            turno: turnoMap[selectedClass.turno] ?? "Integral",
         }))
     }
 
@@ -152,41 +249,44 @@ export function AddStudentDialog({
         setPhotoPreview(previewUrl)
     }
 
-    async function uploadPhoto(
-        studentId: string
-    ) {
+    async function uploadPhoto(studentId: string) {
+        if (!photoFile) return
 
-        if (!photoFile)
-            return null
+        const extension = photoFile.name.split(".").pop()?.toLowerCase()
 
-        const extension =
-            photoFile.name.split(".").pop()
+        if (!extension) {
+            throw new Error("Formato de imagem inválido.")
+        }
 
-        const filePath =
-            `${studentId}/perfil.${extension}`
+        const storagePath = `${studentId}/${crypto.randomUUID()}.${extension}`
 
-        const {
-            error: uploadError,
-        } = await supabase
+        const { error: uploadError } = await supabase
             .storage
-            .from("alunos")
-            .upload(
-                filePath,
-                photoFile,
-                {
-                    upsert: true,
-                }
-            )
+            .from("student-photos")
+            .upload(storagePath, photoFile, {
+                contentType: photoFile.type,
+                upsert: false,
+            })
 
-        if (uploadError)
+        if (uploadError) {
             throw uploadError
+        }
 
-        const { data } =
-            supabase.storage
-                .from("alunos")
-                .getPublicUrl(filePath)
+        const { error: insertError } = await supabase
+            .from("student_photos")
+            .insert({
+                student_id: studentId,
+                storage_path: storagePath,
+                is_primary: true,
+            })
 
-        return data.publicUrl
+        if (insertError) {
+            await supabase.storage
+                .from("student-photos")
+                .remove([storagePath])
+
+            throw insertError
+        }
     }
 
     function resetForm() {
@@ -197,9 +297,13 @@ export function AddStudentDialog({
 
             data_nascimento: "",
 
-            turma: "",
+            school_class_id: "",
 
-            turno: "Manhã",
+            matricula_escolar: "",
+
+            genero: "",
+
+            turno: "Integral",
 
             nivel: "Iniciante",
 
@@ -230,7 +334,7 @@ export function AddStudentDialog({
             if (
                 !form.nome.trim() ||
                 !form.data_nascimento ||
-                !form.turma.trim()
+                !form.school_class_id
             ) {
 
                 toast.error(
@@ -239,6 +343,21 @@ export function AddStudentDialog({
 
                 return
             }
+
+            const selectedClass =
+                schoolClasses.find(
+                    (item) => item.id === form.school_class_id
+                )
+
+            if (!selectedClass) {
+
+                toast.error(
+                    "Selecione uma turma escolar válida"
+                )
+
+                return
+            }
+
             const idadeCalculada = calculateAge(
                 form.data_nascimento
             )
@@ -249,6 +368,14 @@ export function AddStudentDialog({
                 )
                 return
             }
+
+            const matricula = form.matricula_escolar.trim()
+
+            if (matricula && !/^\d{11}$/.test(matricula)) {
+                toast.error("A matrícula escolar deve conter exatamente 11 dígitos.")
+                return
+            }
+
 
             setLoading(true)
 
@@ -264,9 +391,17 @@ export function AddStudentDialog({
 
                     data_nascimento:
                         form.data_nascimento,
-
                     turma:
-                        form.turma.trim(),
+                        selectedClass.nome,
+
+                    school_class_id:
+                        selectedClass.id,
+
+                    matricula_escolar:
+                        matricula || null,
+
+                    genero:
+                        form.genero || null,
 
                     turno:
                         form.turno,
@@ -298,30 +433,9 @@ export function AddStudentDialog({
                     "Aluno não criado"
                 )
 
+
             if (photoFile) {
-
-                const photoUrl =
-                    await uploadPhoto(
-                        insertedStudent.id
-                    )
-
-                if (photoUrl) {
-
-                    const {
-                        error: updateError,
-                    } = await supabase
-                        .from("students")
-                        .update({
-                            foto_url: photoUrl,
-                        })
-                        .eq(
-                            "id",
-                            insertedStudent.id
-                        )
-
-                    if (updateError)
-                        throw updateError
-                }
+                await uploadPhoto(insertedStudent.id)
             }
 
             toast.success(
@@ -523,54 +637,95 @@ export function AddStudentDialog({
                         <div className="space-y-2">
 
                             <Label>
-                                Turma *
+                                Matrícula escolar
                             </Label>
 
                             <Input
-                                value={form.turma}
+                                type="text"
+                                inputMode="numeric"
+                                maxLength={11}
+                                placeholder="Digite os 11 dígitos"
+                                value={form.matricula_escolar}
                                 onChange={(e) =>
                                     updateField(
-                                        "turma",
-                                        e.target.value
+                                        "matricula_escolar",
+                                        e.target.value.replace(/\D/g, "").slice(0, 11)
                                     )
                                 }
-                                placeholder="6A"
                             />
+
+                        </div>
+
+                        <div className="space-y-2 md:col-span-2">
+
+                            <Label>
+                                Turma escolar *
+                            </Label>
+
+                            <Select
+                                value={form.school_class_id}
+                                onValueChange={handleSchoolClassChange}
+                                disabled={loadingClasses}
+                            >
+
+                                <SelectTrigger>
+                                    <SelectValue
+                                        placeholder={
+                                            loadingClasses
+                                                ? "Carregando turmas..."
+                                                : "Selecione a turma escolar"
+                                        }
+                                    />
+                                </SelectTrigger>
+
+                                <SelectContent>
+
+                                    {schoolClasses.map((schoolClass) => (
+
+                                        <SelectItem
+                                            key={schoolClass.id}
+                                            value={schoolClass.id}
+                                        >
+                                            {schoolClass.nome}
+                                        </SelectItem>
+
+                                    ))}
+
+                                </SelectContent>
+
+                            </Select>
 
                         </div>
 
                         <div className="space-y-2">
 
                             <Label>
-                                Turno
+                                Gênero
                             </Label>
 
                             <Select
-                                value={form.turno}
+                                value={form.genero}
                                 onValueChange={(value) =>
-                                    updateField(
-                                        "turno",
-                                        value
-                                    )
+                                    updateField("genero", value)
                                 }
                             >
 
                                 <SelectTrigger>
-                                    <SelectValue />
+                                    <SelectValue placeholder="Selecione" />
                                 </SelectTrigger>
 
                                 <SelectContent>
 
-                                    <SelectItem value="Manhã">
-                                        Manhã
+                                    <SelectItem value="Feminino">
+                                        Feminino
                                     </SelectItem>
 
-                                    <SelectItem value="Tarde">
-                                        Tarde
+                                    <SelectItem value="Masculino">
+                                        Masculino
                                     </SelectItem>
 
-                                    <SelectItem value="Integral">
-                                        Integral
+                                    <SelectItem value="Não informado">
+                                        Não informado
                                     </SelectItem>
 
                                 </SelectContent>
@@ -588,10 +743,7 @@ export function AddStudentDialog({
                             <Select
                                 value={form.nivel}
                                 onValueChange={(value) =>
-                                    updateField(
-                                        "nivel",
-                                        value
-                                    )
+                                    updateField("nivel", value)
                                 }
                             >
 
@@ -695,7 +847,7 @@ export function AddStudentDialog({
                     <AppButton
                         loading={loading}
                         onClick={handleSubmit}
-                        disabled={loading}
+                        disabled={loading || loadingClasses}
                     >
 
                         Salvar aluno

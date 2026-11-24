@@ -327,6 +327,16 @@ export default async function StudentPage({
 
                         <InfoCard
                             icon={
+                                <GraduationCap className="h-5 w-5" />
+                            }
+                            label="Matrícula escolar"
+                            value={
+                                student.matricula_escolar || "Não informada"
+                            }
+                        />
+
+                        <InfoCard
+                            icon={
                                 <Clock3
                                     className="
                                         h-5

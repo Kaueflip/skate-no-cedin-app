@@ -86,6 +86,11 @@ const menuItems = [
     icon: BriefcaseBusiness,
   },
   {
+    title: "Relatórios",
+    url: "/reports",
+    icon: BarChart3,
+  },
+  {
     title: "Manual do Sistema",
     url: "/manual",
     icon: BookOpen,

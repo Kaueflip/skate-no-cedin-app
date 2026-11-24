@@ -13,11 +13,11 @@ import {
     ChevronLeft,
     ChevronRight,
     ImagePlus,
-    Loader2,
     Star,
     Trash2,
     Upload,
     AlertTriangle,
+    LoaderCircle,
 } from "lucide-react"
 
 import {
@@ -347,7 +347,7 @@ export function StudentPhotoGallery({
                     className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     {uploading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <LoaderCircle className="h-4 w-4 animate-spin" />
                     ) : (
                         <Upload className="h-4 w-4" />
                     )}
@@ -366,7 +366,7 @@ export function StudentPhotoGallery({
 
             {loading ? (
                 <div className="flex min-h-64 items-center justify-center rounded-xl border border-border">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    <LoaderCircle className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
             ) : photos.length === 0 ? (
                 <div className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted/20 p-6 text-center">
@@ -401,6 +401,7 @@ export function StudentPhotoGallery({
                                     alt="Foto do aluno"
                                     fill
                                     unoptimized
+                                    loading="eager"
                                     className="rounded-lg object-contain"
                                     sizes="(max-width: 768px) 100vw, 448px"
                                 />
@@ -451,7 +452,7 @@ export function StudentPhotoGallery({
                                     className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-50"
                                 >
                                     {updatingPrimary ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        <LoaderCircle className="h-4 w-4 animate-spin" />
                                     ) : (
                                         <Star className="h-4 w-4" />
                                     )}
@@ -475,7 +476,7 @@ export function StudentPhotoGallery({
                                 className="inline-flex items-center gap-2 rounded-lg border border-destructive/30 px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-40"
                             >
                                 {deleting ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    <LoaderCircle className="h-4 w-4 animate-spin" />
                                 ) : (
                                     <Trash2 className="h-4 w-4" />
                                 )}

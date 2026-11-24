@@ -7,6 +7,12 @@ export type Student = {
 
   turma: string;
 
+  school_class_id: string | null;
+
+  matricula_escolar: string | null;
+
+  genero: string | null;
+
   turno: "Manhã" | "Tarde" | "Integral";
 
   data_inicio: string;

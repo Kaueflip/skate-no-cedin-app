@@ -120,6 +120,7 @@ export function StudentPageActions({
             </div>
 
             <EditStudentDialog
+                key={student.id}
                 student={student}
                 open={editOpen}
                 onOpenChange={setEditOpen}
