@@ -1,21 +1,25 @@
+
 "use client"
 
-import dynamic
-    from "next/dynamic"
+import dynamic from "next/dynamic"
 
-const AddStudentDialog =
-    dynamic(
-        () =>
-            import(
-                "@/components/students/add-student-dialog"
-            ).then(
-                (mod) =>
-                    mod.AddStudentDialog
-            ),
-        {
-            ssr: false,
-        }
-    )
+import { Plus } from "lucide-react"
+
+import { AppButton } from "@/components/ui/app-button"
+
+const AddStudentDialog = dynamic(
+
+    () =>
+        import(
+            "@/components/students/add-student-dialog"
+        ).then(
+            (mod) => mod.AddStudentDialog
+        ),
+
+    {
+        ssr: false,
+    }
+)
 
 export function AddStudentButton() {
 
@@ -23,37 +27,33 @@ export function AddStudentButton() {
 
         <AddStudentDialog>
 
-            <button
+            <AppButton
+                type="button"
                 className="
-          inline-flex
-          items-center
-          justify-center
-          gap-2
-          mb-5
-          rounded-2xl
+                    h-11
+                    shrink-0
+                    gap-1.5
 
-          bg-primary
+                    rounded-lg
 
-          px-6
-          py-3
+                    px-3
+                    text-xs
 
-          text-sm
-          font-semibold
-
-          text-primary-foreground
-
-          shadow-sm
-
-          transition-all
-
-          hover:bg-accent-hover
-          hover:scale-[1.02]
-        "
+                    sm:gap-2
+                    sm:px-4
+                    sm:text-sm
+                "
             >
+
+                <Plus className="
+                    h-4
+                    w-4
+                    shrink-0
+                " />
 
                 Novo aluno
 
-            </button>
+            </AppButton>
 
         </AddStudentDialog>
     )
