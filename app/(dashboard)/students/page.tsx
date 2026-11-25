@@ -20,10 +20,9 @@ import { StatCard }
 import { StudentsClient }
     from "@/components/students/students-client"
 
-import {
-    AddStudentButton,
-}
-    from "@/components/students/add-student-button"
+import { AddStudentButton, } from "@/components/students/add-student-button"
+
+import { attachStudentPrimaryPhotos, } from "@/services/student-photo-service"
 
 export default async function StudentsPage() {
 
@@ -38,6 +37,12 @@ export default async function StudentsPage() {
         .order("nome", {
             ascending: true,
         })
+
+    const studentsWithPhotos =
+        await attachStudentPrimaryPhotos(
+            supabase,
+            students || []
+        )
 
     const totalStudents =
         students?.length || 0
@@ -143,9 +148,7 @@ export default async function StudentsPage() {
             <div className="mt-8">
 
                 <StudentsClient
-                    initialStudents={
-                        students || []
-                    }
+                    initialStudents={studentsWithPhotos}
                 />
 
             </div>

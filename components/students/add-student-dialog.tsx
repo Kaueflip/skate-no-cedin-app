@@ -53,6 +53,8 @@ import { AppButton }
 
 import { calculateAge } from "@/lib/calculate-age"
 
+import { uploadStudentPhoto, } from "@/services/student-photo-upload-service"
+
 type Props = {
     children: React.ReactNode
 }
@@ -250,44 +252,17 @@ export function AddStudentDialog({
     }
 
     async function uploadPhoto(studentId: string) {
+
         if (!photoFile) return
 
-        const extension = photoFile.name.split(".").pop()?.toLowerCase()
-
-        if (!extension) {
-            throw new Error("Formato de imagem inválido.")
-        }
-
-        const storagePath = `${studentId}/${crypto.randomUUID()}.${extension}`
-
-        const { error: uploadError } = await supabase
-            .storage
-            .from("student-photos")
-            .upload(storagePath, photoFile, {
-                contentType: photoFile.type,
-                upsert: false,
-            })
-
-        if (uploadError) {
-            throw uploadError
-        }
-
-        const { error: insertError } = await supabase
-            .from("student_photos")
-            .insert({
-                student_id: studentId,
-                storage_path: storagePath,
-                is_primary: true,
-            })
-
-        if (insertError) {
-            await supabase.storage
-                .from("student-photos")
-                .remove([storagePath])
-
-            throw insertError
-        }
+        await uploadStudentPhoto(
+            supabase,
+            studentId,
+            photoFile,
+            true
+        )
     }
+
 
     function resetForm() {
 
@@ -435,7 +410,21 @@ export function AddStudentDialog({
 
 
             if (photoFile) {
-                await uploadPhoto(insertedStudent.id)
+
+                try {
+                    await uploadPhoto(insertedStudent.id)
+
+                } catch (error) {
+
+                    console.error(
+                        "Erro ao cadastrar foto:",
+                        error
+                    )
+
+                    toast.warning(
+                        "Aluno cadastrado, mas não foi possível enviar a foto."
+                    )
+                }
             }
 
             toast.success(

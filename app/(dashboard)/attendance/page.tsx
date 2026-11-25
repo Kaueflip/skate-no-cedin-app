@@ -18,6 +18,8 @@ import {
     PageHeader,
 } from "@/components/layout/page-header"
 
+import { attachStudentPrimaryPhotos, } from "@/services/student-photo-service"
+
 export default async function AttendancePage() {
 
     const supabase =
@@ -39,6 +41,12 @@ export default async function AttendancePage() {
         .from("students")
         .select("*")
         .order("nome")
+
+    const studentsWithPhotos =
+        await attachStudentPrimaryPhotos(
+            supabase,
+            students || []
+        )
 
     const {
         data: attendance,
@@ -79,7 +87,7 @@ export default async function AttendancePage() {
         "
             />
 
-            <div className="leading-relaxed text-muted">
+            {/*     <div className="leading-relaxed text-muted">
                 <p className="font-black">ATENÇÃO:</p>
                 <ul>
                     <li>- Se você filtrar por turno, somente os alunos exibidos naquele filtro serão registrados.</li>
@@ -87,19 +95,15 @@ export default async function AttendancePage() {
                     <li>- Pelo menos um presente: salva normalmente, sem confirmação.</li>
 
                 </ul>
-            </div>
+            </div> */}
 
             <div className="
         mt-8
       ">
 
                 <AttendanceClient
-                    students={
-                        students || []
-                    }
-                    initialAttendanceMap={
-                        attendanceMap
-                    }
+                    students={studentsWithPhotos}
+                    initialAttendanceMap={attendanceMap}
                     initialDate={today}
                 />
 

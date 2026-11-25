@@ -37,9 +37,12 @@ import { toast } from "sonner"
 
 import { createClient } from "@/lib/supabase-browser"
 
+import { uploadStudentPhoto, } from "@/services/student-photo-upload-service"
+
 type StudentPhoto = {
     id: string
     storage_path: string
+    thumbnail_path: string | null
     is_primary: boolean
     created_at: string
     signedUrl: string
@@ -62,7 +65,13 @@ const supabase = createClient()
 async function getStudentPhotos(studentId: string): Promise<StudentPhoto[]> {
     const { data, error } = await supabase
         .from("student_photos")
-        .select("id, storage_path, is_primary, created_at")
+        .select(`
+    id,
+    storage_path,
+    thumbnail_path,
+    is_primary,
+    created_at
+`)
         .eq("student_id", studentId)
         .order("created_at", { ascending: false })
 
@@ -145,9 +154,11 @@ export function StudentPhotoGallery({
         }
     }, [studentId])
 
+
     async function handleUpload(
         event: React.ChangeEvent<HTMLInputElement>
     ) {
+
         const file = event.target.files?.[0]
 
         if (!file) return
@@ -164,62 +175,42 @@ export function StudentPhotoGallery({
             return
         }
 
-        const extension = file.name.split(".").pop()?.toLowerCase()
-
-        if (!extension) {
-            toast.error("Não foi possível identificar o formato da imagem.")
-            event.target.value = ""
-            return
-        }
-
         setUploading(true)
 
         try {
-            const storagePath =
-                `${studentId}/${crypto.randomUUID()}.${extension}`
-
-            const { error: uploadError } = await supabase.storage
-                .from("student-photos")
-                .upload(storagePath, file, {
-                    contentType: file.type,
-                    upsert: false,
-                })
-
-            if (uploadError) {
-                throw uploadError
-            }
 
             const isFirstPhoto = photos.length === 0
 
-            const { error: insertError } = await supabase
-                .from("student_photos")
-                .insert({
-                    student_id: studentId,
-                    storage_path: storagePath,
-                    is_primary: isFirstPhoto,
-                })
-
-            if (insertError) {
-                await supabase.storage
-                    .from("student-photos")
-                    .remove([storagePath])
-
-                throw insertError
-            }
+            await uploadStudentPhoto(
+                supabase,
+                studentId,
+                file,
+                isFirstPhoto
+            )
 
             toast.success("Foto adicionada com sucesso.")
-            const updatedPhotos = await getStudentPhotos(studentId)
+
+            const updatedPhotos =
+                await getStudentPhotos(studentId)
+
             setPhotos(updatedPhotos)
 
             const primaryIndex = updatedPhotos.findIndex(
                 (photo) => photo.is_primary
             )
 
-            setCurrentIndex(primaryIndex >= 0 ? primaryIndex : 0)
+            setCurrentIndex(
+                primaryIndex >= 0 ? primaryIndex : 0
+            )
+
         } catch (error) {
+
             console.error("Erro ao enviar foto:", error)
+
             toast.error("Não foi possível adicionar a foto.")
+
         } finally {
+
             setUploading(false)
 
             if (fileInputRef.current) {
@@ -227,6 +218,7 @@ export function StudentPhotoGallery({
             }
         }
     }
+
 
     async function handleSetPrimary() {
         if (!currentPhoto || currentPhoto.is_primary) return
@@ -290,9 +282,19 @@ export function StudentPhotoGallery({
             return
         }
 
+        const pathsToDelete = [
+            currentPhoto.storage_path,
+        ]
+
+        if (currentPhoto.thumbnail_path) {
+            pathsToDelete.push(
+                currentPhoto.thumbnail_path
+            )
+        }
+
         const { error: storageError } = await supabase.storage
             .from("student-photos")
-            .remove([currentPhoto.storage_path])
+            .remove(pathsToDelete)
 
         if (storageError) {
             console.error("Erro ao excluir arquivo:", storageError)

@@ -1,8 +1,10 @@
 "use client"
 
-import Image from "next/image"
+/* import Image from "next/image"*/
 import type { Student } from "@/types/student"
 import { Check } from "lucide-react"
+
+import { StudentAvatar, } from "@/components/students/student-avatar"
 
 type Props = {
     students: Student[]
@@ -16,15 +18,15 @@ export function AttendanceList({
     onToggle,
 }: Props) {
 
-    function getInitials(nome: string) {
-        return nome
-            .trim()
-            .split(/\s+/)
-            .map((word) => word[0])
-            .join("")
-            .slice(0, 2)
-            .toUpperCase()
-    }
+    /*    function getInitials(nome: string) {
+           return nome
+               .trim()
+               .split(/\s+/)
+               .map((word) => word[0])
+               .join("")
+               .slice(0, 2)
+               .toUpperCase()
+       } */
 
     if (students.length === 0) {
         return (
@@ -66,26 +68,23 @@ export function AttendanceList({
                         `}
                     >
                         <div className="flex min-w-0 items-center gap-4">
-                            <div className={`
-                                relative flex h-12 w-12 shrink-0
-                                items-center justify-center
-                                overflow-hidden rounded-full
-                                ${checked ? "bg-primary-foreground/15" : "bg-muted"}
-                            `}>
-                                {student.foto_url ? (
-                                    <Image
-                                        src={student.foto_url}
-                                        alt={student.nome}
-                                        fill
-                                        sizes="48px"
-                                        className="object-cover"
-                                    />
-                                ) : (
-                                    <span className="text-sm font-bold">
-                                        {getInitials(student.nome)}
-                                    </span>
-                                )}
-                            </div>
+                            <StudentAvatar
+                                nome={student.nome}
+                                photoUrl={student.foto_principal_url}
+                                className={`
+        h-12 w-12
+        border-transparent
+        ${checked
+                                        ? "bg-primary-foreground/15"
+                                        : "bg-muted"
+                                    }
+    `}
+                                fallbackClassName={
+                                    checked
+                                        ? "bg-primary-foreground/15 text-primary-foreground"
+                                        : "bg-muted text-foreground"
+                                }
+                            />
 
                             <div className="min-w-0">
                                 <h3 className="truncate text-base font-bold">

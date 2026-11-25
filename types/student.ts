@@ -21,6 +21,8 @@ export type Student = {
 
   foto_url?: string | null;
 
+  foto_principal_url?: string | null;
+
   created_at: string;
 
   responsavel_nome?: string | null;

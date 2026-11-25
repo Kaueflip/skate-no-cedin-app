@@ -65,6 +65,9 @@ export function AttendanceClient({
     const [turno, setTurno] =
         useState("all")
 
+    const [turma, setTurma] =
+        useState("all")
+
     const [date, setDate] =
         useState(initialDate)
 
@@ -75,39 +78,75 @@ export function AttendanceClient({
 
     const dateRequest = useRef(0)
 
-    const filteredStudents =
-        useMemo(() => {
 
-            return students.filter(
-                (student) => {
+    const schoolClasses = useMemo(() => {
 
-                    const matchesSearch =
-                        student.nome
-                            .toLowerCase()
-                            .includes(
-                                search.toLowerCase()
-                            )
+        const classes = new Map<string, string>()
 
-                    const matchesTurno =
-                        turno === "all" ||
-                        student.turno === turno ||
-                        (
-                            turno === "Tarde" &&
-                            student.turno === "Integral"
-                        )
+        for (const student of students) {
 
-                    return (
-                        matchesSearch &&
-                        matchesTurno
-                    )
-                }
+            if (!student.turma?.trim()) continue
+
+            const classId =
+                student.school_class_id ||
+                student.turma
+
+            classes.set(
+                classId,
+                student.turma
+            )
+        }
+
+        return Array.from(classes.entries())
+            .map(([id, nome]) => ({
+                id,
+                nome,
+            }))
+            .sort((a, b) =>
+                a.nome.localeCompare(b.nome, "pt-BR", {
+                    numeric: true,
+                })
             )
 
-        }, [
-            students,
-            search,
-            turno,
-        ])
+    }, [students])
+
+    const filteredStudents = useMemo(() => {
+
+        return students.filter((student) => {
+
+            const matchesSearch =
+                student.nome
+                    .toLowerCase()
+                    .includes(search.toLowerCase())
+
+            const matchesTurno =
+                turno === "all" ||
+                student.turno === turno ||
+                (
+                    turno === "Tarde" &&
+                    student.turno === "Integral"
+                )
+
+            const matchesTurma =
+                turma === "all" ||
+                (
+                    student.school_class_id ||
+                    student.turma
+                ) === turma
+
+            return (
+                matchesSearch &&
+                matchesTurno &&
+                matchesTurma
+            )
+        })
+
+    }, [
+        students,
+        search,
+        turno,
+        turma,
+    ])
 
     const [confirmAbsencesOpen, setConfirmAbsencesOpen] =
         useState(false)
@@ -290,17 +329,14 @@ export function AttendanceClient({
 
                 <AttendanceFilters
                     search={search}
-                    onSearchChange={
-                        setSearch
-                    }
+                    onSearchChange={setSearch}
                     turno={turno}
-                    onTurnoChange={
-                        setTurno
-                    }
+                    onTurnoChange={setTurno}
+                    turma={turma}
+                    onTurmaChange={setTurma}
+                    schoolClasses={schoolClasses}
                     date={date}
-                    onDateChange={
-                        handleDateChange
-                    }
+                    onDateChange={handleDateChange}
                 />
 
             </div>
