@@ -462,9 +462,9 @@ export function StudentsClient({
                                     Tarde
                                 </SelectItem>
 
-                                {/*     <SelectItem value="Integral">
+                                <SelectItem value="Integral">
                                     Integral
-                                </SelectItem> */}
+                                </SelectItem>
 
                             </SelectContent>
 

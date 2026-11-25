@@ -1,118 +1,56 @@
 "use client"
 
-/* import Image from "next/image"*/
+import { Check, Users } from "lucide-react"
 import type { Student } from "@/types/student"
-import { Check } from "lucide-react"
-
-import { StudentAvatar, } from "@/components/students/student-avatar"
+import { cn } from "@/lib/utils"
+import { StudentAvatar } from "@/components/students/student-avatar"
 
 type Props = {
     students: Student[]
     attendanceMap: Record<string, boolean>
     onToggle: (studentId: string) => void
+    disabled?: boolean
 }
 
-export function AttendanceList({
-    students,
-    attendanceMap,
-    onToggle,
-}: Props) {
-
-    /*    function getInitials(nome: string) {
-           return nome
-               .trim()
-               .split(/\s+/)
-               .map((word) => word[0])
-               .join("")
-               .slice(0, 2)
-               .toUpperCase()
-       } */
-
+export function AttendanceList({ students, attendanceMap, onToggle, disabled = false }: Props) {
     if (students.length === 0) {
         return (
-            <div className="py-16 text-center">
-                <p className="font-semibold text-foreground">
-                    Nenhum aluno encontrado
-                </p>
-                <p className="mt-1 text-sm text-muted">
-                    Tente alterar os filtros de busca.
-                </p>
+            <div className="rounded-lg border border-dashed border-border px-3 py-8 text-center">
+                <Users className="mx-auto mb-2 h-6 w-6 text-muted" />
+                <p className="text-sm font-semibold text-foreground">Nenhum aluno encontrado</p>
+                <p className="mt-1 text-xs text-muted">Tente alterar os filtros de busca.</p>
             </div>
         )
     }
 
     return (
-        <div className="flex flex-col gap-3">
+        <div className="flex w-full min-w-0 flex-col gap-1.5">
             {students.map((student) => {
                 const checked = attendanceMap[student.id] === true
-
                 return (
                     <button
                         key={student.id}
                         type="button"
                         aria-pressed={checked}
-                        aria-label={`${student.nome}: ${checked ? "Presente" : "Ausente"}`}
+                        aria-label={`Presença de ${student.nome}`}
+                        disabled={disabled}
                         onClick={() => onToggle(student.id)}
-                        className={`
-                            flex w-full items-center justify-between
-                            rounded-2xl border p-4 sm:p-5
-                            text-left transition-all duration-200
-                            focus-visible:outline-none
-                            focus-visible:ring-2
-                            focus-visible:ring-ring
-                            focus-visible:ring-offset-2
-                            ${checked
-                                ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                                : "border-border bg-card text-card-foreground hover:bg-accent"
-                            }
-                        `}
+                        className={cn(
+                            "flex min-h-14 w-full min-w-0 items-center gap-2.5 rounded-lg border p-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset disabled:cursor-not-allowed disabled:opacity-60 sm:gap-3 sm:p-3",
+                            checked ? "border-emerald-500/40 bg-emerald-500/10 text-foreground" : "border-border bg-background/60 text-foreground hover:bg-accent"
+                        )}
                     >
-                        <div className="flex min-w-0 items-center gap-4">
-                            <StudentAvatar
-                                nome={student.nome}
-                                photoUrl={student.foto_principal_url}
-                                className={`
-        h-12 w-12
-        border-transparent
-        ${checked
-                                        ? "bg-primary-foreground/15"
-                                        : "bg-muted"
-                                    }
-    `}
-                                fallbackClassName={
-                                    checked
-                                        ? "bg-primary-foreground/15 text-primary-foreground"
-                                        : "bg-muted text-foreground"
-                                }
-                            />
-
-                            <div className="min-w-0">
-                                <h3 className="truncate text-base font-bold">
-                                    {student.nome}
-                                </h3>
-
-                                <p className={`
-                                    mt-0.5 truncate text-sm
-                                    ${checked ? "text-primary-foreground/75" : "text-muted"}
-                                `}>
-                                    {student.turma}
-                                    {" • "}
-                                    {student.turno}
-                                </p>
-                            </div>
+                        <StudentAvatar nome={student.nome} photoUrl={student.foto_principal_url} className="h-10 w-10 shrink-0 rounded-full border-0 sm:h-11 sm:w-11" fallbackClassName="text-xs" />
+                        <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold leading-snug [overflow-wrap:anywhere]">{student.nome}</p>
+                            <p className="mt-0.5 text-xs leading-relaxed text-muted [overflow-wrap:anywhere]">{student.turma}{" • "}{student.turno}</p>
                         </div>
-
-                        <div className={`
-                            ml-3 flex h-10 w-10 shrink-0
-                            items-center justify-center
-                            rounded-full border transition-colors
-                            ${checked
-                                ? "border-primary-foreground/20 bg-primary-foreground text-primary"
-                                : "border-border bg-background text-muted"
-                            }
-                        `}>
-                            {checked && <Check className="h-5 w-5" />}
-                        </div>
+                        <span aria-hidden="true" className={cn(
+                            "flex h-6 w-6 shrink-0 items-center justify-center rounded-md border transition-colors",
+                            checked ? "border-emerald-600 bg-emerald-600 text-white" : "border-border bg-background"
+                        )}>
+                            {checked && <Check className="h-4 w-4" />}
+                        </span>
                     </button>
                 )
             })}
