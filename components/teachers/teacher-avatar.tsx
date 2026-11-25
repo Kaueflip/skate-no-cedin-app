@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -39,8 +38,6 @@ export function TeacherAvatar({
                     shrink-0
                     overflow-hidden
                     rounded-full
-                    border
-                    border-border
                     bg-muted
                 "
                 style={{
@@ -52,6 +49,7 @@ export function TeacherAvatar({
                     src={fotoUrl}
                     alt={nome}
                     fill
+                    unoptimized
                     sizes={`${size}px`}
                     className="object-cover"
                     onError={() => setFailedUrl(fotoUrl)}
@@ -68,8 +66,6 @@ export function TeacherAvatar({
                 items-center
                 justify-center
                 rounded-full
-                border
-                border-border
                 bg-muted
                 font-semibold
                 text-muted-foreground

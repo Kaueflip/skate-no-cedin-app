@@ -1,4 +1,3 @@
-
 "use client"
 
 import Image from "next/image"
@@ -8,6 +7,7 @@ import {
 } from "lucide-react"
 
 import {
+    useEffect,
     useRef,
     useState,
 } from "react"
@@ -73,6 +73,12 @@ export function AddTeacherDialog({
         data_inicio: "",
     })
 
+    useEffect(() => {
+        return () => {
+            if (photoPreview?.startsWith("blob:")) URL.revokeObjectURL(photoPreview)
+        }
+    }, [photoPreview])
+
     function updateField(
         field: keyof typeof form,
         value: string
@@ -111,6 +117,8 @@ export function AddTeacherDialog({
     ) {
 
         const file = event.target.files?.[0]
+        event.target.value = ""
+        if (loading) return
 
         if (!file) return
 
@@ -128,9 +136,6 @@ export function AddTeacherDialog({
             return
         }
 
-        if (photoPreview) {
-            URL.revokeObjectURL(photoPreview)
-        }
 
         setPhotoFile(file)
 
@@ -150,9 +155,6 @@ export function AddTeacherDialog({
 
         setPhotoFile(null)
 
-        if (photoPreview) {
-            URL.revokeObjectURL(photoPreview)
-        }
 
         setPhotoPreview(null)
 
@@ -184,6 +186,7 @@ export function AddTeacherDialog({
     }
 
     async function handleSubmit() {
+        if (loading) return
 
         try {
 
@@ -214,29 +217,27 @@ export function AddTeacherDialog({
                 throw new Error("Professor não cadastrado.")
             }
 
+            let photoFailed = false
             if (photoFile) {
-
-                const photoUrl = await uploadPhoto(
-                    insertedTeacher.id
-                )
-
-                if (photoFile) {
-                    const photoPath = await uploadPhoto(insertedTeacher.id)
-
+                let photoPath: string | null = null
+                try {
+                    photoPath = await uploadPhoto(insertedTeacher.id)
                     if (photoPath) {
-                        const { error: updateError } = await supabase
-                            .from("teachers")
-                            .update({
-                                foto_url: photoPath,
-                            })
-                            .eq("id", insertedTeacher.id)
-
+                        const { error: updateError } = await supabase.from("teachers")
+                            .update({ foto_url: photoPath }).eq("id", insertedTeacher.id)
                         if (updateError) throw updateError
                     }
+                } catch (error) {
+                    photoFailed = true
+                    console.error("Professor cadastrado, mas foto não vinculada:", error)
+                    // Não repetir o cadastro se apenas a fotografia falhar.
                 }
             }
-
-            toast.success("Professor cadastrado com sucesso.")
+            if (photoFailed) {
+                toast.warning("Professor cadastrado. Adicione a foto pelo perfil.")
+            } else {
+                toast.success("Professor cadastrado com sucesso.")
+            }
 
             setOpen(false)
 
@@ -268,6 +269,7 @@ export function AddTeacherDialog({
         <Dialog
             open={open}
             onOpenChange={(value) => {
+                if (loading) return
 
                 setOpen(value)
 
@@ -280,18 +282,25 @@ export function AddTeacherDialog({
             </DialogTrigger>
 
             <DialogContent className="
-                max-h-[90vh]
+                max-h-[calc(100dvh-2rem)]
+                w-[calc(100%-2rem)]
+                min-w-0
                 overflow-y-auto
+                overscroll-contain
+                rounded-[10px]
+                gap-3
+                p-4
                 sm:max-w-[520px]
+                sm:p-6
             ">
 
-                <DialogHeader>
+                <DialogHeader className="text-left">
 
-                    <DialogTitle>
+                    <DialogTitle className="text-lg font-bold">
                         Novo professor
                     </DialogTitle>
 
-                    <DialogDescription>
+                    <DialogDescription className="text-xs leading-relaxed sm:text-sm">
                         Cadastre um professor no projeto Skate no Cedin.
                     </DialogDescription>
 
@@ -301,19 +310,21 @@ export function AddTeacherDialog({
                     flex
                     flex-col
                     items-center
-                    gap-4
+                    gap-2
                 ">
 
                     <button
                         type="button"
+                        disabled={loading}
+                        aria-label="Selecionar foto do professor"
                         onClick={() =>
                             fileInputRef.current?.click()
                         }
                         className="
                             relative
                             flex
-                            h-28
-                            w-28
+                            h-20
+                            w-20
                             items-center
                             justify-center
                             overflow-hidden
@@ -322,7 +333,6 @@ export function AddTeacherDialog({
                             border-border
                             bg-input
                             transition-all
-                            hover:scale-[1.02]
                             hover:border-primary/30
                             cursor-pointer
                         "
@@ -334,7 +344,8 @@ export function AddTeacherDialog({
                                 src={photoPreview}
                                 alt="Foto do professor"
                                 fill
-                                sizes="112px"
+                                unoptimized
+                                sizes="80px"
                                 className="object-cover"
                             />
 
@@ -348,13 +359,13 @@ export function AddTeacherDialog({
                             ">
 
                                 <Camera className="
-                                    h-6
-                                    w-6
+                                    h-5
+                                    w-5
                                     text-muted
                                 " />
 
                                 <span className="
-                                    text-xs
+                                    text-[10px]
                                     text-muted
                                 ">
                                     Adicionar foto
@@ -375,15 +386,18 @@ export function AddTeacherDialog({
 
                 </div>
 
-                <div className="grid gap-5">
+                <div className="grid min-w-0 gap-3">
 
-                    <div className="space-y-2">
+                    <div className="min-w-0 space-y-1.5">
 
-                        <Label>
+                        <Label htmlFor="add-teacher-dialog-nome" className="text-xs sm:text-sm">
                             Nome completo *
                         </Label>
 
                         <Input
+                            id="add-teacher-dialog-nome"
+                            disabled={loading}
+                            className="h-11 w-full min-w-0 rounded-lg text-base md:text-sm"
                             value={form.nome}
                             onChange={(e) =>
                                 updateField("nome", e.target.value)
@@ -393,13 +407,16 @@ export function AddTeacherDialog({
 
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="min-w-0 space-y-1.5">
 
-                        <Label>
+                        <Label htmlFor="add-teacher-dialog-funcao" className="text-xs sm:text-sm">
                             Função
                         </Label>
 
                         <Input
+                            id="add-teacher-dialog-funcao"
+                            disabled={loading}
+                            className="h-11 w-full min-w-0 rounded-lg text-base md:text-sm"
                             value={form.funcao}
                             onChange={(e) =>
                                 updateField("funcao", e.target.value)
@@ -409,14 +426,17 @@ export function AddTeacherDialog({
 
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="min-w-0 space-y-1.5">
 
-                        <Label>
+                        <Label htmlFor="add-teacher-dialog-contato" className="text-xs sm:text-sm">
                             Contato
                         </Label>
 
                         <Input
-                            inputMode="numeric"
+                            id="add-teacher-dialog-contato"
+                            disabled={loading}
+                            className="h-11 w-full min-w-0 rounded-lg text-base md:text-sm"
+                            inputMode="tel"
                             value={form.contato}
                             onChange={(e) =>
                                 updateField(
@@ -429,16 +449,19 @@ export function AddTeacherDialog({
 
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="min-w-0 space-y-1.5">
 
-                        <Label>
+                        <Label htmlFor="add-teacher-dialog-data_inicio" className="text-xs sm:text-sm">
                             Data de início
                         </Label>
 
                         <Input
+                            id="add-teacher-dialog-data_inicio"
+                            disabled={loading}
+                            className="h-11 w-full min-w-0 rounded-lg text-base md:text-sm"
                             type="date"
                             value={form.data_inicio}
-                            max={new Date().toISOString().slice(0, 10)}
+                            max={new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date())}
                             onChange={(e) =>
                                 updateField(
                                     "data_inicio",
@@ -450,6 +473,7 @@ export function AddTeacherDialog({
                     </div>
 
                     <AppButton
+                        className="h-11 w-full rounded-lg text-sm"
                         loading={loading}
                         onClick={handleSubmit}
                         disabled={loading}

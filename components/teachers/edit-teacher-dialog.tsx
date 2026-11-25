@@ -1,4 +1,3 @@
-
 "use client"
 
 import Image from "next/image"
@@ -8,6 +7,7 @@ import {
 } from "lucide-react"
 
 import {
+    useEffect,
     useRef,
     useState,
 } from "react"
@@ -65,6 +65,12 @@ export function EditTeacherDialog({
         data_inicio: teacher.data_inicio || "",
     })
 
+    useEffect(() => {
+        return () => {
+            if (photoPreview?.startsWith("blob:")) URL.revokeObjectURL(photoPreview)
+        }
+    }, [photoPreview])
+
     function updateField(
         field: keyof typeof form,
         value: string
@@ -103,6 +109,8 @@ export function EditTeacherDialog({
     ) {
 
         const file = event.target.files?.[0]
+        event.target.value = ""
+        if (loading) return
 
         if (!file) return
 
@@ -120,9 +128,6 @@ export function EditTeacherDialog({
             return
         }
 
-        if (photoPreview && photoPreview.startsWith("blob:")) {
-            URL.revokeObjectURL(photoPreview)
-        }
 
         setPhotoFile(file)
         setPhotoPreview(URL.createObjectURL(file))
@@ -137,9 +142,6 @@ export function EditTeacherDialog({
             data_inicio: teacher.data_inicio || "",
         })
 
-        if (photoPreview && photoPreview.startsWith("blob:")) {
-            URL.revokeObjectURL(photoPreview)
-        }
 
         setPhotoFile(null)
         setPhotoPreview(currentPhotoUrl)
@@ -173,6 +175,7 @@ export function EditTeacherDialog({
     }
 
     async function handleSubmit() {
+        if (loading) return
 
         if (!form.nome.trim()) {
             toast.error("Informe o nome do professor.")
@@ -234,6 +237,7 @@ export function EditTeacherDialog({
         <Dialog
             open={open}
             onOpenChange={(value) => {
+                if (loading) return
 
                 if (!value) resetForm()
 
@@ -242,18 +246,25 @@ export function EditTeacherDialog({
         >
 
             <DialogContent className="
-                max-h-[90vh]
+                max-h-[calc(100dvh-2rem)]
+                w-[calc(100%-2rem)]
+                min-w-0
                 overflow-y-auto
+                overscroll-contain
+                rounded-[10px]
+                gap-3
+                p-4
                 sm:max-w-[520px]
+                sm:p-6
             ">
 
-                <DialogHeader>
+                <DialogHeader className="text-left">
 
-                    <DialogTitle>
+                    <DialogTitle className="text-lg font-bold">
                         Editar professor
                     </DialogTitle>
 
-                    <DialogDescription>
+                    <DialogDescription className="text-xs leading-relaxed sm:text-sm">
                         Atualize os dados do professor.
                     </DialogDescription>
 
@@ -263,17 +274,19 @@ export function EditTeacherDialog({
                     flex
                     flex-col
                     items-center
-                    gap-4
+                    gap-2
                 ">
 
                     <button
                         type="button"
+                        disabled={loading}
+                        aria-label="Selecionar foto do professor"
                         onClick={() => fileInputRef.current?.click()}
                         className="
                             relative
                             flex
-                            h-28
-                            w-28
+                            h-20
+                            w-20
                             items-center
                             justify-center
                             overflow-hidden
@@ -282,7 +295,6 @@ export function EditTeacherDialog({
                             border-border
                             bg-input
                             transition-all
-                            hover:scale-[1.02]
                             hover:border-primary/30
                             cursor-pointer
                         "
@@ -294,7 +306,7 @@ export function EditTeacherDialog({
                                 src={photoPreview}
                                 alt="Foto do professor"
                                 fill
-                                sizes="112px"
+                                sizes="80px"
                                 unoptimized
                                 className="object-cover"
                             />
@@ -309,13 +321,13 @@ export function EditTeacherDialog({
                             ">
 
                                 <Camera className="
-                                    h-6
-                                    w-6
+                                    h-5
+                                    w-5
                                     text-muted
                                 " />
 
                                 <span className="
-                                    text-xs
+                                    text-[10px]
                                     text-muted
                                 ">
                                     Adicionar foto
@@ -336,15 +348,18 @@ export function EditTeacherDialog({
 
                 </div>
 
-                <div className="grid gap-5">
+                <div className="grid min-w-0 gap-3">
 
-                    <div className="space-y-2">
+                    <div className="min-w-0 space-y-1.5">
 
-                        <Label>
+                        <Label htmlFor="edit-teacher-dialog-nome" className="text-xs sm:text-sm">
                             Nome completo *
                         </Label>
 
                         <Input
+                            id="edit-teacher-dialog-nome"
+                            disabled={loading}
+                            className="h-11 w-full min-w-0 rounded-lg text-base md:text-sm"
                             value={form.nome}
                             onChange={(e) =>
                                 updateField("nome", e.target.value)
@@ -354,13 +369,16 @@ export function EditTeacherDialog({
 
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="min-w-0 space-y-1.5">
 
-                        <Label>
+                        <Label htmlFor="edit-teacher-dialog-funcao" className="text-xs sm:text-sm">
                             Função
                         </Label>
 
                         <Input
+                            id="edit-teacher-dialog-funcao"
+                            disabled={loading}
+                            className="h-11 w-full min-w-0 rounded-lg text-base md:text-sm"
                             value={form.funcao}
                             onChange={(e) =>
                                 updateField("funcao", e.target.value)
@@ -370,14 +388,17 @@ export function EditTeacherDialog({
 
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="min-w-0 space-y-1.5">
 
-                        <Label>
+                        <Label htmlFor="edit-teacher-dialog-contato" className="text-xs sm:text-sm">
                             Contato
                         </Label>
 
                         <Input
-                            inputMode="numeric"
+                            id="edit-teacher-dialog-contato"
+                            disabled={loading}
+                            className="h-11 w-full min-w-0 rounded-lg text-base md:text-sm"
+                            inputMode="tel"
                             value={form.contato}
                             onChange={(e) =>
                                 updateField(
@@ -390,16 +411,19 @@ export function EditTeacherDialog({
 
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="min-w-0 space-y-1.5">
 
-                        <Label>
+                        <Label htmlFor="edit-teacher-dialog-data_inicio" className="text-xs sm:text-sm">
                             Data de início
                         </Label>
 
                         <Input
+                            id="edit-teacher-dialog-data_inicio"
+                            disabled={loading}
+                            className="h-11 w-full min-w-0 rounded-lg text-base md:text-sm"
                             type="date"
                             value={form.data_inicio}
-                            max={new Date().toISOString().slice(0, 10)}
+                            max={new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date())}
                             onChange={(e) =>
                                 updateField(
                                     "data_inicio",
@@ -411,6 +435,7 @@ export function EditTeacherDialog({
                     </div>
 
                     <AppButton
+                        className="h-11 w-full rounded-lg text-sm"
                         loading={loading}
                         onClick={handleSubmit}
                         disabled={loading}

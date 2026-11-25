@@ -1,10 +1,9 @@
-
 import {
     notFound,
 } from "next/navigation"
 
-import Image
-    from "next/image"
+import type { ReactNode } from "react"
+import { TeacherAvatar } from "@/components/teachers/teacher-avatar"
 
 import Link
     from "next/link"
@@ -14,7 +13,6 @@ import {
     CalendarDays,
     Clock3,
     Phone,
-    UserRound,
     BriefcaseBusiness,
     GraduationCap,
 } from "lucide-react"
@@ -119,6 +117,7 @@ export default async function TeacherPage({
             b.class_date.localeCompare(a.class_date)
         )
 
+    const nightClasses = sessions.filter((session) => session.turno === "Noite").length
     const totalClasses = sessions.length
 
     const morningClasses = sessions.filter(
@@ -130,459 +129,75 @@ export default async function TeacherPage({
     ).length
 
     return (
-
         <PageShell>
-
-            <div className="mb-8">
-
-                <Link href="/teachers">
-
-                    <AppButton variant="secondary">
-
-                        <ArrowLeft className="h-4 w-4" />
-
-                        Voltar
-
-                    </AppButton>
-
-                </Link>
-
-            </div>
-
-            <div className="
-                overflow-hidden
-                rounded-4xl
-                border
-                border-border
-                bg-card
-                shadow-sm
-            ">
-
-                <div className="relative p-6 pb-8">
-
-                    <div className="
-                        flex
-                        flex-col
-                        gap-6
-                        lg:flex-row
-                        lg:items-end
-                        lg:justify-between
-                    ">
-
-
-                        <div className="
-                            flex
-                            flex-col
-                            gap-5
-                            sm:flex-row
-                            sm:items-end
-                        ">
-
-                            <div className="
-                                relative
-                                h-32
-                                w-32
-                                shrink-0
-                                overflow-hidden
-                                rounded-4xl
-                                border-4
-                                border-card
-                                bg-background
-                                shadow-xl
-                            ">
-
-                                {profilePhotoUrl ? (
-
-                                    <Image
-                                        src={profilePhotoUrl}
-                                        alt={teacher.nome}
-                                        fill
-                                        unoptimized
-                                        className="object-cover"
-                                    />
-
-                                ) : (
-
-                                    <div className="
-                                        flex
-                                        h-full
-                                        w-full
-                                        items-center
-                                        justify-center
-                                        text-5xl
-                                        font-black
-                                        text-muted
-                                    ">
-                                        {teacher.nome
-                                            .charAt(0)
-                                            .toUpperCase()}
-                                    </div>
-
-                                )}
-
+            <div className="flex w-full min-w-0 flex-col gap-3 md:gap-5">
+                <div><AppButton asChild variant="ghost" className="h-11 gap-2 px-2 text-sm">
+                    <Link href="/teachers"><ArrowLeft className="h-4 w-4" /> Voltar aos professores</Link>
+                </AppButton></div>
+                <section className="w-full min-w-0 rounded-[10px] border border-border bg-card p-3 shadow-sm sm:p-4 lg:p-5">
+                    <div className="flex min-w-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="flex min-w-0 items-center gap-3">
+                            <TeacherAvatar nome={teacher.nome} fotoUrl={profilePhotoUrl} size={72} />
+                            <div className="min-w-0 flex-1">
+                                <p className="text-[10px] font-semibold uppercase tracking-widest text-primary">Perfil do professor</p>
+                                <h1 className="mt-1 text-lg font-black leading-tight tracking-tight [overflow-wrap:anywhere] md:text-2xl">{teacher.nome}</h1>
+                                <p className="mt-1 text-xs text-muted [overflow-wrap:anywhere] md:text-sm">{teacher.funcao || "Função não informada"}</p>
+                                <span className={`mt-2 inline-flex rounded-md px-2 py-1 text-[11px] font-semibold ${teacher.ativo ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-red-500/10 text-red-600 dark:text-red-400"}`}>{teacher.ativo ? "Ativo" : "Inativo"}</span>
                             </div>
-
-
-                            <div>
-
-                                <p className="
-                                    mb-2
-                                    text-sm
-                                    font-semibold
-                                    uppercase
-                                    tracking-[0.25em]
-                                    text-primary
-                                ">
-                                    Perfil do professor
-                                </p>
-
-                                <h1 className="
-                                    text-4xl
-                                    font-black
-                                    tracking-tight
-                                ">
-                                    {teacher.nome}
-                                </h1>
-
-                                <div className="
-                                    mt-3
-                                    flex
-                                    flex-wrap
-                                    items-center
-                                    gap-3
-                                ">
-
-                                    <p className="text-lg text-muted">
-                                        {teacher.funcao || "Função não informada"}
-                                    </p>
-
-                                    <span className={`
-                                        rounded-full
-                                        px-3
-                                        py-1
-                                        text-xs
-                                        font-semibold
-                                        ${teacher.ativo
-                                            ? "bg-emerald-500/10 text-emerald-600"
-                                            : "bg-red-500/10 text-red-600"
-                                        }
-                                    `}>
-                                        {teacher.ativo ? "Ativo" : "Inativo"}
-                                    </span>
-
-                                </div>
-
-                            </div>
-
                         </div>
-
-                        <TeacherPageActions
-                            teacher={teacher}
-                            currentPhotoUrl={profilePhotoUrl}
-                        />
-
+                        <div className="w-full min-w-0 border-t border-border pt-3 lg:w-auto lg:shrink-0 lg:border-0 lg:pt-0">
+                            <TeacherPageActions teacher={teacher} currentPhotoUrl={profilePhotoUrl} />
+                        </div>
                     </div>
-
-
-
-                    <div className="
-                        mt-10
-                        grid
-                        gap-5
-                        md:grid-cols-2
-                        xl:grid-cols-3
-                    ">
-
-                        <InfoCard
-                            icon={<BriefcaseBusiness className="h-5 w-5" />}
-                            label="Função"
-                            value={teacher.funcao || "Não informada"}
-                        />
-
-                        <InfoCard
-                            icon={<Phone className="h-5 w-5" />}
-                            label="Contato"
-                            value={teacher.contato || "Não informado"}
-                        />
-
-                        <InfoCard
-                            icon={<CalendarDays className="h-5 w-5" />}
-                            label="Data de início"
-                            value={
-                                teacher.data_inicio
-                                    ? new Date(
-                                        `${teacher.data_inicio}T12:00:00`
-                                    ).toLocaleDateString("pt-BR")
-                                    : "Não informada"
-                            }
-                        />
-
+                </section>
+                <section className="min-w-0 rounded-[10px] border border-border bg-card p-3 sm:p-4 lg:p-5">
+                    <h2 className="mb-3 text-base font-bold md:text-lg">Dados do professor</h2>
+                    <div className="grid min-w-0 grid-cols-2 gap-2 lg:grid-cols-3">
+                        <InfoCard icon={<BriefcaseBusiness />} label="Função" value={teacher.funcao || "Não informada"} className="col-span-2 lg:col-span-1" />
+                        <InfoCard icon={<Phone />} label="Contato" value={teacher.contato || "Não informado"} />
+                        <InfoCard icon={<CalendarDays />} label="Data de início" value={teacher.data_inicio ? teacher.data_inicio.split("-").reverse().join("/") : "Não informada"} />
                     </div>
-
-                    <section className="mt-8">
-
-                        <h2 className="
-                            mb-5
-                            text-xl
-                            font-bold
-                        ">
-                            Resumo das aulas
-                        </h2>
-
-                        <div className="
-                            grid
-                            gap-5
-                            md:grid-cols-3
-                        ">
-
-                            <InfoCard
-                                icon={<GraduationCap className="h-5 w-5" />}
-                                label="Total de aulas vinculadas"
-                                value={String(totalClasses)}
-                            />
-
-                            <InfoCard
-                                icon={<Clock3 className="h-5 w-5" />}
-                                label="Aulas no período da manhã"
-                                value={String(morningClasses)}
-                            />
-
-                            <InfoCard
-                                icon={<Clock3 className="h-5 w-5" />}
-                                label="Aulas no período da tarde"
-                                value={String(afternoonClasses)}
-                            />
-
+                </section>
+                <section className="min-w-0 rounded-[10px] border border-border bg-card p-3 sm:p-4 lg:p-5">
+                    <h2 className="mb-1 text-base font-bold md:text-lg">Histórico de aulas</h2>
+                    <p className="mb-3 text-xs text-muted">Aulas vinculadas a este professor</p>
+                    {assignmentsError ? <p role="alert" className="rounded-lg border border-border p-3 text-sm text-destructive">Não foi possível carregar o histórico de aulas.</p> : <>
+                        <div className="mb-3 grid min-w-0 grid-cols-2 gap-2 xl:grid-cols-4">
+                            <InfoCard icon={<GraduationCap />} label="Total vinculado" value={String(totalClasses)} />
+                            <InfoCard icon={<Clock3 />} label="Manhã" value={String(morningClasses)} />
+                            <InfoCard icon={<Clock3 />} label="Tarde" value={String(afternoonClasses)} />
+                            <InfoCard icon={<Clock3 />} label="Noite" value={String(nightClasses)} />
                         </div>
-
-                    </section>
-
-                    <section className="
-                        mt-8
-                        rounded-4xl
-                        border
-                        border-border
-                        bg-background/80
-                        p-6
-                    ">
-
-                        <div className="
-                            mb-5
-                            flex
-                            items-center
-                            justify-between
-                        ">
-
-                            <div>
-                                <h2 className="text-xl font-bold">
-                                    Histórico de aulas
-                                </h2>
-
-                                <p className="mt-1 text-sm text-muted">
-                                    Aulas vinculadas a este professor
-                                </p>
-                            </div>
-
-                            <span className="
-                                rounded-xl
-                                bg-primary/10
-                                px-3
-                                py-1
-                                text-sm
-                                font-semibold
-                                text-primary
-                            ">
-                                {totalClasses} aulas
-                            </span>
-
-                        </div>
-
                         {sessions.length > 0 ? (
-
-                            <div className="
-                                overflow-x-auto
-                                rounded-2xl
-                                border
-                                border-border
-                            ">
-
-                                <table className="w-full text-sm">
-
-                                    <thead className="bg-muted/10">
-
-                                        <tr className="text-left">
-
-                                            <th className="p-4 font-semibold">
-                                                Data
-                                            </th>
-
-                                            <th className="p-4 font-semibold">
-                                                Turno
-                                            </th>
-
-                                            <th className="p-4 font-semibold">
-                                                Aula
-                                            </th>
-
-                                            <th className="p-4 font-semibold">
-                                                Situação
-                                            </th>
-
-                                        </tr>
-
-                                    </thead>
-
-                                    <tbody>
-
-                                        {sessions.map((session) => (
-
-                                            <tr
-                                                key={session.id}
-                                                className="border-t border-border"
-                                            >
-
-                                                <td className="p-4 text-muted">
-                                                    {new Date(
-                                                        `${session.class_date}T12:00:00`
-                                                    ).toLocaleDateString("pt-BR")}
-                                                </td>
-
-                                                <td className="p-4 text-muted">
-                                                    {session.turno}
-                                                </td>
-
-                                                <td className="p-4 text-muted">
-                                                    {session.aula_numero
-                                                        ? `${session.aula_numero}ª aula`
-                                                        : "Não informado"}
-                                                </td>
-
-                                                <td className="p-4">
-
-                                                    <span className="
-                                                        rounded-lg
-                                                        bg-muted/20
-                                                        px-2
-                                                        py-1
-                                                        text-xs
-                                                        font-medium
-                                                    ">
-                                                        {session.status || "Não informado"}
-                                                    </span>
-
-                                                </td>
-
-                                            </tr>
-
-                                        ))}
-
-                                    </tbody>
-
-                                </table>
-
+                            <div className="divide-y divide-border rounded-lg border border-border">
+                                {sessions.map((session) => (
+                                    <div key={session.id} className="flex min-w-0 items-center justify-between gap-2 p-3">
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-sm font-semibold tabular-nums">{session.class_date.split("-").reverse().join("/")}</p>
+                                            <p className="mt-0.5 text-xs text-muted">{session.turno} • {session.aula_numero ? `${session.aula_numero}ª aula` : "Aula não informada"}</p>
+                                        </div>
+                                        <span className={`shrink-0 rounded-md px-2 py-1 text-xs font-medium capitalize ${session.status === "realizada" ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : session.status === "cancelada" ? "bg-red-500/10 text-red-600 dark:text-red-400" : "bg-muted/20 text-muted-foreground"}`}>{session.status || "Não informado"}</span>
+                                    </div>
+                                ))}
                             </div>
-
-                        ) : (
-
-                            <div className="
-                                rounded-2xl
-                                border
-                                border-dashed
-                                border-border
-                                p-10
-                                text-center
-                            ">
-
-                                <UserRound className="
-                                    mx-auto
-                                    mb-3
-                                    h-8
-                                    w-8
-                                    text-muted
-                                " />
-
-                                <p className="font-semibold">
-                                    Nenhuma aula vinculada
-                                </p>
-
-                                <p className="
-                                    mt-1
-                                    text-sm
-                                    text-muted
-                                ">
-                                    O histórico aparecerá aqui quando o professor for vinculado às aulas.
-                                </p>
-
-                            </div>
-
-                        )}
-
-                    </section>
-
-                </div>
-
+                        ) : <div className="rounded-lg border border-dashed border-border px-3 py-6 text-center">
+                            <CalendarDays className="mx-auto mb-2 h-6 w-6 text-muted" />
+                            <p className="text-sm font-semibold">Nenhuma aula vinculada</p>
+                            <p className="mt-1 text-xs text-muted">O histórico aparecerá quando o professor for vinculado às aulas.</p>
+                        </div>}
+                    </>}
+                </section>
             </div>
-
         </PageShell>
     )
 }
 
-type InfoCardProps = {
-    icon: React.ReactNode
-    label: string
-    value: string
-}
-
-function InfoCard({
-    icon,
-    label,
-    value,
-}: InfoCardProps) {
-
-    return (
-
-        <div className="
-            rounded-4xl
-            border
-            border-border
-            bg-background/70
-            p-5
-        ">
-
-            <div className="
-                flex
-                items-center
-                gap-4
-            ">
-
-                <div className="
-                    flex
-                    h-11
-                    w-11
-                    shrink-0
-                    items-center
-                    justify-center
-                    rounded-2xl
-                    bg-primary/10
-                    text-primary
-                ">
-                    {icon}
-                </div>
-
-                <div>
-
-                    <p className="text-sm text-muted">
-                        {label}
-                    </p>
-
-                    <p className="mt-1 font-semibold">
-                        {value}
-                    </p>
-
-                </div>
-
-            </div>
-
+function InfoCard({ icon, label, value, className = "" }: { icon: ReactNode; label: string; value: string; className?: string }) {
+    return <div className={`min-w-0 rounded-lg border border-border bg-background/70 p-2.5 md:p-3 ${className}`}>
+        <div className="flex min-w-0 items-center gap-1.5">
+            <span className="shrink-0 text-primary [&>svg]:h-3.5 [&>svg]:w-3.5">{icon}</span>
+            <span className="min-w-0 text-[11px] leading-tight text-muted md:text-xs">{label}</span>
         </div>
-    )
+        <p className="mt-1.5 text-sm font-semibold [overflow-wrap:anywhere]">{value}</p>
+    </div>
 }
