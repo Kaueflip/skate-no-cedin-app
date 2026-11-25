@@ -76,7 +76,7 @@ export default async function StudentsPage() {
                 }
             />
 
-            <section className="
+            {/*      <section className="
         grid
         gap-5
 
@@ -143,7 +143,7 @@ export default async function StudentsPage() {
                     }
                 />
 
-            </section>
+            </section> */}
 
             <div className="mt-8">
 
