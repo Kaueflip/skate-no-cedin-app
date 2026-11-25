@@ -3,7 +3,7 @@
 
 import {
     useRouter,
-} from "next/navigation"
+} from "nextjs-toploader/app"
 
 import type {
     Teacher,

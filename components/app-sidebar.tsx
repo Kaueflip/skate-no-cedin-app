@@ -3,7 +3,8 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useRef, type MouseEvent } from "react"
-import { useRouter, usePathname } from "next/navigation"
+import { usePathname } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import { useTheme } from "next-themes"
 
 import {
@@ -126,9 +127,7 @@ export function AppSidebar() {
                     className="hidden h-10 w-auto shrink-0 dark:block"
                   />
                   <div className="flex min-w-0 flex-col gap-0.5">
-                    <span className="text-sm font-semibold text-sidebar-foreground">
-                      Skate no Cedin
-                    </span>
+
                     <span className="text-xs text-muted">
                       Sistema de Gestão
                     </span>
@@ -155,8 +154,8 @@ export function AppSidebar() {
                       asChild
                       isActive={active}
                       className={`h-11 rounded-xl px-3 transition-all ${active
-                          ? "bg-primary text-primary-foreground shadow-sm hover:bg-accent-hover hover:text-primary-foreground data-active:bg-primary data-active:text-primary-foreground"
-                          : "bg-transparent text-muted hover:bg-white/70 hover:text-foreground dark:hover:bg-white/4"
+                        ? "bg-primary text-primary-foreground shadow-sm hover:bg-accent-hover hover:text-primary-foreground data-active:bg-primary data-active:text-primary-foreground"
+                        : "bg-transparent text-muted hover:bg-white/70 hover:text-foreground dark:hover:bg-white/4"
                         }`}
                     >
                       <Link

@@ -6,6 +6,8 @@ import { GeistSans }
 
 import "./globals.css"
 
+import NextTopLoader from "nextjs-toploader"
+
 import {
   ThemeProvider,
 } from "@/components/theme/theme-provider"
@@ -71,6 +73,17 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
+
+          <NextTopLoader
+            color="#3b82f6"
+            height={3}
+            initialPosition={0.08}
+            crawl={true}
+            showSpinner={false}
+            shadow={false}
+            zIndex={2000}
+            showForHashAnchor={false}
+          />
 
           <TooltipProvider>
 
