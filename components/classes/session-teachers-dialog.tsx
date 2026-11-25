@@ -57,15 +57,20 @@ export function SessionTeachersDialog({
 
     const [teachers, setTeachers] = useState<Teacher[]>([])
     const [selectedIds, setSelectedIds] = useState<string[]>([])
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const [loadError, setLoadError] = useState(true)
+    const [loadedSession, setLoadedSession] = useState<string | null>(null)
     const [saving, setSaving] = useState(false)
 
     useEffect(() => {
         if (!open || !sessionId) return
 
+        let active = true
         async function loadData() {
             try {
                 setLoading(true)
+                setLoadError(true)
+                setLoadedSession(null)
 
                 const [
                     { data: teachersData, error: teachersError },
@@ -87,6 +92,7 @@ export function SessionTeachersDialog({
                 if (teachersError) throw teachersError
                 if (assignmentsError) throw assignmentsError
 
+                if (!active) return
                 setTeachers(teachersData || [])
 
                 setSelectedIds(
@@ -95,18 +101,24 @@ export function SessionTeachersDialog({
                     )
                 )
 
+                setLoadError(false)
+                setLoadedSession(sessionId)
             } catch (error) {
+                if (!active) return
+                setLoadError(true)
                 console.error("LOAD_SESSION_TEACHERS_ERROR", error)
                 toast.error("Erro ao carregar professores.")
             } finally {
-                setLoading(false)
+                if (active) setLoading(false)
             }
         }
 
         loadData()
+        return () => { active = false }
     }, [open, sessionId])
 
     function toggleTeacher(teacherId: string) {
+        if (saving || loading || loadError || loadedSession !== sessionId) return
         setSelectedIds((prev) =>
             prev.includes(teacherId)
                 ? prev.filter((id) => id !== teacherId)
@@ -115,6 +127,7 @@ export function SessionTeachersDialog({
     }
 
     async function handleSave() {
+        if (loading || saving || loadError || loadedSession !== sessionId) return
         try {
             setSaving(true)
 
@@ -175,12 +188,13 @@ export function SessionTeachersDialog({
     return (
         <Dialog
             open={open}
-            onOpenChange={onOpenChange}
+            onOpenChange={(next) => { if (!saving) onOpenChange(next) }}
         >
             <DialogContent className="
-                max-h-[85vh]
+                max-h-[85dvh]
                 overflow-y-auto
-                rounded-[2rem]
+                rounded-[10px]
+                p-4 sm:p-6
                 border-border
                 bg-card
                 sm:max-w-lg
@@ -189,13 +203,13 @@ export function SessionTeachersDialog({
                 <DialogHeader>
 
                     <div className="
-                        mb-3
+                        mb-2
                         flex
-                        h-12
-                        w-12
+                        h-10
+                        w-10
                         items-center
                         justify-center
-                        rounded-2xl
+                        rounded-lg
                         bg-primary/10
                         text-primary
                     ">
@@ -203,7 +217,7 @@ export function SessionTeachersDialog({
                     </div>
 
                     <DialogTitle className="
-                        text-2xl
+                        text-lg
                         font-black
                         tracking-tight
                     ">
@@ -223,13 +237,15 @@ export function SessionTeachersDialog({
                         items-center
                         justify-center
                         gap-2
-                        py-12
+                        py-8
                         text-muted
                     ">
                         <Loader2 className="h-5 w-5 animate-spin" />
                         Carregando professores...
                     </div>
 
+                ) : loadError ? (
+                    <p className="rounded-lg border border-border p-3 text-sm text-muted">Não foi possível carregar os professores. Feche e abra novamente para tentar.</p>
                 ) : teachers.length > 0 ? (
 
                     <div className="flex flex-col gap-2">
@@ -242,10 +258,10 @@ export function SessionTeachersDialog({
                                     flex
                                     cursor-pointer
                                     items-center
-                                    gap-3
-                                    rounded-2xl
+                                    min-w-0 gap-2
+                                    rounded-lg
                                     border
-                                    p-4
+                                    p-3 min-h-11
                                     transition-colors
                                     ${selectedIds.includes(teacher.id)
                                         ? "border-primary/40 bg-primary/5"
@@ -256,10 +272,11 @@ export function SessionTeachersDialog({
 
                                 <input
                                     type="checkbox"
+                                    disabled={saving}
                                     checked={selectedIds.includes(teacher.id)}
                                     onChange={() => toggleTeacher(teacher.id)}
                                     className="
-                                        h-4
+                                        shrink-0 h-4
                                         w-4
                                         accent-primary
                                     "
@@ -267,11 +284,11 @@ export function SessionTeachersDialog({
 
                                 <div className="min-w-0 flex-1">
 
-                                    <p className="font-semibold">
+                                    <p className="text-sm font-semibold [overflow-wrap:anywhere]">
                                         {teacher.nome}
                                     </p>
 
-                                    <p className="text-xs text-muted">
+                                    <p className="text-xs text-muted [overflow-wrap:anywhere]">
                                         {teacher.funcao || "Função não informada"}
                                     </p>
 
@@ -279,7 +296,7 @@ export function SessionTeachersDialog({
 
                                 {!teacher.ativo && (
                                     <span className="
-                                        rounded-full
+                                        rounded-md shrink-0
                                         bg-zinc-500/10
                                         px-2
                                         py-1
@@ -300,14 +317,14 @@ export function SessionTeachersDialog({
                 ) : (
 
                     <div className="
-                        rounded-2xl
+                        rounded-lg
                         border
                         border-dashed
                         border-border
-                        p-8
+                        p-4
                         text-center
                     ">
-                        <p className="font-semibold">
+                        <p className="text-sm font-semibold [overflow-wrap:anywhere]">
                             Nenhum professor cadastrado
                         </p>
 
@@ -318,22 +335,20 @@ export function SessionTeachersDialog({
 
                 )}
 
-                <p className="text-xs text-muted">
+                <p className="text-xs text-muted [overflow-wrap:anywhere]">
                     {selectedIds.length} professor(es) selecionado(s)
                 </p>
 
                 <DialogFooter className="
-                    mt-4
-                    flex-col-reverse
-                    gap-3
-                    sm:flex-row
+                    mt-3
+                    grid grid-cols-2 gap-2 sm:grid
                 ">
 
                     <AppButton
                         variant="secondary"
                         onClick={() => onOpenChange(false)}
                         disabled={saving}
-                        className="w-full sm:w-auto"
+                        className="h-11 w-full px-2 text-xs sm:text-sm"
                     >
                         Cancelar
                     </AppButton>
@@ -341,8 +356,8 @@ export function SessionTeachersDialog({
                     <AppButton
                         onClick={handleSave}
                         loading={saving}
-                        disabled={loading || saving}
-                        className="w-full sm:w-auto"
+                        disabled={loading || saving || loadError || loadedSession !== sessionId}
+                        className="h-11 w-full px-2 text-xs sm:text-sm"
                     >
                         Salvar professores
                     </AppButton>

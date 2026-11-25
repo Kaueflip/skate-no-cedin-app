@@ -24,6 +24,7 @@ type Props = {
     sessions: ClassSession[]
     onMonthChange: (date: string) => void
     onDaySelect: (date: string) => void
+    disabled?: boolean
 }
 
 const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
@@ -33,6 +34,7 @@ export function MonthlyCalendar({
     sessions,
     onMonthChange,
     onDaySelect,
+    disabled = false,
 }: Props) {
     const calendar = useMemo(() => {
         const [year, month] = date.split("-").map(Number)
@@ -99,24 +101,25 @@ export function MonthlyCalendar({
     }
 
     return (
-        <section className="rounded-[2rem] border border-border bg-card/80 p-5 shadow-sm">
+        <section className="w-full min-w-0">
 
-            <div className="mb-6 flex items-center justify-between">
+            <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
                 <div>
-                    <h2 className="text-lg font-bold">
+                    <h2 className="text-sm font-bold">
                         Calendário de atividades
                     </h2>
 
-                    <p className="mt-1 text-sm text-muted capitalize">
+                    <p className="mt-1 text-xs text-muted capitalize">
                         {monthLabel}
                     </p>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex shrink-0 gap-1">
                     <button
                         type="button"
+                        disabled={disabled}
                         onClick={() => changeMonth(-1)}
-                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-border hover:bg-muted/10"
+                        className="flex h-11 w-11 items-center justify-center rounded-lg border border-border hover:bg-muted/10"
                         aria-label="Mês anterior"
                     >
                         <ChevronLeft className="h-4 w-4" />
@@ -124,8 +127,9 @@ export function MonthlyCalendar({
 
                     <button
                         type="button"
+                        disabled={disabled}
                         onClick={() => changeMonth(1)}
-                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-border hover:bg-muted/10"
+                        className="flex h-11 w-11 items-center justify-center rounded-lg border border-border hover:bg-muted/10"
                         aria-label="Próximo mês"
                     >
                         <ChevronRight className="h-4 w-4" />
@@ -133,11 +137,11 @@ export function MonthlyCalendar({
                 </div>
             </div>
 
-            <div className="grid grid-cols-7 gap-2">
+            <div className="grid min-w-0 grid-cols-7 gap-0.5 sm:gap-2">
                 {weekDays.map((day) => (
                     <div
                         key={day}
-                        className="py-2 text-center text-xs font-semibold text-muted"
+                        className="py-1 text-center text-[10px] sm:text-xs font-semibold text-muted"
                     >
                         {day}
                     </div>
@@ -159,13 +163,16 @@ export function MonthlyCalendar({
                         <button
                             key={dayKey}
                             type="button"
+                            disabled={disabled}
+                            aria-pressed={selected}
+                            aria-label={`${dayKey}: ${dayStats?.realized || 0} realizadas, ${dayStats?.cancelled || 0} canceladas`}
                             onClick={() => onDaySelect(dayKey)}
                             className={`
-            min-h-[76px]
-            rounded-xl
+            min-h-11 min-w-0 sm:min-h-[64px]
+            rounded-lg
             border
-            p-2
-            text-left
+            p-0.5 sm:p-2
+            text-center sm:text-left disabled:opacity-50
             transition
             hover:border-primary
             ${selected
@@ -176,23 +183,23 @@ export function MonthlyCalendar({
                                 }
         `}
                         >
-                            <p className={`text-sm font-bold ${selected ? "text-primary" : ""
+                            <p className={`text-xs sm:text-sm font-bold ${selected ? "text-primary" : ""
                                 }`}>
                                 {day}
                             </p>
 
                             {dayStats && (
-                                <div className="mt-2 flex flex-col gap-1">
+                                <div className="mt-1 flex flex-col items-center gap-0.5 sm:items-start">
                                     {dayStats.realized > 0 && (
-                                        <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600">
-                                            <CheckCircle2 className="h-3 w-3 shrink-0" />
+                                        <span className="flex items-center gap-0.5 text-[10px] font-semibold text-emerald-600">
+                                            <CheckCircle2 className="hidden sm:block h-3 w-3 shrink-0" />
                                             {dayStats.realized}
                                         </span>
                                     )}
 
                                     {dayStats.cancelled > 0 && (
-                                        <span className="flex items-center gap-1 text-[10px] font-semibold text-red-500">
-                                            <XCircle className="h-3 w-3 shrink-0" />
+                                        <span className="flex items-center gap-0.5 text-[10px] font-semibold text-red-500">
+                                            <XCircle className="hidden sm:block h-3 w-3 shrink-0" />
                                             {dayStats.cancelled}
                                         </span>
                                     )}
@@ -203,7 +210,7 @@ export function MonthlyCalendar({
                 })}
             </div>
 
-            <div className="mt-5 flex flex-wrap gap-4 border-t border-border pt-4">
+            <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
                 <span className="flex items-center gap-2 text-xs text-muted">
                     <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
                     Aulas realizadas

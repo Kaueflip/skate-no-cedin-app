@@ -1,11 +1,5 @@
 
-import {
-    CalendarDays,
-} from "lucide-react"
-
-import {
-    createClient,
-} from "@/lib/supabase-server"
+import { createClient } from "@/lib/supabase-server"
 
 import {
     ClassesClient,
@@ -20,12 +14,22 @@ import {
 } from "@/components/layout/page-header"
 
 export default async function ClassesPage() {
+
     const supabase = await createClient()
 
-    const today = new Date()
-        .toLocaleDateString("en-CA", {
+    // DATA ATUAL - FUSO DE BRASÍLIA
+
+    const today = new Intl.DateTimeFormat(
+        "en-CA",
+        {
             timeZone: "America/Sao_Paulo",
-        })
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+        }
+    ).format(new Date())
+
+    // AULAS DO DIA
 
     const {
         data: sessions,
@@ -38,22 +42,38 @@ export default async function ClassesPage() {
         .order("aula_numero")
 
     if (error) {
-        console.error("Erro ao carregar aulas:", error)
+
+        console.error(
+            "Erro ao carregar aulas:",
+            error
+        )
+
+        throw new Error(
+            "Não foi possível carregar as aulas."
+        )
     }
 
     return (
+
         <PageShell>
+
             <PageHeader
-                title="Controle de Aulas"
-                description="Registre e acompanhe as aulas realizadas pelo projeto"
+                title="Controle de aulas"
+                description="Registre e acompanhe as aulas do projeto."
             />
 
-            <div className="mt-8">
+            <div className="
+                w-full
+                min-w-0
+            ">
+
                 <ClassesClient
                     initialSessions={sessions || []}
                     initialDate={today}
                 />
+
             </div>
+
         </PageShell>
     )
 }

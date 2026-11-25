@@ -52,6 +52,7 @@ export function DeleteSessionDialog({
     const [loading, setLoading] = useState(false)
 
     async function handleDelete() {
+        if (loading) return
         try {
             setLoading(true)
 
@@ -81,11 +82,13 @@ export function DeleteSessionDialog({
     return (
         <Dialog
             open={open}
-            onOpenChange={onOpenChange}
+            onOpenChange={(next) => { if (!loading) onOpenChange(next) }}
         >
             <DialogContent
                 className="
-                    rounded-[2rem]
+                    rounded-[10px]
+                    p-4 sm:p-6
+                    max-h-[90dvh] overflow-y-auto
                     border-border
                     bg-card
                     sm:max-w-md
@@ -93,21 +96,21 @@ export function DeleteSessionDialog({
             >
                 <DialogHeader>
                     <div className="
-                        mb-4
+                        mb-2
                         flex
-                        h-14
-                        w-14
+                        h-10
+                        w-10
                         items-center
                         justify-center
-                        rounded-2xl
+                        rounded-lg
                         bg-red-500/10
                         text-red-500
                     ">
-                        <Trash2 className="h-6 w-6" />
+                        <Trash2 className="h-5 w-5" />
                     </div>
 
                     <DialogTitle className="
-                        text-2xl
+                        text-lg
                         font-black
                         tracking-tight
                     ">
@@ -116,7 +119,7 @@ export function DeleteSessionDialog({
 
                     <DialogDescription className="
                         pt-2
-                        text-base
+                        text-sm
                         leading-relaxed
                         text-muted
                     ">
@@ -142,16 +145,14 @@ export function DeleteSessionDialog({
                 </DialogHeader>
 
                 <DialogFooter className="
-                    mt-6
-                    flex-col-reverse
-                    gap-3
-                    sm:flex-row
+                    mt-3
+                    grid grid-cols-2 gap-2 sm:grid
                 ">
                     <AppButton
                         variant="secondary"
                         onClick={() => onOpenChange(false)}
                         disabled={loading}
-                        className="w-full sm:w-auto"
+                        className="h-11 w-full px-2 text-xs sm:text-sm"
                     >
                         Cancelar
                     </AppButton>
@@ -160,7 +161,7 @@ export function DeleteSessionDialog({
                         variant="danger"
                         loading={loading}
                         onClick={handleDelete}
-                        className="w-full sm:w-auto"
+                        className="h-11 w-full px-2 text-xs sm:text-sm"
                     >
                         Excluir aula
                     </AppButton>

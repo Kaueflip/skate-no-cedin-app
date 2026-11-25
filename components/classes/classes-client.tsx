@@ -2,21 +2,18 @@
 "use client"
 
 import {
-    useMemo,
     useState,
     useEffect,
 } from "react"
 
 import {
     CalendarDays,
+    ChevronDown,
     Sun,
     Sunset,
     Plus,
-    CheckCircle2,
-    XCircle,
     Loader2,
     Trash2,
-    Clock3,
     Users,
     Moon,
 } from "lucide-react"
@@ -99,18 +96,6 @@ const classTimes: Partial<
     },
 }
 
-const CLASS_DURATION_MINUTES = 105
-
-function formatDuration(minutes: number) {
-    const hours = Math.floor(minutes / 60)
-    const remainingMinutes = minutes % 60
-
-    return `${hours}h${remainingMinutes > 0
-        ? ` ${remainingMinutes}min`
-        : ""
-        }`
-}
-
 export function ClassesClient({
     initialSessions,
     initialDate,
@@ -121,6 +106,10 @@ export function ClassesClient({
         useState<ClassSession[]>(initialSessions)
 
     const [loading, setLoading] = useState(false)
+    const [loadError, setLoadError] = useState(false)
+    const [shiftFilter, setShiftFilter] = useState<ClassSession["turno"]>("Manhã")
+    const [monthRevision, setMonthRevision] = useState(0)
+    const monthKey = date.slice(0, 7)
 
     const [saving, setSaving] = useState(false)
 
@@ -196,7 +185,10 @@ export function ClassesClient({
 
     // Carrega os professores vinculados às aulas
     useEffect(() => {
-        if (sessions.length === 0) return
+        if (sessions.length === 0) {
+            setSessionTeachers({})
+            return
+        }
 
         let cancelled = false
 
@@ -234,7 +226,7 @@ export function ClassesClient({
 
         async function fetchMonthlySessions() {
             try {
-                const [year, month] = date.split("-")
+                const [year, month] = monthKey.split("-")
 
                 const startDate = `${year}-${month}-01`
 
@@ -279,52 +271,14 @@ export function ClassesClient({
         return () => {
             cancelled = true
         }
-    }, [date])
-
-    const stats = useMemo(() => {
-        const realized = sessions.filter(
-            (item) => item.status === "realizada"
-        )
-
-        const cancelled = sessions.filter(
-            (item) => item.status === "cancelada"
-        )
-
-        return {
-            realized: realized.length,
-            cancelled: cancelled.length,
-            total: sessions.length,
-            hours: realized.length * CLASS_DURATION_MINUTES,
-        }
-    }, [sessions])
-
-    const monthlyStats = useMemo(() => {
-        const realized = monthlySessions.filter(
-            (item) => item.status === "realizada"
-        )
-
-        const cancelled = monthlySessions.filter(
-            (item) => item.status === "cancelada"
-        )
-
-        const activeDays = new Set(
-            realized.map((item) => item.class_date)
-        )
-
-        return {
-            realized: realized.length,
-            cancelled: cancelled.length,
-            total: monthlySessions.length,
-            activeDays: activeDays.size,
-            hours: realized.length * CLASS_DURATION_MINUTES,
-        }
-    }, [monthlySessions])
+    }, [monthKey, monthRevision])
 
     async function handleDateChange(newDate: string) {
-        if (!newDate) return
+        if (!newDate || loading || saving || deleteDialog.open || teachersDialog.open) return
 
         try {
             setLoading(true)
+            setLoadError(false)
             setDate(newDate)
             setSessions([])
             setSessionTeachers({})
@@ -341,48 +295,15 @@ export function ClassesClient({
             setSessions((data || []) as ClassSession[])
         } catch (error) {
             console.error(error)
+            setLoadError(true)
             toast.error("Erro ao carregar aulas")
         } finally {
             setLoading(false)
         }
     }
 
-    async function loadMonthlySessions(selectedDate: string) {
-        try {
-            const [year, month] = selectedDate.split("-")
-
-            const startDate = `${year}-${month}-01`
-
-            const lastDay = new Date(
-                Number(year),
-                Number(month),
-                0
-            ).getDate()
-
-            const endDate =
-                `${year}-${month}-${String(lastDay).padStart(2, "0")}`
-
-            const { data, error } = await supabase
-                .from("class_sessions")
-                .select("*")
-                .gte("class_date", startDate)
-                .lte("class_date", endDate)
-                .order("class_date", {
-                    ascending: false,
-                })
-
-            if (error) throw error
-
-            setMonthlySessions(
-                (data || []) as ClassSession[]
-            )
-        } catch (error) {
-            console.error(error)
-            toast.error("Erro ao carregar histórico mensal")
-        }
-    }
-
     async function addSession(turno: ClassSession["turno"]) {
+        if (loading || saving || loadError) return
         try {
             setSaving(true)
 
@@ -430,7 +351,8 @@ export function ClassesClient({
 
             toast.success("Aula registrada com sucesso")
 
-            await loadMonthlySessions(date)
+            setMonthlySessions((prev) => [...prev.filter((item) => item.id !== newSession.id), newSession])
+            setMonthRevision((prev) => prev + 1)
         } catch (error) {
             console.error(error)
             toast.error("Erro ao registrar aula")
@@ -440,6 +362,7 @@ export function ClassesClient({
     }
 
     async function toggleStatus(session: ClassSession) {
+        if (loading || saving || loadError) return
         const newStatus =
             session.status === "realizada"
                 ? "cancelada"
@@ -474,7 +397,10 @@ export function ClassesClient({
                     : "Aula marcada como cancelada"
             )
 
-            await loadMonthlySessions(date)
+            setMonthlySessions((prev) => prev.map((item) =>
+                item.id === session.id ? { ...item, status: newStatus } : item
+            ))
+            setMonthRevision((prev) => prev + 1)
         } catch (error) {
             console.error(error)
             toast.error("Erro ao atualizar aula")
@@ -498,6 +424,8 @@ export function ClassesClient({
             return updated
         })
 
+        setMonthRevision((prev) => prev + 1)
+
         setDeleteDialog({
             open: false,
             session: null,
@@ -520,489 +448,133 @@ export function ClassesClient({
         }
     }
 
+    const busy = loading || saving || deleteDialog.open || teachersDialog.open
+
     return (
-        <div className="flex flex-col gap-6">
-
-            {/* Seleção de data */}
-
-            <div className="
-                rounded-[2rem]
-                border
-                border-border
-                bg-card/80
-                p-5
-                shadow-sm
-            ">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-
-                    <div>
-                        <h2 className="text-lg font-bold">
-                            Data das atividades
-                        </h2>
-
-                        <p className="mt-1 text-sm text-muted">
-                            Selecione o dia para consultar ou registrar aulas.
-                        </p>
+        <div className="flex w-full min-w-0 flex-col gap-3 md:gap-5">
+            <section className="min-w-0 rounded-[10px] border border-border bg-card p-3 shadow-sm sm:p-4">
+                <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                        <h2 className="text-base font-bold">Data das atividades</h2>
+                        <p className="mt-0.5 text-xs text-muted">Selecione o dia para registrar ou consultar aulas.</p>
                     </div>
-
-                    <div className="relative">
-                        <CalendarDays className="
-                            absolute
-                            left-3
-                            top-1/2
-                            h-4
-                            w-4
-                            -translate-y-1/2
-                            text-muted
-                        "/>
-
+                    <div className="min-w-0 w-full sm:w-auto">
                         <input
+                            aria-label="Data das atividades"
                             type="date"
                             value={date}
-                            onChange={(event) =>
-                                handleDateChange(event.target.value)
-                            }
-                            className="
-                                h-11
-                                w-full
-                                rounded-xl
-                                border
-                                border-border
-                                bg-background
-                                pl-10
-                                pr-3
-                                text-sm
-                                outline-none
-                                focus:border-primary
-                                sm:w-auto
-                            "
+                            disabled={busy}
+                            onChange={(event) => handleDateChange(event.target.value)}
+                            className="h-11 w-full min-w-0 rounded-lg border border-border bg-background px-3 text-base outline-none focus:border-primary disabled:opacity-50 md:text-sm"
                         />
                     </div>
-
                 </div>
-            </div>
-
-            {/* Indicadores */}
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-
-                <div className="rounded-2xl border border-border bg-card p-5">
-                    <div className="mb-3 text-emerald-500">
-                        <CheckCircle2 className="h-5 w-5" />
-                    </div>
-
-                    <p className="text-sm text-muted">
-                        Aulas realizadas
-                    </p>
-
-                    <p className="mt-1 text-3xl font-black">
-                        {stats.realized}
-                    </p>
+                <div className="mt-3 grid grid-cols-3 gap-2" role="group" aria-label="Turno das aulas">
+                    {shifts.map(({ name, icon: Icon }) => (
+                        <button
+                            key={name}
+                            type="button"
+                            aria-pressed={shiftFilter === name}
+                            disabled={busy}
+                            onClick={() => setShiftFilter(name)}
+                            className={`flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-lg border px-1.5 text-xs font-semibold transition-colors disabled:opacity-50 sm:text-sm ${shiftFilter === name ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background/60 hover:bg-accent"}`}
+                        >
+                            <Icon className="h-3.5 w-3.5 shrink-0" />
+                            {name}
+                        </button>
+                    ))}
                 </div>
+            </section>
 
-                <div className="rounded-2xl border border-border bg-card p-5">
-                    <div className="mb-3 text-red-500">
-                        <XCircle className="h-5 w-5" />
-                    </div>
-
-                    <p className="text-sm text-muted">
-                        Aulas canceladas
-                    </p>
-
-                    <p className="mt-1 text-3xl font-black">
-                        {stats.cancelled}
-                    </p>
+            <section className="min-w-0 rounded-[10px] border border-border bg-card p-3 shadow-sm sm:p-4 lg:p-5">
+                <div className="mb-3">
+                    <h2 className="text-base font-bold md:text-lg">Registro de aulas</h2>
+                    <p className="mt-0.5 text-xs text-muted">Adicione somente as aulas programadas para este dia.</p>
                 </div>
-
-                <div className="rounded-2xl border border-border bg-card p-5">
-                    <div className="mb-3 text-primary">
-                        <CalendarDays className="h-5 w-5" />
-                    </div>
-
-                    <p className="text-sm text-muted">
-                        Total registrado
-                    </p>
-
-                    <p className="mt-1 text-3xl font-black">
-                        {stats.total}
-                    </p>
-                </div>
-
-            </div>
-
-            {/* Indicadores mensais */}
-
-            <div>
-                <div className="mb-4">
-                    <h2 className="text-lg font-bold">
-                        Resumo mensal
-                    </h2>
-
-                    <p className="mt-1 text-sm text-muted">
-                        Acompanhamento das atividades no mês selecionado.
-                    </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-
-                    <div className="rounded-2xl border border-border bg-card p-4">
-                        <div className="mb-3 text-emerald-500">
-                            <CheckCircle2 className="h-5 w-5" />
-                        </div>
-
-                        <p className="text-sm text-muted">
-                            Aulas realizadas
-                        </p>
-
-                        <p className="mt-1 text-2xl font-black">
-                            {monthlyStats.realized}
-                        </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-border bg-card p-4">
-                        <div className="mb-3 text-red-500">
-                            <XCircle className="h-5 w-5" />
-                        </div>
-
-                        <p className="text-sm text-muted">
-                            Aulas canceladas
-                        </p>
-
-                        <p className="mt-1 text-2xl font-black">
-                            {monthlyStats.cancelled}
-                        </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-border bg-card p-4">
-                        <div className="mb-3 text-primary">
-                            <CalendarDays className="h-5 w-5" />
-                        </div>
-
-                        <p className="text-sm text-muted">
-                            Total registrado
-                        </p>
-
-                        <p className="mt-1 text-2xl font-black">
-                            {monthlyStats.total}
-                        </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-border bg-card p-4">
-                        <div className="mb-3 text-primary">
-                            <Sun className="h-5 w-5" />
-                        </div>
-
-                        <p className="text-sm text-muted">
-                            Dias com atividades
-                        </p>
-
-                        <p className="mt-1 text-2xl font-black">
-                            {monthlyStats.activeDays}
-                        </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-border bg-card p-4">
-                        <div className="mb-3 text-primary">
-                            <Clock3 className="h-5 w-5" />
-                        </div>
-
-                        <p className="text-sm text-muted">
-                            Carga horária
-                        </p>
-
-                        <p className="mt-1 text-2xl font-black">
-                            {formatDuration(monthlyStats.hours)}
-                        </p>
-                    </div>
-
-                </div>
-            </div>
-
-            <MonthlyCalendar
-                date={date}
-                sessions={monthlySessions}
-                onMonthChange={handleDateChange}
-                onDaySelect={handleDateChange}
-            />
-
-            {/* Turnos */}
-
-            <div className="
-                rounded-[2rem]
-                border
-                border-border
-                bg-card/80
-                p-5
-                shadow-sm
-            ">
-
-                <div className="mb-6">
-                    <h2 className="text-xl font-black tracking-tight">
-                        Registro de aulas
-                    </h2>
-
-                    <p className="mt-1 text-sm text-muted">
-                        Adicione somente as aulas programadas para este dia.
-                    </p>
-                </div>
-
                 {loading ? (
-
-                    <div className="flex items-center justify-center gap-2 py-16 text-muted">
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                        Carregando aulas...
+                    <div role="status" className="flex items-center justify-center gap-2 py-10 text-sm text-muted">
+                        <Loader2 className="h-4 w-4 animate-spin" /> Carregando aulas...
                     </div>
-
+                ) : loadError ? (
+                    <div className="rounded-lg border border-dashed border-border p-4 text-center">
+                        <p className="text-sm text-muted">Não foi possível carregar as aulas desta data.</p>
+                        <AppButton variant="secondary" onClick={() => handleDateChange(date)} className="mt-3 h-11 text-xs">Tentar novamente</AppButton>
+                    </div>
                 ) : (
-
-                    <div className="flex flex-col gap-6">
-
-                        {shifts.map((shift) => {
-                            const Icon = shift.icon
-
-                            const shiftSessions = sessions
-                                .filter((item) => item.turno === shift.name)
-                                .sort((a, b) => a.aula_numero - b.aula_numero)
-
-                            return (
-                                <div
-                                    key={shift.name}
-                                    className="rounded-2xl border border-border bg-background/50 p-4"
-                                >
-
-                                    <div className="mb-4 flex items-center justify-between">
-
-                                        <div className="flex items-center gap-3">
-
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                                <Icon className="h-5 w-5" />
-                                            </div>
-
-                                            <div>
-                                                <h3 className="font-bold">
-                                                    {shift.name}
-                                                </h3>
-
-                                                <p className="text-xs text-muted">
-                                                    {shiftSessions.length}{" "}
-                                                    {shiftSessions.length === 1
-                                                        ? "aula registrada"
-                                                        : "aulas registradas"}
-                                                </p>
-                                            </div>
-
+                    shifts.filter((shift) => shift.name === shiftFilter).map((shift) => {
+                        const Icon = shift.icon
+                        const shiftSessions = sessions.filter((item) => item.turno === shift.name).sort((a, b) => a.aula_numero - b.aula_numero)
+                        return (
+                            <div key={shift.name} className="min-w-0 space-y-3">
+                                <div className="flex min-w-0 items-center justify-between gap-2">
+                                    <div className="flex min-w-0 items-center gap-2">
+                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                            <Icon className="h-4 w-4" />
                                         </div>
-
-                                        <AppButton
-                                            variant="secondary"
-                                            onClick={() => addSession(shift.name)}
-                                            disabled={saving || shiftSessions.length >= 2}
-                                        >
-                                            <Plus className="mr-1 h-4 w-4" />
-                                            Adicionar
-                                        </AppButton>
-
+                                        <div className="min-w-0">
+                                            <h3 className="text-sm font-bold">{shift.name}</h3>
+                                            <p className="text-[11px] text-muted">{shiftSessions.length} {shiftSessions.length === 1 ? "aula registrada" : "aulas registradas"}</p>
+                                        </div>
                                     </div>
-
-                                    {shiftSessions.length > 0 ? (
-
-                                        <div className="flex flex-col gap-3">
-
-                                            {shiftSessions.map((session) => {
-                                                const assignedTeachers =
-                                                    sessionTeachers[session.id] || []
-
-                                                return (
-                                                    <div
-                                                        key={session.id}
-                                                        className="
-                                                            rounded-xl
-                                                            border
-                                                            border-border
-                                                            bg-card
-                                                            p-4
-                                                        "
-                                                    >
-
-                                                        <div className="
-                                                            flex
-                                                            flex-wrap
-                                                            items-center
-                                                            justify-between
-                                                            gap-3
-                                                        ">
-
-                                                            <div>
-                                                                <p className="font-semibold">
-                                                                    {session.aula_numero}ª aula
-                                                                </p>
-
-                                                                <p className="text-xs font-medium text-primary">
-                                                                    {classTimes[session.turno]?.[
-                                                                        session.aula_numero as 1 | 2
-                                                                    ] || "Horário não definido"}
-                                                                </p>
-
-                                                                <p className="text-xs text-muted">
-                                                                    {session.status === "realizada"
-                                                                        ? "Atividade registrada"
-                                                                        : "Aula cancelada"}
-                                                                </p>
-                                                            </div>
-
-                                                            <div className="flex items-center gap-2">
-
-                                                                <button
-                                                                    type="button"
-                                                                    disabled={saving}
-                                                                    onClick={() => toggleStatus(session)}
-                                                                    className={`
-                                                                        rounded-full
-                                                                        px-3
-                                                                        py-2
-                                                                        text-xs
-                                                                        font-bold
-                                                                        transition
-                                                                        disabled:opacity-50
-                                                                        ${session.status === "realizada"
-                                                                            ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
-                                                                            : "bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                                                                        }
-                                                                    `}
-                                                                >
-                                                                    {session.status === "realizada"
-                                                                        ? "Realizada"
-                                                                        : "Cancelada"}
-                                                                </button>
-
-                                                                <button
-                                                                    type="button"
-                                                                    disabled={saving}
-                                                                    onClick={() =>
-                                                                        setDeleteDialog({
-                                                                            open: true,
-                                                                            session,
-                                                                        })
-                                                                    }
-                                                                    title="Excluir aula"
-                                                                    aria-label="Excluir aula"
-                                                                    className="
-                                                                        flex
-                                                                        h-9
-                                                                        w-9
-                                                                        items-center
-                                                                        justify-center
-                                                                        rounded-xl
-                                                                        text-muted
-                                                                        transition
-                                                                        hover:bg-red-500/10
-                                                                        hover:text-red-500
-                                                                        disabled:opacity-50
-                                                                    "
-                                                                >
-                                                                    <Trash2 className="h-4 w-4" />
-                                                                </button>
-
-                                                            </div>
-
-                                                        </div>
-
-                                                        <div className="
-                                                            mt-4
-                                                            flex
-                                                            flex-wrap
-                                                            items-center
-                                                            justify-between
-                                                            gap-3
-                                                            border-t
-                                                            border-border
-                                                            pt-3
-                                                        ">
-
-                                                            <div className="flex min-w-0 flex-1 items-center gap-2">
-
-                                                                <Users className="h-4 w-4 shrink-0 text-muted" />
-
-                                                                {assignedTeachers.length > 0 ? (
-
-                                                                    <div className="flex flex-wrap gap-2">
-
-                                                                        {assignedTeachers.map((teacher) => (
-                                                                            <span
-                                                                                key={teacher.id}
-                                                                                className="
-                                                                                    rounded-lg
-                                                                                    bg-primary/10
-                                                                                    px-2
-                                                                                    py-1
-                                                                                    text-xs
-                                                                                    font-medium
-                                                                                    text-primary
-                                                                                "
-                                                                            >
-                                                                                {teacher.nome}
-                                                                            </span>
-                                                                        ))}
-
-                                                                    </div>
-
-                                                                ) : (
-
-                                                                    <span className="text-xs text-muted">
-                                                                        Nenhum professor vinculado
-                                                                    </span>
-
-                                                                )}
-
-                                                            </div>
-
-                                                            <AppButton
-                                                                variant="secondary"
-                                                                onClick={() =>
-                                                                    setTeachersDialog({
-                                                                        open: true,
-                                                                        sessionId: session.id,
-                                                                    })
-                                                                }
-                                                            >
-                                                                <Users className="mr-2 h-4 w-4" />
-                                                                Professores
-                                                            </AppButton>
-
-                                                        </div>
-
-                                                    </div>
-                                                )
-                                            })}
-
-                                        </div>
-
-                                    ) : (
-
-                                        <div className="
-                                            rounded-xl
-                                            border
-                                            border-dashed
-                                            border-border
-                                            p-5
-                                            text-center
-                                        ">
-                                            <p className="text-sm text-muted">
-                                                Nenhuma aula registrada neste turno.
-                                            </p>
-                                        </div>
-
-                                    )}
-
+                                    <AppButton variant="secondary" onClick={() => addSession(shift.name)} disabled={busy || shiftSessions.length >= 2} className="h-11 shrink-0 gap-1.5 px-3 text-xs sm:text-sm">
+                                        <Plus className="h-4 w-4" /> Adicionar
+                                    </AppButton>
                                 </div>
-                            )
-                        })}
-
-                    </div>
-
+                                {shiftSessions.length === 0 ? (
+                                    <div className="rounded-lg border border-dashed border-border px-3 py-6 text-center text-xs text-muted">Nenhuma aula registrada neste turno.</div>
+                                ) : (
+                                    <div className="grid min-w-0 gap-2 xl:grid-cols-2">
+                                        {shiftSessions.map((session) => {
+                                            const assignedTeachers = sessionTeachers[session.id] || []
+                                            const realized = session.status === "realizada"
+                                            return (
+                                                <article key={session.id} className="min-w-0 space-y-3 rounded-lg border border-border bg-background/60 p-3">
+                                                    <div className="flex min-w-0 items-start justify-between gap-2">
+                                                        <div className="min-w-0">
+                                                            <p className="text-sm font-semibold">{session.aula_numero}ª aula</p>
+                                                            <p className="mt-1 text-xs font-medium text-primary">{classTimes[session.turno]?.[session.aula_numero as 1 | 2] || "Horário não definido"}</p>
+                                                        </div>
+                                                        <div className="flex shrink-0 items-center gap-1.5">
+                                                            <span className={`rounded-md px-2 py-1 text-[10px] font-semibold ${realized ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-red-500/10 text-red-500"}`}>{realized ? "Realizada" : "Cancelada"}</span>
+                                                            <button type="button" disabled={busy} onClick={() => setDeleteDialog({open: true, session})} aria-label="Excluir aula" title="Excluir aula" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-red-500/10 hover:text-red-500 disabled:opacity-50">
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <button type="button" aria-pressed={realized} disabled={busy || realized} onClick={() => toggleStatus(session)} className={`min-h-11 rounded-lg border px-2 text-xs font-semibold ${realized ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "border-border hover:bg-accent"}`}>Realizada</button>
+                                                        <button type="button" aria-pressed={!realized} disabled={busy || !realized} onClick={() => toggleStatus(session)} className={`min-h-11 rounded-lg border px-2 text-xs font-semibold ${!realized ? "border-red-500/30 bg-red-500/10 text-red-500" : "border-border hover:bg-accent"}`}>Cancelada</button>
+                                                    </div>
+                                                    <div className="space-y-2 border-t border-border pt-3">
+                                                        <p className="flex items-center gap-1.5 text-xs font-medium text-muted"><Users className="h-4 w-4 shrink-0" /> Professores responsáveis</p>
+                                                        {assignedTeachers.length > 0 ? (
+                                                            <div className="flex min-w-0 flex-wrap gap-1.5">
+                                                                {assignedTeachers.map((teacher) => <span key={teacher.id} className="max-w-full rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary [overflow-wrap:anywhere]">{teacher.nome}</span>)}
+                                                            </div>
+                                                        ) : <p className="text-xs text-muted">Nenhum professor vinculado</p>}
+                                                        <AppButton variant="secondary" disabled={busy} onClick={() => setTeachersDialog({open: true, sessionId: session.id})} className="h-11 w-full gap-1.5 px-3 text-xs sm:w-auto sm:text-sm"><Users className="h-4 w-4" /> Professores</AppButton>
+                                                    </div>
+                                                    {session.observacoes?.trim() && <p className="border-t border-border pt-2 text-xs text-muted whitespace-pre-wrap [overflow-wrap:anywhere]">{session.observacoes}</p>}
+                                                </article>
+                                            )
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    })
                 )}
+            </section>
 
-            </div>
+            <details className="group min-w-0 rounded-[10px] border border-border bg-card shadow-sm">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3 py-3 text-sm font-semibold [&::-webkit-details-marker]:hidden">
+                    <CalendarDays className="h-4 w-4 shrink-0 text-primary" /> Calendário de atividades
+                    <ChevronDown className="ml-auto h-4 w-4 shrink-0 text-muted transition-transform group-open:rotate-180" />
+                </summary>
+                <div className="min-w-0 border-t border-border p-2 sm:p-3">
+                    <MonthlyCalendar date={date} sessions={monthlySessions} onMonthChange={handleDateChange} onDaySelect={handleDateChange} disabled={busy} />
+                </div>
+            </details>
 
             {deleteDialog.session && (
                 <DeleteSessionDialog
@@ -1020,8 +592,9 @@ export function ClassesClient({
                 />
             )}
 
-            {teachersDialog.sessionId && (
+            {teachersDialog.sessionId && teachersDialog.open && (
                 <SessionTeachersDialog
+                    key={teachersDialog.sessionId}
                     sessionId={teachersDialog.sessionId}
                     open={teachersDialog.open}
                     onOpenChange={(open) =>
