@@ -8,6 +8,10 @@ import {
 
 import { createClient } from "@/lib/supabase-server"
 
+import {
+    attachStudentPrimaryPhotos,
+} from "@/services/student-photo-service"
+
 import { PageShell } from "@/components/layout/page-shell"
 import { PageHeader } from "@/components/layout/page-header"
 import { StatCard } from "@/components/dashboard/stat-card"
@@ -33,6 +37,8 @@ export default async function DashboardPage() {
 
     // DATA ATUAL - FUSO DE BRASÍLIA
 
+    const now = new Date()
+
     const dateParts = new Intl.DateTimeFormat(
         "en-US",
         {
@@ -41,24 +47,18 @@ export default async function DashboardPage() {
             month: "2-digit",
             day: "2-digit",
         }
-    ).formatToParts(new Date())
+    ).formatToParts(now)
 
     const currentYear = Number(
-        dateParts.find(
-            (part) => part.type === "year"
-        )?.value
+        dateParts.find((part) => part.type === "year")?.value
     )
 
     const currentMonth = Number(
-        dateParts.find(
-            (part) => part.type === "month"
-        )?.value
+        dateParts.find((part) => part.type === "month")?.value
     )
 
     const currentDay = Number(
-        dateParts.find(
-            (part) => part.type === "day"
-        )?.value
+        dateParts.find((part) => part.type === "day")?.value
     )
 
     const currentMonthName = new Intl.DateTimeFormat(
@@ -67,24 +67,12 @@ export default async function DashboardPage() {
             month: "long",
             timeZone: "America/Sao_Paulo",
         }
-    ).format(new Date())
-
-    // TOTAL DE ALUNOS ATIVOS
-
-    const {
-        count: studentsCount,
-    } = await supabase
-        .from("students")
-        .select("*", {
-            count: "exact",
-            head: true,
-        })
-        .eq("ativo", true)
-
+    ).format(now)
 
     // PERÍODO DO MÊS ATUAL
 
-    const monthStart = `${currentYear}-${String(currentMonth).padStart(2, "0")}-01`
+    const monthStart =
+        `${currentYear}-${String(currentMonth).padStart(2, "0")}-01`
 
     const nextMonthDate = new Date(
         Date.UTC(currentYear, currentMonth, 1)
@@ -96,91 +84,85 @@ export default async function DashboardPage() {
         "01",
     ].join("-")
 
-    // TOTAL DE PRESENÇAS NO MÊS
+    // CONSULTAS EM PARALELO
 
-    const {
-        count: attendanceCount,
-    } = await supabase
-        .from("attendance")
-        .select("*", {
-            count: "exact",
-            head: true,
-        })
-        .eq("present", true)
-        .gte("class_date", monthStart)
-        .lt("class_date", nextMonthStart)
+    const [
+        { count: studentsCount },
+        { count: attendanceCount },
+        { count: absencesCount },
+        { count: classesCount },
+        { data: students },
+        { data: birthdayStudents },
+    ] = await Promise.all([
 
-    // TOTAL DE FALTAS NO MÊS
+        supabase
+            .from("students")
+            .select("*", {
+                count: "exact",
+                head: true,
+            })
+            .eq("ativo", true),
 
-    const {
-        count: absencesCount,
-    } = await supabase
-        .from("attendance")
-        .select("*", {
-            count: "exact",
-            head: true,
-        })
-        .eq("present", false)
-        .gte("class_date", monthStart)
-        .lt("class_date", nextMonthStart)
+        supabase
+            .from("attendance")
+            .select("*", {
+                count: "exact",
+                head: true,
+            })
+            .eq("present", true)
+            .gte("class_date", monthStart)
+            .lt("class_date", nextMonthStart),
 
-    // AULAS REALIZADAS NO MÊS
+        supabase
+            .from("attendance")
+            .select("*", {
+                count: "exact",
+                head: true,
+            })
+            .eq("present", false)
+            .gte("class_date", monthStart)
+            .lt("class_date", nextMonthStart),
 
-    const {
-        count: classesCount,
-    } = await supabase
-        .from("class_sessions")
-        .select("*", {
-            count: "exact",
-            head: true,
-        })
-        .eq("status", "realizada")
-        .gte("class_date", monthStart)
-        .lt("class_date", nextMonthStart)
+        supabase
+            .from("class_sessions")
+            .select("*", {
+                count: "exact",
+                head: true,
+            })
+            .eq("status", "realizada")
+            .gte("class_date", monthStart)
+            .lt("class_date", nextMonthStart),
 
+        supabase
+            .from("students")
+            .select("id, nome, turma, turno, nivel")
+            .order("created_at", {
+                ascending: false,
+            })
+            .limit(5),
 
+        supabase
+            .from("students")
+            .select(`
+                id,
+                nome,
+                turma,
+                data_nascimento
+            `)
+            .eq("ativo", true)
+            .not("data_nascimento", "is", null),
 
-    // ÚLTIMOS ALUNOS
-
-    const {
-        data: students,
-    } = await supabase
-        .from("students")
-        .select("*")
-        .limit(5)
-        .order("created_at", {
-            ascending: false,
-        })
+    ])
 
     // ANIVERSARIANTES
-
-    const {
-        data: birthdayStudents,
-    } = await supabase
-        .from("students")
-        .select(`
-            id,
-            nome,
-            turma,
-            data_nascimento,
-            foto_url
-        `)
-        .eq("ativo", true)
-        .not("data_nascimento", "is", null)
-
-    // REMOVE DATAS DE NASCIMENTO NULAS
 
     const validBirthdayStudents = (
         birthdayStudents || []
     ).filter(
-        (
-            student
-        ): student is typeof student & {
+        (student): student is typeof student & {
             data_nascimento: string
         } => student.data_nascimento !== null
     )
-
-    // ANIVERSARIANTES DO MÊS
 
     const birthdays = validBirthdayStudents
         .filter((student) => {
@@ -205,19 +187,18 @@ export default async function DashboardPage() {
 
         })
 
-    // ANIVERSARIANTES DE HOJE
-
     const todayBirthdays = birthdays.filter(
-        (student) => {
-
-            const day = Number(
+        (student) =>
+            Number(
                 student.data_nascimento.split("-")[2]
-            )
-
-            return day === currentDay
-
-        }
+            ) === currentDay
     )
+
+    const todayBirthdaysWithPhotos =
+        await attachStudentPrimaryPhotos(
+            supabase,
+            todayBirthdays
+        )
 
     return (
 
@@ -225,164 +206,244 @@ export default async function DashboardPage() {
 
             <PageHeader
                 title="Dashboard"
-                description="
-                    Visão geral do projeto
-                    Skate no Cedin
-                "
+                description="Visão geral do projeto Skate no Cedin"
             />
 
-            {/* INDICADORES */}
-
-            <section className="
-                grid
-                gap-5
-                md:grid-cols-2
-                xl:grid-cols-4
+            <div className="
+                flex
+                w-full
+                min-w-0
+                flex-col
+                gap-4
+                md:gap-6
             ">
 
-                <StatCard
-                    title="Alunos ativos"
-                    value={studentsCount || 0}
-                    icon={
-                        <Users className="h-5 w-5" />
-                    }
-                />
+                {/* INDICADORES */}
 
-                <StatCard
-                    title="Presenças"
-                    value={attendanceCount || 0}
-                    description="registros realizados"
-                    icon={
-                        <ClipboardCheck className="h-5 w-5" />
-                    }
-                />
+                <section className="
+                    grid
+                    w-full
+                    min-w-0
+                    grid-cols-1
+                    gap-3
 
-                <StatCard
-                    title="Aulas realizadas"
-                    value={classesCount || 0}
-                    description="neste mês"
-                    icon={
-                        <CalendarDays className="h-5 w-5" />
-                    }
-                />
+                    min-[380px]:grid-cols-2
 
-                <StatCard
-                    title="Faltas"
-                    value={absencesCount || 0}
-                    description="registros de ausência"
-                    icon={
-                        <UserX className="h-5 w-5" />
-                    }
-                />
-
-            </section>
-
-            {/* ANIVERSARIANTES */}
-
-            <section className="
-                mt-8
-                grid
-                gap-5
-                lg:grid-cols-2
-            ">
-
-                <BirthdaysToday
-                    students={todayBirthdays}
-                    currentYear={currentYear}
-                />
-
-                <BirthdaysMonth
-                    students={birthdays}
-                    currentYear={currentYear}
-                    currentMonth={currentMonth}
-                    currentDay={currentDay}
-                    monthName={currentMonthName}
-                />
-
-            </section>
-
-            {/* ÚLTIMOS ALUNOS */}
-
-            <GlassCard className="
-                mt-8
-                overflow-hidden
-                p-0
-            ">
-
-                <div className="
-                    border-b
-                    border-border
-                    p-6
+                    xl:grid-cols-4
+                    xl:gap-4
                 ">
 
-                    <h2 className="
-                        text-xl
-                        font-bold
-                        text-foreground
+                    <StatCard
+                        title="Alunos ativos"
+                        value={studentsCount || 0}
+                        icon={<Users className="h-4 w-4 md:h-5 md:w-5" />}
+                    />
+
+                    <StatCard
+                        title="Presenças"
+                        value={attendanceCount || 0}
+                        description="Neste mês"
+                        icon={<ClipboardCheck className="h-4 w-4 md:h-5 md:w-5" />}
+                    />
+
+                    <StatCard
+                        title="Aulas realizadas"
+                        value={classesCount || 0}
+                        description="Neste mês"
+                        icon={<CalendarDays className="h-4 w-4 md:h-5 md:w-5" />}
+                    />
+
+                    <StatCard
+                        title="Faltas"
+                        value={absencesCount || 0}
+                        description="Neste mês"
+                        icon={<UserX className="h-4 w-4 md:h-5 md:w-5" />}
+                    />
+
+                </section>
+
+                {/* ANIVERSARIANTES */}
+
+                <section className="
+                    grid
+                    w-full
+                    min-w-0
+                    grid-cols-1
+                    items-start
+                    gap-3
+
+                    lg:grid-cols-2
+                    lg:gap-4
+                ">
+
+                    <BirthdaysToday
+                        students={todayBirthdaysWithPhotos}
+                        currentYear={currentYear}
+                    />
+
+                    <BirthdaysMonth
+                        students={birthdays}
+                        currentYear={currentYear}
+                        currentMonth={currentMonth}
+                        currentDay={currentDay}
+                        monthName={currentMonthName}
+                    />
+
+                </section>
+
+                {/* ÚLTIMOS ALUNOS */}
+
+                <GlassCard className="
+                    w-full
+                    min-w-0
+                    overflow-hidden
+                    rounded-[10px]
+                    p-0
+                ">
+
+                    <div className="
+                        border-b
+                        border-border
+                        p-3
+                        md:p-5
                     ">
-                        Últimos alunos
-                    </h2>
 
-                    <p className="
-                        mt-1
-                        text-sm
-                        text-muted
-                    ">
-                        Alunos cadastrados recentemente
-                    </p>
+                        <h2 className="
+                            text-base
+                            font-bold
+                            text-foreground
+                            md:text-lg
+                        ">
+                            Últimos alunos
+                        </h2>
 
-                </div>
+                        <p className="mt-1 text-xs text-muted md:text-sm">
+                            Alunos cadastrados recentemente
+                        </p>
 
-                <Table>
+                    </div>
 
-                    <TableHeader>
+                    {/* LISTAGEM MOBILE */}
 
-                        <TableRow>
-
-                            <TableHead>Nome</TableHead>
-                            <TableHead>Turma</TableHead>
-                            <TableHead>Turno</TableHead>
-                            <TableHead>Nível</TableHead>
-
-                        </TableRow>
-
-                    </TableHeader>
-
-                    <TableBody>
+                    <div className="divide-y divide-border md:hidden">
 
                         {students?.map((student) => (
 
-                            <TableRow key={student.id}>
+                            <div
+                                key={student.id}
+                                className="
+                                    flex
+                                    min-w-0
+                                    items-start
+                                    gap-3
+                                    p-3
+                                "
+                            >
 
-                                <TableCell className="font-medium">
-                                    {student.nome}
-                                </TableCell>
+                                <div className="min-w-0 flex-1">
 
-                                <TableCell>
-                                    {student.turma}
-                                </TableCell>
+                                    <p className="
+                                        break-words
+                                        text-sm
+                                        font-semibold
+                                        text-foreground
+                                    ">
+                                        {student.nome}
+                                    </p>
 
-                                <TableCell>
-                                    {student.turno}
-                                </TableCell>
+                                    <p className="
+                                        mt-1
+                                        break-words
+                                        text-xs
+                                        leading-relaxed
+                                        text-muted
+                                    ">
+                                        {student.turma}
+                                    </p>
 
-                                <TableCell>
+                                    <p className="mt-1 text-xs text-muted">
+                                        {student.turno}
+                                    </p>
 
-                                    <Badge variant="secondary">
-                                        {student.nivel}
-                                    </Badge>
+                                </div>
 
-                                </TableCell>
+                                <Badge
+                                    variant="secondary"
+                                    className="shrink-0 rounded-md text-[10px]"
+                                >
+                                    {student.nivel}
+                                </Badge>
 
-                            </TableRow>
+                            </div>
 
                         ))}
 
-                    </TableBody>
+                    </div>
 
-                </Table>
+                    {/* TABELA DESKTOP */}
 
-            </GlassCard>
+                    <div className="
+                        hidden
+                        w-full
+                        min-w-0
+                        overflow-x-auto
+                        md:block
+                    ">
+
+                        <Table>
+
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Nome</TableHead>
+                                    <TableHead>Turma</TableHead>
+                                    <TableHead>Turno</TableHead>
+                                    <TableHead>Nível</TableHead>
+                                </TableRow>
+                            </TableHeader>
+
+                            <TableBody>
+
+                                {students?.map((student) => (
+
+                                    <TableRow key={student.id}>
+
+                                        <TableCell className="font-medium">
+                                            {student.nome}
+                                        </TableCell>
+
+                                        <TableCell>
+                                            {student.turma}
+                                        </TableCell>
+
+                                        <TableCell>
+                                            {student.turno}
+                                        </TableCell>
+
+                                        <TableCell>
+                                            <Badge variant="secondary">
+                                                {student.nivel}
+                                            </Badge>
+                                        </TableCell>
+
+                                    </TableRow>
+
+                                ))}
+
+                            </TableBody>
+
+                        </Table>
+
+                    </div>
+
+                    {!students?.length && (
+                        <div className="p-6 text-center text-sm text-muted">
+                            Nenhum aluno cadastrado.
+                        </div>
+                    )}
+
+                </GlassCard>
+
+            </div>
 
         </PageShell>
     )

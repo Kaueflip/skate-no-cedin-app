@@ -1,18 +1,12 @@
-import Image
-    from "next/image"
 
-import type {
-    ReactNode,
-} from "react"
+import Image from "next/image"
 
-import {
-    AppNavbar,
-} from "@/components/navigation/app-navbar"
+import type { ReactNode } from "react"
+
+import { AppNavbar } from "@/components/navigation/app-navbar"
 
 type Props = {
-
-    children:
-    ReactNode
+    children: ReactNode
 }
 
 export function AuthShell({
@@ -20,8 +14,7 @@ export function AuthShell({
 }: Props) {
 
     return (
-
-        <>
+        <div className="flex min-h-dvh flex-col bg-background">
 
             <AppNavbar
                 showLinks={false}
@@ -29,117 +22,101 @@ export function AuthShell({
             />
 
             <main className="
-        relative
-
-        flex
-        min-h-screen
-
-        overflow-hidden
-
-        bg-background
-      ">
-
-                <div className="
-          absolute
-          inset-0
-
-          bg-background
-        " />
-
-                <div className="
-          absolute
-
-          left-1/2
-          top-0
-
-          h-[600px]
-          w-[600px]
-
-          -translate-x-1/2
-
-          rounded-full
-
-          bg-primary/10
-
-          blur-3xl
-        " />
-
-                <section className="
-          relative
-
-          hidden
-          flex-1
-          flex-col
-          justify-between
-
-          px-10
-          pb-10
-          pt-24
-
-          lg:flex
-        ">
-
-                    <div className="
-            max-w-lg
-          ">
-
-                        <div className="
-              inline-flex
-              items-center
-
-              rounded-full
-
-              border
-              border-border
-
-              bg-card/80
-
-              px-4
-              py-2
-
-              text-[15px]
-
-              backdrop-blur
+                relative
+                flex
+                min-w-0
+                flex-1
+                flex-col
+                bg-background
+                lg:flex-row
             ">
 
-                            Projeto Social • Skate • Educação
+                {/* EFEITO DE FUNDO */}
 
+                <div
+                    aria-hidden="true"
+                    className="
+                        pointer-events-none
+                        absolute
+                        inset-0
+                        overflow-hidden
+                    "
+                >
+                    <div className="
+                        absolute
+                        left-1/2
+                        top-0
+                        h-48
+                        w-48
+                        -translate-x-1/2
+                        rounded-full
+                        bg-primary/5
+                        blur-3xl
+                        lg:h-[600px]
+                        lg:w-[600px]
+                        lg:bg-primary/10
+                    " />
+                </div>
+
+                {/* APRESENTAÇÃO DESKTOP */}
+
+                <section className="
+                    relative
+                    hidden
+                    min-w-0
+                    flex-1
+                    flex-col
+                    justify-between
+                    px-10
+                    py-8
+                    lg:flex
+                    xl:px-16
+                ">
+
+                    <div className="max-w-xl">
+
+                        <div className="
+                            inline-flex
+                            items-center
+                            rounded-lg
+                            border
+                            border-border
+                            bg-card/80
+                            px-3
+                            py-2
+                            text-xs
+                            font-medium
+                        ">
+                            Projeto Social • Skate • Educação
                         </div>
 
                         <h1 className="
-              mt-8
-
-              text-5xl
-              font-black
-              leading-tight
-              tracking-tight
-            ">
-
+                            mt-6
+                            text-4xl
+                            font-black
+                            leading-tight
+                            tracking-tight
+                            text-foreground
+                            xl:text-5xl
+                        ">
                             Gestão moderna para projetos que transformam vidas.
-
                         </h1>
 
                         <p className="
-              mt-6
-
-              text-lg
-              leading-relaxed
-
-              text-muted
-            ">
-
+                            mt-4
+                            max-w-md
+                            text-base
+                            leading-relaxed
+                            text-muted
+                            xl:text-lg
+                        ">
                             Plataforma completa para controle de alunos,
                             presença, evolução e métricas do projeto.
-
                         </p>
 
                     </div>
 
-                    <div className="
-            flex
-            items-center
-            gap-3
-          ">
+                    <div className="flex items-center gap-3">
 
                         <Image
                             unoptimized
@@ -147,12 +124,7 @@ export function AuthShell({
                             alt="Skate no Cedin"
                             width={48}
                             height={48}
-                            className="
-                h-10
-                w-auto
-
-                dark:hidden
-              "
+                            className="h-10 w-auto dark:hidden"
                         />
 
                         <Image
@@ -161,69 +133,42 @@ export function AuthShell({
                             alt="Skate no Cedin"
                             width={48}
                             height={48}
-                            className="
-                hidden
-
-                h-10
-                w-auto
-
-                dark:block
-              "
+                            className="hidden h-10 w-auto dark:block"
                         />
-
-                        {/*           <div>
-
-                            <p className="
-                text-sm
-                font-semibold
-              ">
-
-                                Skate no Cedin
-
-                            </p>
-
-                            <p className="
-                text-xs
-
-                text-muted
-              ">
-
-                                Plataforma de Gestão
-
-                            </p>
-
-                        </div> */}
 
                     </div>
 
                 </section>
 
+                {/* FORMULÁRIO */}
+
                 <section className="
-          relative
-
-          flex
-          flex-1
-          items-center
-          justify-center
-
-          px-6
-          pb-12
-          pt-24
-        ">
+                    relative
+                    flex
+                    min-w-0
+                    flex-1
+                    flex-col
+                    items-center
+                    justify-center
+                    px-3
+                    py-4
+                    sm:px-6
+                    lg:px-10
+                    lg:py-8
+                ">
 
                     <div className="
-            w-full
-            max-w-lg
-          ">
-
+                        w-full
+                        min-w-0
+                        max-w-md
+                    ">
                         {children}
-
                     </div>
 
                 </section>
 
             </main>
 
-        </>
+        </div>
     )
 }

@@ -1,5 +1,4 @@
 
-import Image from "next/image"
 import Link from "next/link"
 
 import { Cake } from "lucide-react"
@@ -7,14 +6,16 @@ import { Cake } from "lucide-react"
 import { GlassCard } from "@/components/ui/glass-card"
 import { Badge } from "@/components/ui/badge"
 
-import { calculateAge } from "@/lib/calculate-age"
+import {
+    StudentAvatar,
+} from "@/components/students/student-avatar"
 
 type BirthdayStudent = {
     id: string
     nome: string
     turma: string
     data_nascimento: string
-    foto_url: string | null
+    foto_principal_url?: string | null
 }
 
 type Props = {
@@ -28,136 +29,157 @@ export function BirthdaysToday({
 }: Props) {
 
     return (
-        <GlassCard className="p-6">
+
+        <GlassCard className="
+            w-full
+            min-w-0
+            rounded-[10px]
+            p-3
+            md:p-5
+        ">
+
+            {/* CABEÇALHO */}
 
             <div className="
-                mb-5
+                mb-4
                 flex
-                items-center
+                min-w-0
+                items-start
                 justify-between
+                gap-2
             ">
 
-                <div>
-                    <h2 className="text-xl font-bold">
+                <div className="min-w-0 flex-1">
+
+                    <h2 className="
+                        text-base
+                        font-bold
+                        leading-tight
+                        md:text-lg
+                    ">
                         Aniversariantes de hoje
                     </h2>
 
-                    <p className="mt-1 text-sm text-muted">
+                    <p className="
+                        mt-1
+                        text-xs
+                        leading-relaxed
+                        text-muted
+                        md:text-sm
+                    ">
                         Alunos que fazem aniversário hoje
                     </p>
+
                 </div>
 
                 <div className="
-                    rounded-2xl
+                    flex
+                    h-9
+                    w-9
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-lg
                     bg-primary/10
-                    p-3
                     text-primary
                 ">
-                    <Cake className="h-6 w-6" />
+
+                    <Cake className="h-5 w-5" />
+
                 </div>
 
             </div>
 
+            {/* ANIVERSARIANTES */}
+
             {students.length > 0 ? (
 
-                <div className="space-y-3">
+                <div className="min-w-0 space-y-2">
 
                     {students.map((student) => {
 
-                        const age = calculateAge(
-                            student.data_nascimento
+                        const birthYear = Number(
+                            student.data_nascimento.split("-")[0]
                         )
 
-                        const birthdayAge = age !== null
-                            ? age
-                            : currentYear -
-                            Number(student.data_nascimento.split("-")[0])
+                        const birthdayAge =
+                            currentYear - birthYear
 
                         return (
+
                             <Link
                                 key={student.id}
                                 href={`/students/${student.id}`}
                                 className="
                                     flex
+                                    w-full
+                                    min-w-0
                                     items-center
-                                    justify-between
-                                    gap-3
-                                    rounded-2xl
+                                    gap-2
+
+                                    rounded-lg
                                     border
                                     border-border
                                     bg-background/60
-                                    p-4
+
+                                    p-2
+
                                     transition-colors
                                     hover:bg-accent
+
+                                    sm:gap-3
+                                    sm:p-3
                                 "
                             >
 
+                                <StudentAvatar
+                                    nome={student.nome}
+                                    photoUrl={student.foto_principal_url}
+                                    className="
+                                        h-9
+                                        w-9
+                                        sm:h-10
+                                        sm:w-10
+                                    "
+                                    fallbackClassName="text-xs"
+                                />
+
                                 <div className="
-                                    flex
-                                    items-center
-                                    gap-3
                                     min-w-0
+                                    flex-1
                                 ">
 
-                                    <div className="
-                                        relative
-                                        h-12
-                                        w-12
-                                        shrink-0
-                                        overflow-hidden
-                                        rounded-full
-                                        border
-                                        border-border
-                                        bg-primary/10
+                                    <p className="
+                                        text-sm
+                                        font-semibold
+                                        leading-snug
+                                        [overflow-wrap:anywhere]
                                     ">
+                                        {student.nome}
+                                    </p>
 
-                                        {student.foto_url ? (
-                                            <Image
-                                                src={student.foto_url}
-                                                alt={student.nome}
-                                                fill
-                                                sizes="48px"
-                                                className="object-cover"
-                                            />
-                                        ) : (
-                                            <div className="
-                                                flex
-                                                h-full
-                                                w-full
-                                                items-center
-                                                justify-center
-                                                font-bold
-                                                text-primary
-                                            ">
-                                                {student.nome
-                                                    .charAt(0)
-                                                    .toUpperCase()}
-                                            </div>
-                                        )}
-
-                                    </div>
-
-                                    <div className="min-w-0">
-
-                                        <p className="
-                                            truncate
-                                            font-semibold
-                                        ">
-                                            {student.nome}
-                                        </p>
-
-                                        <p className="
-                                            text-sm
-                                            text-muted
-                                        ">
-                                            Turma {student.turma}
-                                        </p>
-
-                                    </div>
+                                    <p className="
+                                        mt-0.5
+                                        text-xs
+                                        leading-relaxed
+                                        text-muted
+                                        [overflow-wrap:anywhere]
+                                    ">
+                                        {student.turma}
+                                    </p>
 
                                 </div>
 
-                                <Badge variant="secondary">
+                                <Badge
+                                    variant="secondary"
+                                    className="
+                                        shrink-0
+                                        whitespace-nowrap
+                                        rounded-md
+                                        px-2
+                                        text-[11px]
+                                    "
+                                >
                                     {birthdayAge} anos
                                 </Badge>
 
@@ -170,14 +192,19 @@ export function BirthdaysToday({
             ) : (
 
                 <div className="
-                    rounded-2xl
+                    rounded-lg
                     border
                     border-dashed
                     border-border
-                    p-8
+                    px-3
+                    py-6
                     text-center
-                    text-sm
+                    text-xs
+                    leading-relaxed
                     text-muted
+
+                    md:py-8
+                    md:text-sm
                 ">
                     Nenhum aluno faz aniversário hoje.
                 </div>

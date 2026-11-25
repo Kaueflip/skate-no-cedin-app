@@ -1,8 +1,7 @@
-import type { Metadata }
-  from "next"
 
-import { GeistSans }
-  from "geist/font/sans"
+import type { Metadata } from "next"
+
+import { GeistSans } from "geist/font/sans"
 
 import "./globals.css"
 
@@ -16,30 +15,19 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip"
 
-import {
-  Toaster,
-} from "@/components/ui/sonner"
+import { Toaster } from "@/components/ui/sonner"
 
-import {
-  Analytics,
-} from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/react"
 
-
-export const metadata:
-  Metadata = {
-
-  title:
-    "Skate no Cedin",
-
-  description:
-    "Sistema de gestão do projeto Skate no Cedin",
+export const metadata: Metadata = {
+  title: "Skate no Cedin",
+  description: "Sistema de gestão do projeto Skate no Cedin",
 }
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children:
-  React.ReactNode
+  children: React.ReactNode
 }>) {
 
   return (
@@ -51,20 +39,15 @@ export default function RootLayout({
 
       <body
         className={`
-          ${GeistSans.className}
+                    ${GeistSans.className}
 
-          min-h-screen
+                    min-h-dvh
 
-          bg-[#e5e8f7]
+                    bg-background
+                    text-foreground
 
-          text-zinc-900
-
-          antialiased
-
-          dark:bg-zinc-950
-
-          dark:text-white
-        `}
+                    antialiased
+                `}
       >
 
         <ThemeProvider
@@ -94,48 +77,28 @@ export default function RootLayout({
                 classNames: {
 
                   toast: `
-                    border-white/40
-
-                    bg-[#eef1fb]
-
-                    text-zinc-900
-
-                    shadow-xl
-
-                    backdrop-blur-2xl
-
-                    dark:border-white/10
-
-                    dark:bg-zinc-900/95
-
-                    dark:text-white
-                  `,
+                                        rounded-[10px]
+                                        border-border
+                                        bg-card
+                                        text-card-foreground
+                                        shadow-lg
+                                    `,
 
                   description: `
-                    text-zinc-500
-
-                    dark:text-zinc-400
-                  `,
+                                        text-muted-foreground
+                                    `,
 
                   actionButton: `
-                    bg-zinc-900
-
-                    text-white
-
-                    dark:bg-white
-
-                    dark:text-zinc-900
-                  `,
+                                        rounded-md
+                                        bg-primary
+                                        text-primary-foreground
+                                    `,
 
                   cancelButton: `
-                    bg-zinc-200
-
-                    text-zinc-900
-
-                    dark:bg-zinc-800
-
-                    dark:text-white
-                  `,
+                                        rounded-md
+                                        bg-secondary
+                                        text-secondary-foreground
+                                    `,
                 },
               }}
             />

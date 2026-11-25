@@ -1,20 +1,15 @@
-import Image
-    from "next/image"
+
+import Image from "next/image"
+
+import Link from "next/link"
 
 import {
     ThemeToggle,
 } from "@/components/theme/theme-toggle"
 
-import Link
-    from "next/link"
-
 type Props = {
-
-    showLinks?:
-    boolean
-
-    showLogin?:
-    boolean
+    showLinks?: boolean
+    showLogin?: boolean
 }
 
 export function AppNavbar({
@@ -25,37 +20,51 @@ export function AppNavbar({
     return (
 
         <header className="
-      sticky
-      top-0
-      z-50
+            sticky
+            top-0
+            z-50
 
-      border-b
-      border-border
+            shrink-0
 
-      bg-background/80
+            border-b
+            border-border
 
-      backdrop-blur-xl
-    ">
+            bg-background/95
+
+            md:bg-background/80
+            md:backdrop-blur-xl
+        ">
 
             <div className="
-        mx-auto
+                mx-auto
 
-        flex
-        h-16
-        max-w-7xl
-        items-center
-        justify-between
+                flex
+                h-14
+                w-full
+                max-w-7xl
+                items-center
+                justify-between
 
-        px-6
-      ">
+                gap-3
+                px-3
+
+                sm:px-4
+
+                md:h-16
+                md:px-6
+            ">
+
+                {/* LOGOTIPO */}
 
                 <Link
                     href="/"
+                    aria-label="Página inicial - Skate no Cedin"
                     className="
-            flex
-            items-center
-            gap-3
-          "
+                        flex
+                        min-w-0
+                        shrink-0
+                        items-center
+                    "
                 >
 
                     <Image
@@ -65,11 +74,13 @@ export function AppNavbar({
                         width={52}
                         height={52}
                         className="
-              h-12
-              w-auto
+                            h-9
+                            w-auto
 
-              dark:hidden
-            "
+                            dark:hidden
+
+                            md:h-12
+                        "
                     />
 
                     <Image
@@ -79,114 +90,89 @@ export function AppNavbar({
                         width={52}
                         height={52}
                         className="
-              hidden
+                            hidden
 
-              h-12
-              w-auto
+                            h-9
+                            w-auto
 
-              dark:block
-            "
+                            dark:block
+
+                            md:h-12
+                        "
                     />
-
-                    {/*   <div>
-
-                        <p className="
-              text-sm
-              font-semibold
-              leading-none
-            ">
-
-                            Skate no Cedin
-
-                        </p>
-
-                        <p className="
-              text-xs
-
-              text-muted
-            ">
-
-                            Plataforma
-
-                        </p>
-
-                    </div> */}
 
                 </Link>
 
+                {/* NAVEGAÇÃO DESKTOP */}
+
                 {showLinks && (
 
-                    <nav className="
-            hidden
-            items-center
-            gap-8
+                    <nav
+                        aria-label="Navegação principal"
+                        className="
+                            hidden
+                            items-center
+                            gap-6
 
-            md:flex
-          ">
+                            md:flex
+
+                            lg:gap-8
+                        "
+                    >
 
                         <Link
                             href="/#sobre"
                             className="
-                text-sm
-                font-medium
-
-                text-muted
-
-                transition-colors
-
-                hover:text-foreground
-              "
+                                text-sm
+                                font-medium
+                                text-muted
+                                transition-colors
+                                hover:text-foreground
+                            "
                         >
-
                             Sobre
-
                         </Link>
 
                         <Link
                             href="/#galeria"
                             className="
-                text-sm
-                font-medium
-
-                text-muted
-
-                transition-colors
-
-                hover:text-foreground
-              "
+                                text-sm
+                                font-medium
+                                text-muted
+                                transition-colors
+                                hover:text-foreground
+                            "
                         >
-
                             Galeria
-
                         </Link>
 
                         <Link
                             href="/#sistema"
                             className="
-                text-sm
-                font-medium
-
-                text-muted
-
-                transition-colors
-
-                hover:text-foreground
-              "
+                                text-sm
+                                font-medium
+                                text-muted
+                                transition-colors
+                                hover:text-foreground
+                            "
                         >
-
                             Plataforma
-
                         </Link>
 
                     </nav>
 
                 )}
 
+                {/* AÇÕES */}
+
                 <div className="
-          flex
-          items-center
-          gap-3
-        ">
+                    flex
+                    shrink-0
+                    items-center
+                    gap-2
+
+                    md:gap-3
+                ">
 
                     <ThemeToggle />
 
@@ -195,27 +181,31 @@ export function AppNavbar({
                         <Link
                             href="/login"
                             className="
-                rounded-2xl
+                                inline-flex
+                                min-h-11
+                                items-center
+                                justify-center
 
-                bg-primary
+                                rounded-lg
 
-                px-5
-                py-2
+                                bg-primary
+                                text-primary-foreground
 
-                text-sm
-                font-semibold
+                                px-4
+                                py-2
 
-                text-primary-foreground
+                                text-sm
+                                font-semibold
 
-                transition-all
+                                transition-colors
 
-                hover:bg-accent-hover
-                hover:scale-[1.02]
-              "
+                                hover:bg-accent-hover
+                                active:opacity-80
+
+                                md:px-5
+                            "
                         >
-
                             Entrar
-
                         </Link>
 
                     )}

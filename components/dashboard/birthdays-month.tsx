@@ -1,10 +1,7 @@
 
 import Link from "next/link"
 
-import {
-    Cake,
-    CalendarDays,
-} from "lucide-react"
+import { CalendarDays } from "lucide-react"
 
 import { GlassCard } from "@/components/ui/glass-card"
 import { Badge } from "@/components/ui/badge"
@@ -32,132 +29,192 @@ export function BirthdaysMonth({
 }: Props) {
 
     return (
-        <GlassCard className="p-6">
+
+        <GlassCard className="
+            w-full
+            min-w-0
+            rounded-[10px]
+            p-3
+            md:p-5
+        ">
+
+            {/* CABEÇALHO */}
 
             <div className="
-                mb-5
+                mb-4
                 flex
-                items-center
+                min-w-0
+                items-start
                 justify-between
+                gap-2
             ">
 
-                <div>
+                <div className="min-w-0 flex-1">
+
                     <h2 className="
-                        text-xl
+                        text-base
                         font-bold
-                        capitalize
+                        leading-tight
+                        md:text-lg
                     ">
                         Aniversariantes de {monthName}
                     </h2>
 
-                    <p className="mt-1 text-sm text-muted">
-                        Todos os aniversários deste mês
+                    <p className="
+                        mt-1
+                        text-xs
+                        leading-relaxed
+                        text-muted
+                        md:text-sm
+                    ">
+                        {students.length} {
+                            students.length === 1
+                                ? "aniversariante"
+                                : "aniversariantes"
+                        } neste mês
                     </p>
+
                 </div>
 
                 <div className="
-                    rounded-2xl
+                    flex
+                    h-9
+                    w-9
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-lg
                     bg-primary/10
-                    p-3
                     text-primary
                 ">
-                    <CalendarDays className="h-6 w-6" />
+
+                    <CalendarDays className="h-5 w-5" />
+
                 </div>
 
             </div>
+
+            {/* LISTAGEM */}
 
             {students.length > 0 ? (
 
                 <div className="
                     max-h-80
-                    space-y-2
+                    w-full
+                    min-w-0
+                    space-y-1
+
                     overflow-y-auto
-                    pr-1
+                    overscroll-contain
+
+                    md:max-h-96
                 ">
 
                     {students.map((student) => {
 
-                        const [, , day] =
+                        const [birthYear, , day] =
                             student.data_nascimento.split("-")
 
-                        const birthYear = Number(
-                            student.data_nascimento.split("-")[0]
-                        )
-
-                        const age = currentYear - birthYear
+                        const age =
+                            currentYear - Number(birthYear)
 
                         const isToday =
                             Number(day) === currentDay
 
                         return (
+
                             <Link
                                 key={student.id}
                                 href={`/students/${student.id}`}
-                                className="
+                                className={`
                                     flex
+                                    w-full
+                                    min-w-0
                                     items-center
-                                    justify-between
-                                    gap-3
-                                    rounded-xl
-                                    p-3
+                                    gap-2
+
+                                    rounded-lg
+                                    border
+                                    p-2
+
                                     transition-colors
                                     hover:bg-accent
-                                "
+
+                                    sm:gap-3
+
+                                    ${isToday
+                                        ? "border-primary/20 bg-primary/5"
+                                        : "border-transparent"
+                                    }
+                                `}
                             >
+
+                                {/* DATA */}
 
                                 <div className="
                                     flex
+                                    h-10
+                                    w-10
+                                    shrink-0
+                                    flex-col
                                     items-center
-                                    gap-3
-                                    min-w-0
+                                    justify-center
+
+                                    rounded-lg
+                                    border
+                                    border-border
+                                    bg-background
                                 ">
 
-                                    <div className="
-                                        flex
-                                        h-12
-                                        w-12
-                                        shrink-0
-                                        flex-col
-                                        items-center
-                                        justify-center
-                                        rounded-xl
-                                        border
-                                        border-border
-                                        bg-background
+                                    <span className="
+                                        text-base
+                                        font-bold
+                                        leading-none
+                                        tabular-nums
                                     ">
+                                        {day}
+                                    </span>
 
-                                        <span className="
-                                            text-lg
-                                            font-bold
-                                            leading-none
-                                        ">
-                                            {day}
-                                        </span>
-
-                                        <span className="
-                                            mt-1
-                                            text-[10px]
-                                            uppercase
-                                            text-muted
-                                        ">
-                                            {monthName.slice(0, 3)}
-                                        </span>
-
-                                    </div>
-
-                                    <div className="min-w-0">
-
-                                        <p className="truncate font-semibold">
-                                            {student.nome}
-                                        </p>
-
-                                        <p className="text-sm text-muted">
-                                            Turma {student.turma}
-                                        </p>
-
-                                    </div>
+                                    <span className="
+                                        mt-0.5
+                                        text-[10px]
+                                        uppercase
+                                        text-muted
+                                    ">
+                                        {monthName.slice(0, 3)}
+                                    </span>
 
                                 </div>
+
+                                {/* ALUNO */}
+
+                                <div className="
+                                    min-w-0
+                                    flex-1
+                                ">
+
+                                    <p className="
+                                        text-sm
+                                        font-semibold
+                                        leading-snug
+                                        [overflow-wrap:anywhere]
+                                    ">
+                                        {student.nome}
+                                    </p>
+
+                                    <p className="
+                                        mt-0.5
+                                        text-xs
+                                        leading-relaxed
+                                        text-muted
+                                        [overflow-wrap:anywhere]
+                                    ">
+                                        {student.turma}
+                                    </p>
+
+                                </div>
+
+                                {/* IDADE */}
 
                                 <div className="
                                     flex
@@ -167,14 +224,25 @@ export function BirthdaysMonth({
                                     gap-1
                                 ">
 
-                                    <span className="text-sm font-semibold">
+                                    <span className="
+                                        whitespace-nowrap
+                                        text-xs
+                                        font-semibold
+                                    ">
                                         {age} anos
                                     </span>
 
                                     {isToday && (
-                                        <Badge>
+
+                                        <Badge className="
+                                            rounded-md
+                                            px-1.5
+                                            py-0.5
+                                            text-[10px]
+                                        ">
                                             Hoje
                                         </Badge>
+
                                     )}
 
                                 </div>
@@ -188,14 +256,18 @@ export function BirthdaysMonth({
             ) : (
 
                 <div className="
-                    rounded-2xl
+                    rounded-lg
                     border
                     border-dashed
                     border-border
-                    p-8
+                    px-3
+                    py-6
                     text-center
-                    text-sm
+                    text-xs
                     text-muted
+
+                    md:py-8
+                    md:text-sm
                 ">
                     Nenhum aniversariante neste mês.
                 </div>
