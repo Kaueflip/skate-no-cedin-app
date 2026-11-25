@@ -75,7 +75,7 @@ export function DashboardStats({
                     className="
             overflow-hidden
 
-            rounded-[2rem]
+            rounded
 
             border
             border-white/40

@@ -38,7 +38,9 @@ export function StatCard({
 
           overflow-hidden
 
-          p-6
+          p-3
+          sm:p-4
+          md:p-6
         `,
                 className
             )}
@@ -48,13 +50,15 @@ export function StatCard({
         flex
         items-start
         justify-between
-        gap-4
+        gap-2
+        sm:gap-4
       ">
 
-                <div>
+                <div className="min-w-0">
 
                     <p className="
-            text-sm
+            text-xs
+            sm:text-sm
             font-medium
 
             text-muted
@@ -65,9 +69,11 @@ export function StatCard({
                     </p>
 
                     <h3 className="
-            mt-3
-
-            text-4xl
+            mt-1
+            sm:mt-2
+            text-2xl
+            sm:text-3xl
+            lg:text-4xl
             font-black
             tracking-tight
 
@@ -81,9 +87,10 @@ export function StatCard({
                     {description && (
 
                         <p className="
-              mt-2
-
-              text-sm
+              mt-1
+              sm:mt-2
+              text-xs
+              sm:text-sm
 
               text-muted
             ">
@@ -100,12 +107,16 @@ export function StatCard({
 
                     <div className="
             flex
-            h-12
-            w-12
+            h-9
+            w-9
+            shrink-0
+            sm:h-12
+            sm:w-12
             items-center
             justify-center
 
-            rounded-2xl
+            rounded-xl
+            sm:rounded-2xl
 
             bg-primary/10
 

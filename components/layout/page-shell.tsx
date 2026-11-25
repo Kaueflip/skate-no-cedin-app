@@ -1,31 +1,13 @@
-import type {
-    HTMLAttributes,
-} from "react"
+import type { HTMLAttributes } from "react"
+import { cn } from "@/lib/utils"
 
-import { cn }
-    from "@/lib/utils"
+type Props = HTMLAttributes<HTMLDivElement>
 
-type Props =
-    HTMLAttributes<HTMLDivElement>
-
-export function PageShell({
-    className,
-    ...props
-}: Props) {
-
+export function PageShell({ className, ...props }: Props) {
     return (
-
-        <main
+        <div
             className={cn(
-                `
-          min-h-screen
-
-          bg-background
-
-          p-6
-
-          md:p-8
-        `,
+                "w-full min-w-0 flex-1 bg-background p-3 text-sm sm:p-4 md:p-6 lg:p-8",
                 className
             )}
             {...props}

@@ -3,6 +3,8 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  --radius: 8px;
+
   --background: #f3f5fb;
 
   --foreground: #18181b;
@@ -10,6 +12,8 @@
   --card: rgba(255, 255, 255, 0.78);
 
   --card-foreground: #18181b;
+
+  --popover: #ffffff;
 
   --border: rgba(15, 23, 42, 0.08);
 
@@ -41,6 +45,8 @@
 
   --card-foreground: #fafafa;
 
+  --popover: #18181b;
+
   --border: rgba(255, 255, 255, 0.08);
 
   --muted: #a1a1aa;
@@ -62,6 +68,18 @@
   --ring: rgba(29, 78, 216, 0.32);
 }
 
+/* Escala global de arredondamento (Tailwind CSS v4). */
+@theme {
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 10px;
+  --radius-3xl: 10px;
+  --radius-4xl: 10px;
+}
+
 @theme inline {
   --color-background: var(--background);
 
@@ -70,6 +88,8 @@
   --color-card: var(--card);
 
   --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
 
   --color-border: var(--border);
 
@@ -112,4 +132,35 @@ body {
   font-feature-settings:
     "rlig" 1,
     "calt" 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Compatibilidade com raios absolutos ainda presentes no código. */
+[class~="rounded-[2rem]"] {
+  border-radius: 10px;
+}
+
+@media (min-width: 48rem) {
+  [class~="md:rounded-[2rem]"] {
+    border-radius: 10px;
+  }
+}
+
+[class~="rounded-b-[1.75rem]"] {
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+/* Badges e controles em formato de cápsula: limitar sem afetar avatares,
+   indicadores circulares e barras de progresso. */
+[data-slot="badge"][class~="rounded-full"],
+[class~="rounded-full"][class~="px-2.5"][class~="py-1"],
+[class~="rounded-full"][class~="px-3"][class~="py-2"],
+[class~="rounded-full"][class~="px-4"][class~="py-2"] {
+  border-radius: 10px;
 }
