@@ -6,7 +6,6 @@ import {
     CalendarX,
     ClipboardCheck,
     FileSpreadsheet,
-    Filter,
     Percent,
     UserPlus,
     Users,
@@ -20,6 +19,7 @@ import { PageShell } from "@/components/layout/page-shell"
 import { PageHeader } from "@/components/layout/page-header"
 import { GlassCard } from "@/components/ui/glass-card"
 import { StatCard } from "@/components/dashboard/stat-card"
+import { ReportsFilters } from "@/components/reports/reports-filters"
 
 type SearchParams = {
     periodo?: string
@@ -35,6 +35,16 @@ type Props = {
 
 function formatDate(date: Date) {
     return date.toISOString().slice(0, 10)
+}
+
+function isValidDate(value: string | undefined): value is string {
+    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+    const date = new Date(`${value}T00:00:00Z`)
+    return Number.isFinite(date.getTime()) && formatDate(date) === value
+}
+
+function formatDisplayDate(value: string) {
+    return value.split("-").reverse().join("/")
 }
 
 function addDays(date: string, days: number) {
@@ -89,11 +99,17 @@ export default async function ReportsPage({
 
     const {
         data: students,
+        error: turmasError,
     } = await supabase
         .from("students")
         .select("turma")
         .eq("ativo", true)
         .not("turma", "is", null)
+
+    if (turmasError) {
+        console.error("Erro ao carregar turmas:", turmasError)
+        throw new Error("Não foi possível carregar as turmas.")
+    }
 
     const turmas = Array.from(
         new Set(
@@ -118,7 +134,9 @@ export default async function ReportsPage({
         ? params.periodo!
         : "mes"
 
-    const turma = params.turma || "todas"
+    const turma = params.turma && turmas.includes(params.turma)
+        ? params.turma
+        : "todas"
 
     const turnoOptions = [
         "todos",
@@ -161,46 +179,58 @@ export default async function ReportsPage({
 
     if (periodo === "personalizado") {
 
-        const validStart =
-            /^\d{4}-\d{2}-\d{2}$/.test(
-                params.dataInicio || ""
-            )
-
-        const validEnd =
-            /^\d{4}-\d{2}-\d{2}$/.test(
-                params.dataFim || ""
-            )
-
         if (
-            validStart &&
-            validEnd &&
-            params.dataInicio! <= params.dataFim!
+            isValidDate(params.dataInicio) &&
+            isValidDate(params.dataFim) &&
+            params.dataInicio <= params.dataFim &&
+            params.dataFim < "9999-12-31"
         ) {
+            periodStart = params.dataInicio
+            periodEnd = addDays(params.dataFim, 1)
+        }
+    }
 
-            periodStart = params.dataInicio!
-            periodEnd = addDays(params.dataFim!, 1)
+    const invalidCustomPeriod = periodo === "personalizado" && (
+        !isValidDate(params.dataInicio) ||
+        !isValidDate(params.dataFim) ||
+        params.dataInicio > params.dataFim ||
+        params.dataFim >= "9999-12-31"
+    )
 
+    // ALUNOS ATIVOS E DISTRIBUIÇÃO POR GÊNERO (CADASTRO ATUAL)
+
+    function activeStudentsQuery(gender?: "M" | "F") {
+        let query = supabase
+            .from("students")
+            .select("id", { count: "exact", head: true })
+            .eq("ativo", true)
+
+        if (turma !== "todas") query = query.eq("turma", turma)
+
+        if (turno === "Tarde") {
+            query = query.in("turno", ["Tarde", "Integral"])
+        } else if (turno !== "todos") {
+            query = query.eq("turno", turno)
         }
 
+        if (gender === "M") {
+            query = query.or(
+                "genero.ilike.M,genero.ilike.Masculino"
+            )
+        }
+
+        if (gender === "F") {
+            query = query.or(
+                "genero.ilike.F,genero.ilike.Feminino"
+            )
+        }
+
+        return query
     }
 
-    // CONSULTA DE ALUNOS ATIVOS
-
-    let studentsQuery = supabase
-        .from("students")
-        .select("id", {
-            count: "exact",
-            head: true,
-        })
-        .eq("ativo", true)
-
-    if (turma !== "todas") {
-        studentsQuery = studentsQuery.eq("turma", turma)
-    }
-
-    if (turno !== "todos") {
-        studentsQuery = studentsQuery.eq("turno", turno)
-    }
+    const studentsQuery = activeStudentsQuery()
+    const maleStudentsQuery = activeStudentsQuery("M")
+    const femaleStudentsQuery = activeStudentsQuery("F")
 
     // NOVOS ALUNOS NO PERÍODO
 
@@ -227,11 +257,10 @@ export default async function ReportsPage({
         )
     }
 
-    if (turno !== "todos") {
-        newStudentsQuery = newStudentsQuery.eq(
-            "turno",
-            turno
-        )
+    if (turno === "Tarde") {
+        newStudentsQuery = newStudentsQuery.in("turno", ["Tarde", "Integral"])
+    } else if (turno !== "todos") {
+        newStudentsQuery = newStudentsQuery.eq("turno", turno)
     }
 
     // PRESENÇAS NO PERÍODO
@@ -256,11 +285,10 @@ export default async function ReportsPage({
         )
     }
 
-    if (turno !== "todos") {
-        attendanceQuery = attendanceQuery.eq(
-            "students.turno",
-            turno
-        )
+    if (turno === "Tarde") {
+        attendanceQuery = attendanceQuery.in("students.turno", ["Tarde", "Integral"])
+    } else if (turno !== "todos") {
+        attendanceQuery = attendanceQuery.eq("students.turno", turno)
     }
 
     // FALTAS NO PERÍODO
@@ -285,11 +313,10 @@ export default async function ReportsPage({
         )
     }
 
-    if (turno !== "todos") {
-        absencesQuery = absencesQuery.eq(
-            "students.turno",
-            turno
-        )
+    if (turno === "Tarde") {
+        absencesQuery = absencesQuery.in("students.turno", ["Tarde", "Integral"])
+    } else if (turno !== "todos") {
+        absencesQuery = absencesQuery.eq("students.turno", turno)
     }
 
     // AULAS REALIZADAS
@@ -341,6 +368,8 @@ export default async function ReportsPage({
 
     const [
         studentsResult,
+        maleStudentsResult,
+        femaleStudentsResult,
         newStudentsResult,
         attendanceResult,
         absencesResult,
@@ -349,6 +378,8 @@ export default async function ReportsPage({
         teachersResult,
     ] = await Promise.all([
         studentsQuery,
+        maleStudentsQuery,
+        femaleStudentsQuery,
         newStudentsQuery,
         attendanceQuery,
         absencesQuery,
@@ -357,9 +388,39 @@ export default async function ReportsPage({
         teachersQuery,
     ])
 
+    const queryError = [
+        studentsResult,
+        maleStudentsResult,
+        femaleStudentsResult,
+        newStudentsResult,
+        attendanceResult,
+        absencesResult,
+        classesResult,
+        canceledClassesResult,
+        teachersResult,
+    ].find((result) => result.error)?.error
+
+    if (queryError) {
+        console.error("Erro ao carregar indicadores:", queryError)
+        throw new Error("Não foi possível carregar os indicadores.")
+    }
+
     // RESULTADOS
 
     const studentsCount = studentsResult.count || 0
+
+    const maleCount = maleStudentsResult.count ?? 0
+    const femaleCount = femaleStudentsResult.count ?? 0
+    const unknownGenderCount = Math.max(0, studentsCount - maleCount - femaleCount)
+
+    const genderDistribution = [
+        { label: "Masculino", count: maleCount, color: "bg-blue-500" },
+        { label: "Feminino", count: femaleCount, color: "bg-violet-500" },
+        { label: "Não informado / outro", count: unknownGenderCount, color: "bg-zinc-400" },
+    ].map((item) => ({
+        ...item,
+        percentage: studentsCount > 0 ? item.count / studentsCount * 100 : 0,
+    }))
 
     const newStudentsCount = newStudentsResult.count || 0
 
@@ -397,7 +458,7 @@ export default async function ReportsPage({
     }
 
     const periodDescription =
-        `${periodLabels[periodo]} · ${periodStart} até ${addDays(periodEnd, -1)}`
+        `${invalidCustomPeriod ? "Mês atual (datas inválidas)" : periodLabels[periodo]} · ${formatDisplayDate(periodStart)} até ${formatDisplayDate(addDays(periodEnd, -1))}`
 
     return (
 
@@ -408,426 +469,220 @@ export default async function ReportsPage({
                 description="Indicadores e análises do projeto Skate no Cedin"
             />
 
-            {/* FILTROS */}
+            <div className="flex w-full min-w-0 flex-col gap-4 md:gap-6">
 
-            <GlassCard className="p-6">
+                <ReportsFilters
+                    key={JSON.stringify([periodo, turma, turno, params.dataInicio, params.dataFim])}
+                    periodo={periodo}
+                    turma={turma}
+                    turno={turno}
+                    turmas={turmas}
+                    dataInicio={params.dataInicio || periodStart}
+                    dataFim={params.dataFim || addDays(periodEnd, -1)}
+                    periodDescription={periodDescription}
+                    invalidCustomPeriod={invalidCustomPeriod}
+                />
 
-                <div className="
-                    mb-5
-                    flex
-                    items-center
-                    gap-2
-                ">
+                {/* INDICADORES GERAIS */}
 
-                    <Filter className="h-5 w-5 text-muted" />
+                <section className="w-full min-w-0">
 
-                    <h2 className="
+                    <div className="mb-3">
+
+                        <h2 className="
                         text-base
+                        md:text-lg
                         font-semibold
                         text-foreground
                     ">
-                        Filtros dos relatórios
-                    </h2>
+                            Indicadores gerais
+                        </h2>
 
-                </div>
-
-                <form
-                    method="GET"
-                    className="
-                        grid
-                        gap-4
-                        md:grid-cols-2
-                        xl:grid-cols-4
-                    "
-                >
-
-                    <div className="space-y-2">
-
-                        <label
-                            htmlFor="periodo"
-                            className="text-sm font-medium text-foreground"
-                        >
-                            Período
-                        </label>
-
-                        <select
-                            id="periodo"
-                            name="periodo"
-                            defaultValue={periodo}
-                            className="
-                                h-11
-                                w-full
-                                rounded-xl
-                                border
-                                border-border
-                                bg-card
-                                px-3
-                                text-sm
-                                text-foreground
-                                outline-none
-                                focus:ring-2
-                                focus:ring-ring
-                            "
-                        >
-                            <option value="mes">Mês atual</option>
-                            <option value="trimestre">Últimos 3 meses</option>
-                            <option value="ano">Ano atual</option>
-                            <option value="personalizado">Personalizado</option>
-                        </select>
-
-                    </div>
-
-                    <div className="space-y-2">
-
-                        <label
-                            htmlFor="turma"
-                            className="text-sm font-medium text-foreground"
-                        >
-                            Turma
-                        </label>
-
-                        <select
-                            id="turma"
-                            name="turma"
-                            defaultValue={turma}
-                            className="
-                                h-11
-                                w-full
-                                rounded-xl
-                                border
-                                border-border
-                                bg-card
-                                px-3
-                                text-sm
-                                text-foreground
-                                outline-none
-                                focus:ring-2
-                                focus:ring-ring
-                            "
-                        >
-
-                            <option value="todas">
-                                Todas as turmas
-                            </option>
-
-                            {turmas.map((item) => (
-
-                                <option
-                                    key={item}
-                                    value={item}
-                                >
-                                    {item}
-                                </option>
-
-                            ))}
-
-                        </select>
-
-                    </div>
-
-                    <div className="space-y-2">
-
-                        <label
-                            htmlFor="turno"
-                            className="text-sm font-medium text-foreground"
-                        >
-                            Turno
-                        </label>
-
-                        <select
-                            id="turno"
-                            name="turno"
-                            defaultValue={turno}
-                            className="
-                                h-11
-                                w-full
-                                rounded-xl
-                                border
-                                border-border
-                                bg-card
-                                px-3
-                                text-sm
-                                text-foreground
-                                outline-none
-                                focus:ring-2
-                                focus:ring-ring
-                            "
-                        >
-
-                            <option value="todos">
-                                Todos os turnos
-                            </option>
-
-                            <option value="Manhã">Manhã</option>
-                            <option value="Tarde">Tarde</option>
-                            <option value="Noite">Noite</option>
-
-                        </select>
-
-                    </div>
-
-                    <div className="flex items-end">
-
-                        <button
-                            type="submit"
-                            className="
-                                h-11
-                                w-full
-                                rounded-xl
-                                bg-primary
-                                px-5
-                                text-sm
-                                font-semibold
-                                text-primary-foreground
-                                transition
-                                hover:opacity-90
-                            "
-                        >
-                            Aplicar filtros
-                        </button>
-
-                    </div>
-
-                    {periodo === "personalizado" && (
-
-                        <div className="
-                            grid
-                            gap-4
-                            md:col-span-2
-                            xl:col-span-4
-                            md:grid-cols-2
-                        ">
-
-                            <div className="space-y-2">
-
-                                <label
-                                    htmlFor="dataInicio"
-                                    className="text-sm font-medium text-foreground"
-                                >
-                                    Data inicial
-                                </label>
-
-                                <input
-                                    type="date"
-                                    id="dataInicio"
-                                    name="dataInicio"
-                                    defaultValue={params.dataInicio}
-                                    required
-                                    className="
-                                        h-11
-                                        w-full
-                                        rounded-xl
-                                        border
-                                        border-border
-                                        bg-card
-                                        px-3
-                                        text-sm
-                                        text-foreground
-                                        outline-none
-                                        focus:ring-2
-                                        focus:ring-ring
-                                    "
-                                />
-
-                            </div>
-
-                            <div className="space-y-2">
-
-                                <label
-                                    htmlFor="dataFim"
-                                    className="text-sm font-medium text-foreground"
-                                >
-                                    Data final
-                                </label>
-
-                                <input
-                                    type="date"
-                                    id="dataFim"
-                                    name="dataFim"
-                                    defaultValue={params.dataFim}
-                                    required
-                                    className="
-                                        h-11
-                                        w-full
-                                        rounded-xl
-                                        border
-                                        border-border
-                                        bg-card
-                                        px-3
-                                        text-sm
-                                        text-foreground
-                                        outline-none
-                                        focus:ring-2
-                                        focus:ring-ring
-                                    "
-                                />
-
-                            </div>
-
-                        </div>
-
-                    )}
-
-                </form>
-
-                <p className="
-                    mt-4
-                    text-xs
-                    text-muted
-                ">
-                    {periodDescription}
-                </p>
-
-            </GlassCard>
-
-            {/* INDICADORES GERAIS */}
-
-            <section className="mt-8">
-
-                <div className="mb-5">
-
-                    <h2 className="
-                        text-lg
-                        font-semibold
-                        text-foreground
-                    ">
-                        Indicadores gerais
-                    </h2>
-
-                    <p className="
+                        <p className="
                         mt-1
-                        text-sm
+                        text-xs
+                        md:text-sm
                         text-muted
                     ">
-                        Resultados conforme os filtros selecionados
-                    </p>
+                            Alunos e frequência por turma e turno; aulas por turno; professores do projeto.
+                        </p>
 
-                </div>
+                    </div>
 
-                <div className="
+                    <div className="
                     grid
-                    gap-5
-                    md:grid-cols-2
+                    w-full
+                    min-w-0
+                    grid-cols-2
+                    gap-2
+                    sm:gap-3
                     xl:grid-cols-4
                 ">
 
-                    <StatCard
-                        title="Alunos ativos"
-                        value={studentsCount}
-                        description="Alunos dentro dos filtros selecionados"
-                        icon={<Users className="h-5 w-5" />}
-                    />
+                        <StatCard
+                            title="Alunos ativos"
+                            value={studentsCount}
+                            description="Cadastro atual"
+                            icon={<Users className="h-5 w-5" />}
+                        />
 
-                    <StatCard
-                        title="Novos alunos"
-                        value={newStudentsCount}
-                        description="Cadastros no período"
-                        icon={<UserPlus className="h-5 w-5" />}
-                    />
+                        <StatCard
+                            title="Novos alunos"
+                            value={newStudentsCount}
+                            description="Cadastros no período"
+                            icon={<UserPlus className="h-5 w-5" />}
+                        />
 
-                    <StatCard
-                        title="Professores ativos"
-                        value={teachersCount}
-                        description="Equipe cadastrada"
-                        icon={<BriefcaseBusiness className="h-5 w-5" />}
-                    />
+                        <StatCard
+                            title="Professores ativos"
+                            value={teachersCount}
+                            description="Equipe do projeto"
+                            icon={<BriefcaseBusiness className="h-5 w-5" />}
+                        />
 
-                    <StatCard
-                        title="Frequência"
-                        value={`${attendanceRate.toFixed(1).replace(".", ",")}%`}
-                        description={`${attendanceCount} presenças em ${totalAttendanceRecords} registros`}
-                        icon={<Percent className="h-5 w-5" />}
-                    />
+                        <StatCard
+                            title="Frequência"
+                            value={`${attendanceRate.toFixed(1).replace(".", ",")}%`}
+                            description={`${attendanceCount} presenças em ${totalAttendanceRecords} registros`}
+                            icon={<Percent className="h-5 w-5" />}
+                        />
 
-                    <StatCard
-                        title="Presenças"
-                        value={attendanceCount}
-                        description="Registros de presença"
-                        icon={<ClipboardCheck className="h-5 w-5" />}
-                    />
+                        <StatCard
+                            title="Presenças"
+                            value={attendanceCount}
+                            description="Registros de presença"
+                            icon={<ClipboardCheck className="h-5 w-5" />}
+                        />
 
-                    <StatCard
-                        title="Faltas"
-                        value={absencesCount}
-                        description="Registros de ausência"
-                        icon={<UserX className="h-5 w-5" />}
-                    />
+                        <StatCard
+                            title="Faltas"
+                            value={absencesCount}
+                            description="Registros de ausência"
+                            icon={<UserX className="h-5 w-5" />}
+                        />
 
-                    <StatCard
-                        title="Aulas realizadas"
-                        value={classesCount}
-                        description="Aulas concluídas no período"
-                        icon={<CalendarCheck className="h-5 w-5" />}
-                    />
+                        <StatCard
+                            title="Aulas realizadas"
+                            value={classesCount}
+                            description="No período e turno"
+                            icon={<CalendarCheck className="h-5 w-5" />}
+                        />
 
-                    <StatCard
-                        title="Aulas canceladas"
-                        value={canceledClassesCount}
-                        description="Aulas canceladas no período"
-                        icon={<CalendarX className="h-5 w-5" />}
-                    />
+                        <StatCard
+                            title="Aulas canceladas"
+                            value={canceledClassesCount}
+                            description="No período e turno"
+                            icon={<CalendarX className="h-5 w-5" />}
+                        />
 
-                </div>
+                    </div>
 
-            </section>
+                </section>
 
-            {/* ANÁLISES */}
+                {/* DISTRIBUIÇÃO POR GÊNERO */}
 
-            <GlassCard className="mt-8 p-6">
+                <GlassCard className="w-full min-w-0 rounded-[10px] p-3 sm:p-4 lg:p-5">
+                    <div className="mb-4 flex min-w-0 items-start justify-between gap-2">
+                        <div className="min-w-0">
+                            <h2 className="text-base font-bold md:text-lg">Distribuição por gênero</h2>
+                            <p className="mt-1 text-xs text-muted md:text-sm">
+                                Alunos ativos no cadastro atual, por turma e turno.
+                            </p>
+                        </div>
+                        <Users className="h-5 w-5 shrink-0 text-primary" />
+                    </div>
 
-                <div className="flex items-center gap-2">
+                    {studentsCount > 0 ? (
+                        <>
+                            <div className="mb-3 flex h-3 w-full overflow-hidden rounded-full bg-muted" aria-hidden="true">
+                                {genderDistribution.map((item) => (
+                                    <div key={item.label} className={item.color} style={{ width: `${item.percentage}%` }} />
+                                ))}
+                            </div>
+                            <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-3">
+                                {genderDistribution.map((item, index) => (
+                                    <div key={item.label} className={`min-w-0 rounded-lg border border-border bg-background/60 p-2.5 sm:p-3 ${index === 2 ? "col-span-2 sm:col-span-1" : ""}`}>
+                                        <div className="flex min-w-0 items-center gap-1.5">
+                                            <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${item.color}`} aria-hidden="true" />
+                                            <p className="text-xs leading-tight text-muted [overflow-wrap:anywhere]">{item.label}</p>
+                                        </div>
+                                        <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                                            <p className="text-xl font-black tabular-nums sm:text-2xl">{item.count}</p>
+                                            <p className="text-xs tabular-nums text-muted">{item.percentage.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    ) : (
+                        <p className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted">Nenhum aluno ativo nos filtros selecionados.</p>
+                    )}
+                    <p className="mt-3 text-xs leading-relaxed text-muted">
+                        Total: {studentsCount} alunos ativos. O período não altera este indicador; registros diferentes de M e F são agrupados em Não informado / outro.
+                    </p>
+                </GlassCard>
 
-                    <BarChart3 className="h-5 w-5 text-muted" />
+                {/* ANÁLISES */}
 
-                    <h2 className="
-                        text-lg
+                <GlassCard className="w-full min-w-0 rounded-[10px] p-3 sm:p-4 lg:p-5">
+
+                    <div className="flex items-center gap-2">
+
+                        <BarChart3 className="h-5 w-5 text-muted" />
+
+                        <h2 className="
+                        text-base
+                        md:text-lg
                         font-semibold
                         text-foreground
                     ">
-                        Análises e gráficos
-                    </h2>
+                            Análises e gráficos
+                        </h2>
 
-                </div>
+                    </div>
 
-                <p className="
+                    <p className="
                     mt-2
                     text-sm
                     text-muted
                 ">
-                    Nesta seção serão adicionados os gráficos de frequência,
-                    distribuição de alunos, aulas por turno e evolução pedagógica.
-                </p>
+                        Nesta seção serão adicionados os gráficos de frequência,
+                        distribuição de alunos, aulas por turno e evolução pedagógica.
+                    </p>
 
-            </GlassCard>
+                </GlassCard>
 
-            {/* EXPORTAÇÃO */}
+                {/* EXPORTAÇÃO */}
 
-            <GlassCard className="mt-5 p-6">
+                <GlassCard className="w-full min-w-0 rounded-[10px] p-3 sm:p-4 lg:p-5">
 
-                <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
 
-                    <FileSpreadsheet className="h-5 w-5 text-muted" />
+                        <FileSpreadsheet className="h-5 w-5 text-muted" />
 
-                    <h2 className="
-                        text-lg
+                        <h2 className="
+                        text-base
+                        md:text-lg
                         font-semibold
                         text-foreground
                     ">
-                        Exportação de relatórios
-                    </h2>
+                            Exportação de relatórios
+                        </h2>
 
-                </div>
+                    </div>
 
-                <p className="
+                    <p className="
                     mt-2
                     text-sm
                     text-muted
                 ">
-                    Os recursos de exportação em PDF, Excel e CSV serão
-                    implementados nas próximas etapas.
-                </p>
+                        Os recursos de exportação em PDF, Excel e CSV serão
+                        implementados nas próximas etapas.
+                    </p>
 
-            </GlassCard>
+                </GlassCard>
+
+            </div>
 
         </PageShell>
     )
