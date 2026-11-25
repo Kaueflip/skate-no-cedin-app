@@ -1,6 +1,8 @@
 
 "use client"
 
+import type { ReactNode } from "react"
+
 import {
     CalendarDays,
     CheckCircle2,
@@ -10,6 +12,8 @@ import {
 } from "lucide-react"
 
 import { useMemo } from "react"
+
+import { cn } from "@/lib/utils"
 
 type AttendanceRecord = {
     id: string
@@ -34,12 +38,24 @@ export function StudentAttendanceHistory({
         const absent = attendance.length - present
 
         const percentage = attendance.length > 0
-            ? Math.round((present / attendance.length) * 100)
+            ? Math.round(
+                (present / attendance.length) * 100
+            )
             : 0
 
-        const lastPresence = attendance.find(
-            (item) => item.present
-        )?.class_date ?? null
+        const lastPresence = attendance.reduce<string | null>(
+            (latest, item) => {
+
+                if (!item.present) return latest
+
+                if (!latest || item.class_date > latest) {
+                    return item.class_date
+                }
+
+                return latest
+            },
+            null
+        )
 
         return {
             present,
@@ -64,26 +80,32 @@ export function StudentAttendanceHistory({
 
         attendance.forEach((item) => {
 
-            const [year, month] = item.class_date.split("-")
+            const [year, month] =
+                item.class_date.split("-")
 
             const key = `${year}-${month}`
 
             if (!months[key]) {
 
-                const date = new Date(
-                    Number(year),
-                    Number(month) - 1,
-                    1
-                )
-
                 months[key] = {
-                    label: new Intl.DateTimeFormat("pt-BR", {
-                        month: "long",
-                        year: "numeric",
-                        timeZone: "UTC",
-                    }).format(
-                        new Date(Date.UTC(Number(year), Number(month) - 1, 1))
+
+                    label: new Intl.DateTimeFormat(
+                        "pt-BR",
+                        {
+                            month: "long",
+                            year: "numeric",
+                            timeZone: "UTC",
+                        }
+                    ).format(
+                        new Date(
+                            Date.UTC(
+                                Number(year),
+                                Number(month) - 1,
+                                1
+                            )
+                        )
                     ),
+
                     present: 0,
                     absent: 0,
                 }
@@ -107,90 +129,176 @@ export function StudentAttendanceHistory({
     }, [attendance])
 
     const formattedLastPresence = stats.lastPresence
-        ? new Date(
-            `${stats.lastPresence}T12:00:00`
-        ).toLocaleDateString("pt-BR")
+        ? stats.lastPresence.split("-").reverse().join("/")
         : "Nenhuma presença"
 
     return (
 
-        <section className="mt-8 rounded-4xl border border-border bg-card p-6 shadow-sm">
+        <section className="
+            w-full
+            min-w-0
 
-            <div className="mb-6 flex items-center gap-3">
+            rounded-[10px]
+            border
+            border-border
+            bg-card
 
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                    <CalendarDays className="h-5 w-5" />
+            p-3
+            shadow-sm
+
+            sm:p-4
+            lg:p-5
+        ">
+
+            {/* CABEÇALHO */}
+
+            <div className="
+                mb-4
+                flex
+                min-w-0
+                items-center
+                gap-2.5
+            ">
+
+                <div className="
+                    flex
+                    h-9
+                    w-9
+                    shrink-0
+                    items-center
+                    justify-center
+
+                    rounded-lg
+
+                    bg-primary/10
+                    text-primary
+                ">
+
+                    <CalendarDays className="h-4 w-4" />
+
                 </div>
 
-                <div>
-                    <h2 className="text-xl font-bold">
+                <div className="min-w-0">
+
+                    <h2 className="
+                        text-base
+                        font-bold
+                        leading-tight
+
+                        md:text-lg
+                    ">
                         Histórico de frequência
                     </h2>
 
-                    <p className="text-sm text-muted">
+                    <p className="
+                        mt-0.5
+                        text-xs
+                        text-muted
+                    ">
                         Acompanhamento das aulas do aluno
                     </p>
+
                 </div>
 
             </div>
 
-            <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+            {/* INDICADORES */}
+
+            <div className="
+                grid
+                min-w-0
+                grid-cols-2
+                gap-2
+
+                md:gap-3
+                xl:grid-cols-4
+            ">
 
                 <StatCard
                     label="Presenças"
                     value={stats.present}
-                    icon={<CheckCircle2 className="h-5 w-5" />}
-                    color="text-emerald-500"
+                    icon={<CheckCircle2 />}
+                    color="text-emerald-600 dark:text-emerald-400"
                 />
 
                 <StatCard
                     label="Faltas"
                     value={stats.absent}
-                    icon={<XCircle className="h-5 w-5" />}
+                    icon={<XCircle />}
                     color="text-red-500"
                 />
 
                 <StatCard
                     label="Aulas registradas"
                     value={stats.total}
-                    icon={<CalendarDays className="h-5 w-5" />}
+                    icon={<CalendarDays />}
                     color="text-primary"
                 />
 
                 <StatCard
                     label="Frequência"
                     value={`${stats.percentage}%`}
-                    icon={<TrendingUp className="h-5 w-5" />}
+                    icon={<TrendingUp />}
                     color="text-primary"
                 />
 
             </div>
 
-            <div className="mt-5 flex items-center gap-3 rounded-2xl border border-border bg-background/70 p-4">
+            {/* ÚLTIMA PRESENÇA */}
 
-                <Clock3 className="h-5 w-5 shrink-0 text-muted" />
+            <div className="
+                mt-3
+                flex
+                min-w-0
+                items-center
+                gap-2
 
-                <div>
-                    <p className="text-xs text-muted">
+                rounded-lg
+                border
+                border-border
+                bg-background/70
+
+                p-3
+            ">
+
+                <Clock3 className="
+                    h-4
+                    w-4
+                    shrink-0
+                    text-muted
+                " />
+
+                <div className="min-w-0">
+
+                    <p className="text-[11px] text-muted">
                         Última presença
                     </p>
 
-                    <p className="font-semibold">
+                    <p className="text-sm font-semibold">
                         {formattedLastPresence}
                     </p>
+
                 </div>
 
             </div>
 
-            <div className="mt-8">
+            {/* HISTÓRICO MENSAL */}
 
-                <h3 className="mb-4 text-lg font-bold">
+            <div className="mt-5">
+
+                <h3 className="
+                    mb-3
+                    text-sm
+                    font-bold
+
+                    md:text-base
+                ">
                     Histórico mensal
                 </h3>
 
                 {monthlyHistory.length > 0 ? (
 
-                    <div className="space-y-3">
+                    <div className="space-y-2">
 
                         {monthlyHistory.map((month) => {
 
@@ -205,25 +313,68 @@ export function StudentAttendanceHistory({
 
                                 <div
                                     key={month.key}
-                                    className="rounded-2xl border border-border bg-background/60 p-4"
+                                    className="
+                                        min-w-0
+                                        rounded-lg
+                                        border
+                                        border-border
+                                        bg-background/60
+                                        p-3
+                                    "
                                 >
 
-                                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                                    <div className="
+                                        mb-2
+                                        flex
+                                        min-w-0
+                                        items-center
+                                        justify-between
+                                        gap-2
+                                    ">
 
-                                        <p className="font-semibold capitalize">
+                                        <p className="
+                                            min-w-0
+                                            text-sm
+                                            font-semibold
+                                            capitalize
+                                        ">
                                             {month.label}
                                         </p>
 
-                                        <span className="text-sm font-bold text-primary">
+                                        <span className="
+                                            shrink-0
+                                            text-xs
+                                            font-bold
+                                            tabular-nums
+                                            text-primary
+                                        ">
                                             {Math.round(percentage)}%
                                         </span>
 
                                     </div>
 
-                                    <div className="mb-3 flex h-2 overflow-hidden rounded-full bg-muted">
+                                    <div
+                                        role="progressbar"
+                                        aria-label={`Frequência de ${month.label}`}
+                                        aria-valuemin={0}
+                                        aria-valuemax={100}
+                                        aria-valuenow={Math.round(percentage)}
+                                        className="
+                                            mb-3
+                                            h-1.5
+                                            overflow-hidden
+                                            rounded-full
+                                            bg-muted
+                                        "
+                                    >
 
                                         <div
-                                            className="bg-emerald-500 transition-all"
+                                            className="
+                                                h-full
+                                                rounded-full
+                                                bg-emerald-500
+                                                transition-all
+                                            "
                                             style={{
                                                 width: `${percentage}%`,
                                             }}
@@ -231,24 +382,33 @@ export function StudentAttendanceHistory({
 
                                     </div>
 
-                                    <div className="flex flex-wrap gap-4 text-sm">
+                                    <div className="
+                                        grid
+                                        grid-cols-3
+                                        gap-2
+                                        text-center
+                                    ">
 
-                                        <span className="text-emerald-600">
-                                            {month.present} presenças
-                                        </span>
+                                        <MonthlyMetric
+                                            label="Presenças"
+                                            value={month.present}
+                                            color="text-emerald-600 dark:text-emerald-400"
+                                        />
 
-                                        <span className="text-red-500">
-                                            {month.absent} faltas
-                                        </span>
+                                        <MonthlyMetric
+                                            label="Faltas"
+                                            value={month.absent}
+                                            color="text-red-500"
+                                        />
 
-                                        <span className="text-muted">
-                                            {total} aulas
-                                        </span>
+                                        <MonthlyMetric
+                                            label="Total"
+                                            value={total}
+                                        />
 
                                     </div>
 
                                 </div>
-
                             )
 
                         })}
@@ -257,15 +417,36 @@ export function StudentAttendanceHistory({
 
                 ) : (
 
-                    <div className="rounded-2xl border border-dashed border-border p-8 text-center">
+                    <div className="
+                        rounded-lg
+                        border
+                        border-dashed
+                        border-border
 
-                        <CalendarDays className="mx-auto mb-3 h-8 w-8 text-muted" />
+                        px-3
+                        py-6
 
-                        <p className="font-semibold">
+                        text-center
+                    ">
+
+                        <CalendarDays className="
+                            mx-auto
+                            mb-2
+                            h-6
+                            w-6
+                            text-muted
+                        " />
+
+                        <p className="text-sm font-semibold">
                             Nenhum registro de frequência
                         </p>
 
-                        <p className="mt-1 text-sm text-muted">
+                        <p className="
+                            mt-1
+                            text-xs
+                            leading-relaxed
+                            text-muted
+                        ">
                             O histórico aparecerá aqui após as primeiras chamadas.
                         </p>
 
@@ -282,7 +463,7 @@ export function StudentAttendanceHistory({
 type StatCardProps = {
     label: string
     value: string | number
-    icon: React.ReactNode
+    icon: ReactNode
     color: string
 }
 
@@ -295,18 +476,104 @@ function StatCard({
 
     return (
 
-        <div className="rounded-2xl border border-border bg-background/70 p-4">
+        <div className="
+            flex
+            h-full
+            min-w-0
+            flex-col
 
-            <div className={`mb-3 ${color}`}>
-                {icon}
+            rounded-lg
+            border
+            border-border
+            bg-background/70
+
+            p-3
+        ">
+
+            <div className="
+                flex
+                min-w-0
+                items-center
+                justify-between
+                gap-2
+            ">
+
+                <p className="
+                    min-w-0
+                    text-xs
+                    font-medium
+                    leading-tight
+                    text-muted
+                ">
+                    {label}
+                </p>
+
+                <div className={cn(
+                    `
+                        shrink-0
+                        [&>svg]:h-4
+                        [&>svg]:w-4
+                    `,
+                    color
+                )}>
+
+                    {icon}
+
+                </div>
+
             </div>
 
-            <p className="text-sm text-muted">
-                {label}
+            <p className="
+                mt-2
+                text-xl
+                font-black
+                leading-none
+                tracking-tight
+                tabular-nums
+
+                sm:text-2xl
+            ">
+                {value}
             </p>
 
-            <p className="mt-1 text-2xl font-black tracking-tight">
+        </div>
+    )
+}
+
+type MonthlyMetricProps = {
+    label: string
+    value: number
+    color?: string
+}
+
+function MonthlyMetric({
+    label,
+    value,
+    color,
+}: MonthlyMetricProps) {
+
+    return (
+
+        <div className="min-w-0">
+
+            <p className={cn(
+                "text-sm font-bold tabular-nums",
+                color
+            )}>
+
                 {value}
+
+            </p>
+
+            <p className="
+                mt-0.5
+                text-[10px]
+                leading-tight
+                text-muted
+            ">
+
+                {label}
+
             </p>
 
         </div>

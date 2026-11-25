@@ -1,29 +1,23 @@
 
 "use client"
 
-import {
-    useState,
-} from "react"
+import { useState } from "react"
+
+import { useRouter } from "next/navigation"
 
 import {
-    useRouter,
-} from "next/navigation"
+    Pencil,
+    UserCheck,
+    UserX,
+} from "lucide-react"
 
-import {
-    toast,
-} from "sonner"
+import { toast } from "sonner"
 
-import {
-    createClient,
-} from "@/lib/supabase-browser"
+import { createClient } from "@/lib/supabase-browser"
 
-import type {
-    Student,
-} from "@/types/student"
+import type { Student } from "@/types/student"
 
-import {
-    AppButton,
-} from "@/components/ui/app-button"
+import { AppButton } from "@/components/ui/app-button"
 
 import {
     EditStudentDialog,
@@ -48,49 +42,79 @@ export function StudentPageActions({
     const [deleteOpen, setDeleteOpen] = useState(false)
     const [isActivating, setIsActivating] = useState(false)
 
+    const isActive = student.ativo !== false
+
     async function handleActivate() {
 
         if (isActivating) return
 
         setIsActivating(true)
 
-        const { error } = await supabase
-            .from("students")
-            .update({
-                ativo: true,
-            })
-            .eq("id", student.id)
+        try {
 
-        if (error) {
-            console.error("Erro ao reativar aluno:", error)
+            const { error } = await supabase
+                .from("students")
+                .update({
+                    ativo: true,
+                })
+                .eq("id", student.id)
 
-            toast.error("Não foi possível reativar o aluno.")
+            if (error) throw error
+
+            toast.success("Aluno reativado com sucesso!")
+
+            router.refresh()
+
+        } catch (error) {
+
+            console.error(
+                "Erro ao reativar aluno:",
+                error
+            )
+
+            toast.error(
+                "Não foi possível reativar o aluno."
+            )
+
+        } finally {
 
             setIsActivating(false)
-            return
         }
-
-        toast.success("Aluno reativado com sucesso!")
-
-        router.refresh()
-
-        setIsActivating(false)
     }
-
-    const isActive = student.ativo !== false
 
     return (
         <>
             <div className="
-                flex
-                flex-wrap
-                gap-3
+                grid
+                w-full
+                min-w-0
+                grid-cols-2
+                gap-2
+
+                lg:flex
+                lg:w-auto
             ">
 
                 <AppButton
                     onClick={() => setEditOpen(true)}
+                    disabled={isActivating}
+                    className="
+                        h-11
+                        min-w-0
+                        gap-1.5
+                        rounded-lg
+                        px-2
+                        text-xs
+
+                        sm:px-4
+                        sm:text-sm
+                    "
                 >
+
+                    <Pencil className="h-3.5 w-3.5 shrink-0" />
+
                     Editar aluno
+
                 </AppButton>
 
                 {isActive ? (
@@ -98,21 +122,57 @@ export function StudentPageActions({
                     <AppButton
                         variant="danger"
                         onClick={() => setDeleteOpen(true)}
+                        className="
+                            h-11
+                            min-w-0
+                            gap-1.5
+                            rounded-lg
+                            px-2
+                            text-xs
+
+                            sm:px-4
+                            sm:text-sm
+                        "
                     >
-                        Desativar aluno
+
+                        <UserX className="h-3.5 w-3.5 shrink-0" />
+
+                        Desativar
+
                     </AppButton>
 
                 ) : (
 
                     <AppButton
                         onClick={handleActivate}
-                        disabled={isActivating}
-                        className="bg-emerald-600 text-white hover:bg-emerald-700"
+                        loading={isActivating}
+                        className="
+                            h-11
+                            min-w-0
+                            gap-1.5
 
+                            rounded-lg
+
+                            bg-emerald-600
+                            px-2
+                            text-xs
+                            text-white
+
+                            hover:bg-emerald-700
+
+                            sm:px-4
+                            sm:text-sm
+                        "
                     >
+
+                        {!isActivating && (
+                            <UserCheck className="h-3.5 w-3.5 shrink-0" />
+                        )}
+
                         {isActivating
                             ? "Reativando..."
-                            : "Reativar aluno"}
+                            : "Reativar"}
+
                     </AppButton>
 
                 )}
