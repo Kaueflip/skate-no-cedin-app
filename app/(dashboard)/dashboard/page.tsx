@@ -221,16 +221,14 @@ export default async function DashboardPage() {
                 {/* INDICADORES */}
 
                 <section className="
-                    grid
-                    w-full
-                    min-w-0
-                    grid-cols-1
-                    gap-3
-
-                    min-[380px]:grid-cols-2
-
-                    xl:grid-cols-4
-                    xl:gap-4
+                grid
+                w-full
+                min-w-0
+                grid-cols-2
+                gap-2
+                sm:gap-3
+                xl:grid-cols-4
+                xl:gap-4
                 ">
 
                     <StatCard

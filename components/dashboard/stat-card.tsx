@@ -1,23 +1,15 @@
-import type {
-    ReactNode,
-} from "react"
 
-import { cn }
-    from "@/lib/utils"
+import type { ReactNode } from "react"
 
-import { GlassCard }
-    from "@/components/ui/glass-card"
+import { cn } from "@/lib/utils"
+
+import { GlassCard } from "@/components/ui/glass-card"
 
 type Props = {
-
     title: string
-
     value: string | number
-
     icon?: ReactNode
-
     description?: string
-
     className?: string
 }
 
@@ -34,94 +26,77 @@ export function StatCard({
         <GlassCard
             className={cn(
                 `
-          relative
+                    relative
+                    flex
+                    h-full
+                    w-full
+                    min-w-0
+                    flex-col
 
-          overflow-hidden
+                    rounded-[10px]
 
-          p-3
-          sm:p-4
-          md:p-6
-        `,
+                    p-3
+                    sm:p-4
+                    lg:p-5
+                `,
                 className
             )}
         >
 
+            {/* TÍTULO E ÍCONE */}
+
             <div className="
-        flex
-        items-start
-        justify-between
-        gap-2
-        sm:gap-4
-      ">
-
-                <div className="min-w-0">
-
-                    <p className="
-            text-xs
-            sm:text-sm
-            font-medium
-
-            text-muted
-          ">
-
-                        {title}
-
-                    </p>
-
-                    <h3 className="
-            mt-1
-            sm:mt-2
-            text-2xl
-            sm:text-3xl
-            lg:text-4xl
-            font-black
-            tracking-tight
-
-            text-foreground
-          ">
-
-                        {value}
-
-                    </h3>
-
-                    {description && (
-
-                        <p className="
-              mt-1
-              sm:mt-2
-              text-xs
-              sm:text-sm
-
-              text-muted
+                flex
+                min-w-0
+                items-center
+                justify-between
+                gap-2
             ">
 
-                            {description}
+                <p className="
+                    min-w-0
 
-                        </p>
+                    text-xs
+                    font-medium
+                    leading-tight
+                    text-muted
 
-                    )}
+                    [overflow-wrap:anywhere]
 
-                </div>
+                    sm:text-sm
+                ">
+
+                    {title}
+
+                </p>
 
                 {icon && (
 
                     <div className="
-            flex
-            h-9
-            w-9
-            shrink-0
-            sm:h-12
-            sm:w-12
-            items-center
-            justify-center
+                        flex
+                        h-7
+                        w-7
+                        shrink-0
+                        items-center
+                        justify-center
 
-            rounded-xl
-            sm:rounded-2xl
+                        rounded-lg
 
-            bg-primary/10
+                        bg-primary/10
+                        text-primary
 
-            text-primary
-          ">
+                        sm:h-9
+                        sm:w-9
+
+                        lg:h-10
+                        lg:w-10
+
+                        [&>svg]:h-4
+                        [&>svg]:w-4
+
+                        lg:[&>svg]:h-5
+                        lg:[&>svg]:w-5
+                    ">
 
                         {icon}
 
@@ -130,6 +105,52 @@ export function StatCard({
                 )}
 
             </div>
+
+            {/* VALOR */}
+
+            <h3 className="
+                mt-2
+
+                text-2xl
+                font-black
+                leading-none
+                tracking-tight
+                tabular-nums
+
+                text-foreground
+
+                [overflow-wrap:anywhere]
+
+                sm:text-3xl
+                lg:text-4xl
+            ">
+
+                {value}
+
+            </h3>
+
+            {/* DESCRIÇÃO */}
+
+            {description && (
+
+                <p className="
+                    mt-1.5
+
+                    text-[11px]
+                    leading-tight
+                    text-muted
+
+                    [overflow-wrap:anywhere]
+
+                    sm:text-xs
+                    lg:text-sm
+                ">
+
+                    {description}
+
+                </p>
+
+            )}
 
         </GlassCard>
     )
