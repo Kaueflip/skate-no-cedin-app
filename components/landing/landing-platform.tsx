@@ -1,236 +1,37 @@
-import {
-    BarChart3,
-    Users,
-    ShieldCheck,
-    ClipboardCheck,
-} from "lucide-react"
+import Link from "next/link"
+import { ArrowRight, BarChart3, CalendarDays, ClipboardCheck, Users, UserRound, FileDown } from "lucide-react"
 
 const items = [
-
-    {
-        title: "Gestão de alunos",
-        icon:
-            Users,
-    },
-
-    {
-        title: "Controle de presença",
-        icon:
-            ClipboardCheck,
-    },
-
-    {
-        title: "Métricas e relatórios",
-        icon:
-            BarChart3,
-    },
-
-    {
-        title: "Organização segura",
-        icon:
-            ShieldCheck,
-    },
+    { title: "Alunos", description: "Cadastro e organização dos participantes.", icon: Users },
+    { title: "Frequência", description: "Registros de presenças e faltas.", icon: ClipboardCheck },
+    { title: "Controle de aulas", description: "Sessões realizadas e canceladas.", icon: CalendarDays },
+    { title: "Professores", description: "Equipe e vínculos com as aulas.", icon: UserRound },
+    { title: "Indicadores", description: "Participação e carga horária.", icon: BarChart3 },
+    { title: "Relatórios", description: "Exportações para acompanhamento do projeto.", icon: FileDown },
 ]
 
 export function LandingPlatform() {
-
     return (
-
-        <section
-            id="sistema"
-            className="
-        mx-auto
-
-        max-w-7xl
-
-        px-6
-        py-24
-      "
-        >
-
-            <div className="
-        overflow-hidden
-
-        rounded-[2rem]
-
-        border
-        border-border
-
-        bg-card
-      ">
-
-                <div className="
-          grid
-          gap-12
-
-          p-10
-
-          lg:grid-cols-2
-          lg:p-16
-        ">
-
-                    <div>
-
-                        <p className="
-              mb-4
-
-              text-sm
-              font-semibold
-
-              uppercase
-
-              tracking-[0.25em]
-
-              text-muted
-            ">
-
-                            Sistema de Gestão
-
-                        </p>
-
-                        <h2 className="
-              text-4xl
-              font-black
-
-              tracking-tight
-
-              lg:text-5xl
-            ">
-
-                            Plataforma completa para gestão das aulas.
-
-                        </h2>
-
-                        <p className="
-              mt-6
-
-              max-w-xl
-
-              text-lg
-              leading-relaxed
-
-              text-muted
-            ">
-
-                            Controle de alunos,
-                            presença, evolução técnica,
-                            relatórios e métricas
-                            do projeto em um único lugar.
-
-                        </p>
-
-                        <a
-                            href="/login"
-                            className="
-                mt-10
-
-                inline-flex
-                items-center
-                justify-center
-
-                rounded-2xl
-
-                bg-primary
-
-                px-8
-                py-4
-
-                text-base
-                font-semibold
-
-                text-primary-foreground
-
-                transition-all
-
-                hover:bg-accent-hover
-                hover:scale-[1.02]
-              "
-                        >
-
-                            Acessar Plataforma
-
-                        </a>
-
-                    </div>
-
-                    <div className="
-            grid
-            gap-4
-
-            sm:grid-cols-2
-          ">
-
-                        {items.map(
-                            (item) => {
-
-                                const Icon =
-                                    item.icon
-
-                                return (
-
-                                    <div
-                                        key={item.title}
-                                        className="
-                      rounded-3xl
-
-                      border
-                      border-border
-
-                      bg-background/60
-
-                      p-6
-
-                      transition-all
-
-                      hover:border-primary/20
-                    "
-                                    >
-
-                                        <div className="
-                      flex
-                      h-14
-                      w-14
-                      items-center
-                      justify-center
-
-                      rounded-2xl
-
-                      bg-primary/10
-
-                      text-primary
-                    ">
-
-                                            <Icon
-                                                className="
-                          h-6
-                          w-6
-                        "
-                                            />
-
-                                        </div>
-
-                                        <h3 className="
-                      mt-6
-
-                      text-lg
-                      font-semibold
-                    ">
-
-                                            {item.title}
-
-                                        </h3>
-
-                                    </div>
-                                )
-                            }
-                        )}
-
-                    </div>
-
+        <section id="sistema" className="mx-auto max-w-7xl scroll-mt-20 px-3 py-8 sm:px-6 sm:py-12 lg:py-16">
+            <div className="grid gap-5 rounded-[10px] border bg-card p-3 sm:p-6 lg:grid-cols-[1fr_1.3fr] lg:gap-8 lg:p-8">
+                <div>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-muted">Plataforma de gestão</p>
+                    <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Organização das atividades em um só lugar</h2>
+                    <p className="mt-3 text-sm leading-relaxed text-muted sm:text-base">O ambiente interno reúne as ferramentas de acompanhamento das aulas e da equipe. O acesso é destinado aos usuários autorizados.</p>
+                    <Link href="/login" className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 sm:w-auto">
+                        Acessar plataforma <ArrowRight className="size-4" aria-hidden="true" />
+                    </Link>
                 </div>
-
+                <div className="grid grid-cols-1 gap-2 min-[380px]:grid-cols-2 sm:gap-3">
+                    {items.map(({ title, description, icon: Icon }) => (
+                        <article key={title} className="min-w-0 rounded-lg border bg-background/60 p-3">
+                            <Icon className="size-5 text-primary dark:text-blue-400" aria-hidden="true" />
+                            <h3 className="mt-2 text-sm font-semibold">{title}</h3>
+                            <p className="mt-1 text-xs leading-relaxed text-muted sm:text-sm">{description}</p>
+                        </article>
+                    ))}
+                </div>
             </div>
-
         </section>
     )
 }

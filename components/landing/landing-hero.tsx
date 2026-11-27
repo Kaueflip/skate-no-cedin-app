@@ -1,244 +1,54 @@
+import Image from "next/image"
+import Link from "next/link"
+import { ArrowRight, MapPin } from "lucide-react"
+
 export function LandingHero() {
-
     return (
-
-        <section className="
-      relative
-
-      overflow-hidden
-
-      border-b
-      border-border
-    ">
-
-            <div className="
-        absolute
-        inset-0
-
-        bg-background
-      " />
-
-            <div className="
-        relative
-
-        mx-auto
-
-        flex
-        max-w-7xl
-        flex-col
-        items-center
-
-        px-6
-        py-24
-
-        text-center
-
-        lg:py-36
-      ">
-
-                <div className="
-          mb-6
-
-          inline-flex
-          items-center
-
-          rounded-full
-
-          border
-          border-border
-
-          bg-card/80
-
-          px-4
-          py-2
-
-          text-sm
-
-          backdrop-blur
-        ">
-
-                    Projeto Social • Skate • Educação
-
+        <section className="border-b border-border">
+            <div className="mx-auto grid max-w-7xl items-center gap-6 px-3 py-8 sm:px-6 sm:py-12 lg:grid-cols-2 lg:gap-12 lg:py-20">
+                <div className="min-w-0">
+                    <p className="flex items-center gap-2 text-xs font-semibold text-muted sm:text-sm">
+                        <MapPin className="size-4 shrink-0" aria-hidden="true" />
+                        Desde 2023 · Itajaí, Santa Catarina
+                    </p>
+                    <p className="mt-4 text-xs font-semibold uppercase tracking-widest text-muted">
+                        Skate · Cultura urbana · Educação Integral
+                    </p>
+                    <h1 className="mt-3 text-4xl font-black leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl">
+                        Skate no Cedin
+                    </h1>
+                    <p className="mt-3 text-xl font-semibold leading-snug sm:text-2xl">
+                        Cultura urbana como linguagem pedagógica.
+                    </p>
+                    <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted sm:text-base lg:text-lg">
+                        Uma experiência de Educação Integral que conecta esporte, cultura, educação e desenvolvimento humano, fortalecendo o protagonismo dos estudantes e seus vínculos com a escola.
+                    </p>
+                    <div className="mt-6 grid gap-2 min-[380px]:grid-cols-2 sm:flex sm:gap-3">
+                        <a href="#sobre" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2">
+                            Conhecer projeto <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
+                        </a>
+                        <a href="#indicadores" className="inline-flex min-h-11 items-center justify-center rounded-lg border bg-card px-4 py-2 text-sm font-semibold transition-colors hover:bg-background focus-visible:outline-2 focus-visible:outline-offset-2">
+                            Ver indicadores
+                        </a>
+                    </div>
+                    <Link href="/login" className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-semibold underline underline-offset-4">
+                        Acesso à plataforma de gestão
+                    </Link>
                 </div>
-
-                <h1 className="
-          max-w-5xl
-
-          text-5xl
-          font-black
-          tracking-tight
-
-          sm:text-6xl
-
-          lg:text-7xl
-        ">
-
-                    Skate no Cedin
-
-                </h1>
-
-                <p className="
-          mt-8
-
-          max-w-3xl
-
-          text-lg
-          leading-relaxed
-
-          text-muted
-
-          sm:text-xl
-        ">
-
-                    Muito além do skate.
-                    Um projeto que transforma vidas através da cultura urbana,
-                    educação, disciplina, amizade e desenvolvimento humano.
-
-                </p>
-
-                <div className="
-          mt-10
-
-          flex
-          flex-col
-          gap-4
-
-          sm:flex-row
-        ">
-
-                    <a
-                        href="/login"
-                        className="
-              rounded-2xl
-
-              bg-primary
-
-              px-8
-              py-4
-
-              text-base
-              font-semibold
-
-              text-primary-foreground
-
-              transition-all
-
-              hover:bg-accent-hover
-              hover:scale-[1.02]
-            "
-                    >
-
-                        Entrar no Sistema
-
-                    </a>
-
-                    <a
-                        href="#sobre"
-                        className="
-              rounded-2xl
-
-              border
-              border-border
-
-              bg-card/70
-
-              px-8
-              py-4
-
-              text-base
-              font-semibold
-
-              backdrop-blur
-
-              transition-all
-
-              hover:bg-card
-              hover:scale-[1.02]
-            "
-                    >
-
-                        Conhecer Projeto
-
-                    </a>
-
+                <div className="min-w-0 overflow-hidden rounded-[10px] border bg-card">
+                    <Image
+                        unoptimized
+                        src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/landing%20page/galeria/inst-cedin%20(2).webp"
+                        alt="Registro fotográfico das atividades do Skate no Cedin"
+                        width={1200}
+                        height={800}
+                        preload
+                        sizes="(min-width: 1024px) 50vw, 100vw"
+                        className="aspect-[4/3] h-auto w-full object-cover lg:aspect-square"
+                    />
+                    <p className="px-3 py-2 text-xs text-muted">CEDIN Ângela Dalçóquio de Souza</p>
                 </div>
-
-                <div className="
-          mt-20
-
-          grid
-          w-full
-          max-w-5xl
-
-          grid-cols-2
-          gap-4
-
-          md:grid-cols-4
-        ">
-
-                    {[
-                        {
-                            value: "+100",
-                            label: "Alunos Impactados",
-                        },
-                        {
-                            value: "2019",
-                            label: "Desde",
-                        },
-                        {
-                            value: "2",
-                            label: "Turnos",
-                        },
-                        {
-                            value: "100%",
-                            label: "Inclusivo",
-                        },
-                    ].map((item) => (
-
-                        <div
-                            key={item.label}
-                            className="
-                rounded-3xl
-
-                border
-                border-border
-
-                bg-card/80
-
-                p-6
-
-                backdrop-blur
-              "
-                        >
-
-                            <p className="
-                text-4xl
-                font-black
-              ">
-
-                                {item.value}
-
-                            </p>
-
-                            <p className="
-                mt-2
-
-                text-sm
-
-                text-muted
-              ">
-
-                                {item.label}
-
-                            </p>
-
-                        </div>
-                    ))}
-
-                </div>
-
             </div>
-
         </section>
     )
 }
