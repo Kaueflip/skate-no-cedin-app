@@ -1,92 +1,14 @@
-
-"use client"
-
-import {
-    BookOpen,
-    LayoutDashboard,
-    Users,
-    ClipboardCheck,
-    CalendarDays,
-    ChartNoAxesCombined,
-    GraduationCap,
-    ShieldCheck,
-    CircleHelp,
-} from "lucide-react"
-
-const sections = [
-    {
-        title: "Apresentação",
-        href: "#apresentacao",
-        icon: BookOpen,
-    },
-    {
-        title: "Conhecendo o sistema",
-        href: "#conhecendo",
-        icon: LayoutDashboard,
-    },
-    {
-        title: "Gestão de alunos",
-        href: "#alunos",
-        icon: Users,
-    },
-    {
-        title: "Controle de frequência",
-        href: "#frequencia",
-        icon: ClipboardCheck,
-    },
-    {
-        title: "Controle de aulas",
-        href: "#aulas",
-        icon: CalendarDays,
-    },
-    {
-        title: "Dashboard e indicadores",
-        href: "#indicadores",
-        icon: ChartNoAxesCombined,
-    },
-    {
-        title: "Rotina dos professores",
-        href: "#rotina",
-        icon: GraduationCap,
-    },
-    {
-        title: "Boas práticas",
-        href: "#boas-praticas",
-        icon: ShieldCheck,
-    },
-    {
-        title: "Perguntas frequentes",
-        href: "#duvidas",
-        icon: CircleHelp,
-    },
-]
+import { chapters } from "./manual-data"
 
 export function ManualSidebar() {
     return (
-        <aside className="space-y-2">
-            <div className="mb-4 px-3">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Conteúdo do manual
-                </p>
-            </div>
-
-            <nav className="space-y-1">
-                {sections.map((section) => {
-                    const Icon = section.icon
-
-                    return (
-                        <a
-                            key={section.href}
-                            href={section.href}
-                            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent/10 hover:text-accent-foreground"
-                        >
-                            <Icon className="h-4 w-4 shrink-0" />
-
-                            <span>{section.title}</span>
-                        </a>
-                    )
-                })}
-            </nav>
-        </aside>
+        <nav aria-label="Índice do manual" className="min-w-0 space-y-1">
+            {chapters.map((chapter, index) => (
+                <a key={chapter.id} href={`#${chapter.id}`} className="flex min-h-11 min-w-0 items-center gap-2 rounded-lg px-2 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    <span className="shrink-0 text-xs tabular-nums">{String(index + 1).padStart(2, "0")}</span>
+                    <span className="min-w-0 break-words">{chapter.title}</span>
+                </a>
+            ))}
+        </nav>
     )
 }

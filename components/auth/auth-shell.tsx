@@ -1,174 +1,57 @@
-
-import Image from "next/image"
-
+import Link from "next/link"
 import type { ReactNode } from "react"
+import { ArrowLeft } from "lucide-react"
 
 import { AppNavbar } from "@/components/navigation/app-navbar"
+import { AuthBranding } from "@/components/auth/auth-branding"
 
 type Props = {
     children: ReactNode
 }
 
-export function AuthShell({
-    children,
-}: Props) {
-
+export function AuthShell({ children }: Props) {
     return (
-        <div className="flex min-h-dvh flex-col bg-background">
+        <div className="flex min-h-dvh flex-col bg-background text-foreground">
+            <AppNavbar showLinks={false} showLogin={false} />
 
-            <AppNavbar
-                showLinks={false}
-                showLogin={false}
-            />
+            <main className="grid min-w-0 flex-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+                <AuthBranding />
 
-            <main className="
-                relative
-                flex
-                min-w-0
-                flex-1
-                flex-col
-                bg-background
-                lg:flex-row
-            ">
-
-                {/* EFEITO DE FUNDO */}
-
-                <div
-                    aria-hidden="true"
-                    className="
-                        pointer-events-none
-                        absolute
-                        inset-0
-                        overflow-hidden
-                    "
+                <section
+                    aria-labelledby="auth-heading"
+                    className="flex min-w-0 flex-col items-center justify-center px-3 py-5 sm:px-6 sm:py-8 lg:px-10"
                 >
-                    <div className="
-                        absolute
-                        left-1/2
-                        top-0
-                        h-48
-                        w-48
-                        -translate-x-1/2
-                        rounded-full
-                        bg-primary/5
-                        blur-3xl
-                        lg:h-[600px]
-                        lg:w-[600px]
-                        lg:bg-primary/10
-                    " />
-                </div>
+                    <div className="w-full min-w-0 max-w-md">
+                        <Link
+                            href="/"
+                            className="mb-3 inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                            <ArrowLeft className="size-4" aria-hidden="true" />
+                            Voltar ao site
+                        </Link>
 
-                {/* APRESENTAÇÃO DESKTOP */}
-
-                <section className="
-                    relative
-                    hidden
-                    min-w-0
-                    flex-1
-                    flex-col
-                    justify-between
-                    px-10
-                    py-8
-                    lg:flex
-                    xl:px-16
-                ">
-
-                    <div className="max-w-xl">
-
-                        <div className="
-                            inline-flex
-                            items-center
-                            rounded-lg
-                            border
-                            border-border
-                            bg-card/80
-                            px-3
-                            py-2
-                            text-xs
-                            font-medium
-                        ">
-                            Projeto Social • Skate • Educação
+                        <div className="mb-4 sm:mb-5">
+                            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                Skate no Cedin · Educação Integral
+                            </p>
+                            <h1 id="auth-heading" className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
+                                Plataforma de gestão
+                            </h1>
+                            <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                                Educação, esporte e cultura urbana.
+                            </p>
                         </div>
 
-                        <h1 className="
-                            mt-6
-                            text-4xl
-                            font-black
-                            leading-tight
-                            tracking-tight
-                            text-foreground
-                            xl:text-5xl
-                        ">
-                            Gestão moderna para projetos que transformam vidas.
-                        </h1>
-
-                        <p className="
-                            mt-4
-                            max-w-md
-                            text-base
-                            leading-relaxed
-                            text-muted
-                            xl:text-lg
-                        ">
-                            Plataforma completa para controle de alunos,
-                            presença, evolução e métricas do projeto.
-                        </p>
-
-                    </div>
-
-                    <div className="flex items-center gap-3">
-
-                        <Image
-                            unoptimized
-                            src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo.svg"
-                            alt="Skate no Cedin"
-                            width={48}
-                            height={48}
-                            className="h-10 w-auto dark:hidden"
-                        />
-
-                        <Image
-                            unoptimized
-                            src="https://vcurlhurvhjgmxxhsasd.supabase.co/storage/v1/object/public/assets/logo-light-cedin.png"
-                            alt="Skate no Cedin"
-                            width={48}
-                            height={48}
-                            className="hidden h-10 w-auto dark:block"
-                        />
-
-                    </div>
-
-                </section>
-
-                {/* FORMULÁRIO */}
-
-                <section className="
-                    relative
-                    flex
-                    min-w-0
-                    flex-1
-                    flex-col
-                    items-center
-                    justify-center
-                    px-3
-                    py-4
-                    sm:px-6
-                    lg:px-10
-                    lg:py-8
-                ">
-
-                    <div className="
-                        w-full
-                        min-w-0
-                        max-w-md
-                    ">
                         {children}
+
+                        <footer className="mt-5 text-center text-xs leading-relaxed text-muted-foreground sm:mt-6">
+                            <p className="font-medium text-foreground">CEDIN Ângela Dalçóquio de Souza</p>
+                            <p>Itajaí · Santa Catarina</p>
+                            <p className="mt-2">Skate no Cedin · Desde 2023</p>
+                        </footer>
                     </div>
-
                 </section>
-
             </main>
-
         </div>
     )
 }

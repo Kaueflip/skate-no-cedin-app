@@ -1,155 +1,81 @@
-
 "use client"
 
-import { useState } from "react"
-
-import { Mail, Lock } from "lucide-react"
+import { useRef, useState } from "react"
+import type { FormEvent } from "react"
+import { ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck } from "lucide-react"
 
 import { createClient } from "@/lib/supabase-browser"
-
 import { Input } from "@/components/ui/input"
-
 import { AppButton } from "@/components/ui/app-button"
 
-import { toast } from "sonner"
-
 export function LoginForm() {
-
     const [email, setEmail] = useState("")
-
     const [password, setPassword] = useState("")
-
+    const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [errorMessage, setErrorMessage] = useState("")
+    const submitting = useRef(false)
 
-    async function handleLogin(
-        event: React.FormEvent<HTMLFormElement>
-    ) {
-
+    async function handleLogin(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
+        if (submitting.current) return
 
-        if (loading) return
+        setErrorMessage("")
+        if (!email.trim() || !password) {
+            setErrorMessage("Informe seu e-mail e sua senha.")
+            return
+        }
+
+        submitting.current = true
+        setLoading(true)
+        setShowPassword(false)
+        let redirecting = false
 
         try {
-
-            setLoading(true)
-
             const supabase = createClient()
+            const { error } = await supabase.auth.signInWithPassword({
+                email: email.trim(),
+                password,
+            })
 
-            const { error } = await supabase.auth
-                .signInWithPassword({
-                    email: email.trim(),
-                    password,
-                })
+            if (error) {
+                if (error.status === 429) {
+                    setErrorMessage("Muitas tentativas de acesso. Tente novamente mais tarde.")
+                } else if (error.code === "invalid_credentials") {
+                    setErrorMessage("E-mail ou senha inválidos. Confira suas credenciais.")
+                } else {
+                    setErrorMessage("Não foi possível entrar. Confira seus dados ou tente novamente.")
+                }
+                return
+            }
 
-            if (error) throw error
-
+            // Mantém a navegação completa usada pelo fluxo de autenticação existente.
             window.location.href = "/dashboard"
-
-        } catch (error) {
-
-            console.error("LOGIN_ERROR", error)
-
-            toast.error("E-mail ou senha inválidos")
-
-            setLoading(false)
+            redirecting = true
+        } catch {
+            setErrorMessage("Não foi possível conectar à plataforma. Tente novamente.")
+        } finally {
+            if (!redirecting) {
+                submitting.current = false
+                setLoading(false)
+            }
         }
     }
 
     return (
-
-        <div className="
-            w-full
-            rounded-[10px]
-            border
-            border-border
-            bg-card/80
-            p-4
-            shadow-sm
-
-            sm:p-6
-
-            lg:p-8
-            lg:shadow-xl
-            lg:backdrop-blur-xl
-        ">
-
-            {/* CABEÇALHO */}
-
-            <div className="mb-5 sm:mb-6">
-
-                <p className="
-                    text-[11px]
-                    font-semibold
-                    uppercase
-                    tracking-widest
-                    text-primary
-                ">
-                    Acessar plataforma
+        <div className="w-full min-w-0 rounded-[10px] border border-border bg-card p-4 shadow-sm sm:p-6 lg:p-7">
+            <div className="mb-5">
+                <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Acessar sua conta</h2>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                    Informe suas credenciais para continuar.
                 </p>
-
-                <h2 className="
-                    mt-2
-                    text-2xl
-                    font-black
-                    tracking-tight
-                    text-foreground
-
-                    sm:text-3xl
-                ">
-                    Entrar
-                </h2>
-
-                <p className="
-                    mt-2
-                    text-sm
-                    leading-relaxed
-                    text-muted
-                ">
-                    Faça login para acessar o sistema de gestão do projeto.
-                </p>
-
             </div>
 
-            {/* FORMULÁRIO */}
-
-            <form
-                onSubmit={handleLogin}
-                className="space-y-4"
-            >
-
-                {/* E-MAIL */}
-
+            <form onSubmit={handleLogin} aria-busy={loading} className="space-y-4">
                 <div className="space-y-1.5">
-
-                    <label
-                        htmlFor="email"
-                        className="
-                            text-xs
-                            font-medium
-                            text-foreground
-
-                            sm:text-sm
-                        "
-                    >
-                        E-mail
-                    </label>
-
+                    <label htmlFor="email" className="text-sm font-medium text-foreground">E-mail</label>
                     <div className="relative">
-
-                        <Mail
-                            aria-hidden="true"
-                            className="
-                                pointer-events-none
-                                absolute
-                                left-3
-                                top-1/2
-                                h-4
-                                w-4
-                                -translate-y-1/2
-                                text-muted
-                            "
-                        />
-
+                        <Mail aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                             id="email"
                             name="email"
@@ -159,100 +85,64 @@ export function LoginForm() {
                             autoCapitalize="none"
                             spellCheck={false}
                             value={email}
-                            onChange={(e) =>
-                                setEmail(e.target.value)
-                            }
+                            onChange={(event) => { setEmail(event.target.value); setErrorMessage("") }}
                             placeholder="voce@email.com"
                             required
                             disabled={loading}
-                            className="
-                                h-11
-                                rounded-lg
-                                pl-10
-                                text-base
-                                md:text-sm
-                            "
+                            aria-describedby={errorMessage ? "login-error" : undefined}
+                            className="h-11 min-w-0 rounded-lg pl-10 text-base md:text-sm"
                         />
-
                     </div>
-
                 </div>
 
-                {/* SENHA */}
-
                 <div className="space-y-1.5">
-
-                    <label
-                        htmlFor="password"
-                        className="
-                            text-xs
-                            font-medium
-                            text-foreground
-
-                            sm:text-sm
-                        "
-                    >
-                        Senha
-                    </label>
-
+                    <label htmlFor="password" className="text-sm font-medium text-foreground">Senha</label>
                     <div className="relative">
-
-                        <Lock
-                            aria-hidden="true"
-                            className="
-                                pointer-events-none
-                                absolute
-                                left-3
-                                top-1/2
-                                h-4
-                                w-4
-                                -translate-y-1/2
-                                text-muted
-                            "
-                        />
-
+                        <Lock aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                             id="password"
                             name="password"
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             autoComplete="current-password"
+                            autoCapitalize="none"
+                            spellCheck={false}
                             value={password}
-                            onChange={(e) =>
-                                setPassword(e.target.value)
-                            }
+                            onChange={(event) => { setPassword(event.target.value); setErrorMessage("") }}
                             placeholder="Sua senha"
                             required
                             disabled={loading}
-                            className="
-                                h-11
-                                rounded-lg
-                                pl-10
-                                text-base
-                                md:text-sm
-                            "
+                            aria-describedby={errorMessage ? "login-error" : undefined}
+                            className="h-11 min-w-0 rounded-lg pl-10 pr-12 text-base md:text-sm"
                         />
-
+                        <button
+                            type="button"
+                            aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                            aria-controls="password"
+                            disabled={loading}
+                            onClick={() => setShowPassword((current) => !current)}
+                            className="absolute inset-y-0 right-0 flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                        >
+                            {showPassword ? <EyeOff className="size-4" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
+                        </button>
                     </div>
-
                 </div>
 
-                {/* BOTÃO DE ACESSO */}
+                {errorMessage && (
+                    <p id="login-error" role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm leading-relaxed text-red-700 dark:text-red-300">
+                        {errorMessage}
+                    </p>
+                )}
 
-                <AppButton
-                    type="submit"
-                    loading={loading}
-                    className="
-                        h-11
-                        w-full
-                        rounded-lg
-                        text-sm
-                    "
-                >
-                    {loading ? "Entrando..." : "Entrar"}
+                <AppButton type="submit" loading={loading} disabled={loading} className="min-h-11 w-full rounded-lg px-3 py-2 text-sm">
+                    {loading ? "Entrando..." : "Entrar na plataforma"}
+                    {!loading && <ArrowRight className="size-4" aria-hidden="true" />}
                 </AppButton>
-
             </form>
 
+            <div className="mt-5 flex items-center justify-center gap-2 border-t border-border pt-4 text-xs leading-relaxed text-muted-foreground">
+                <ShieldCheck className="size-4 shrink-0" aria-hidden="true" />
+                <span>Acesso restrito à equipe autorizada.</span>
+            </div>
         </div>
     )
 }

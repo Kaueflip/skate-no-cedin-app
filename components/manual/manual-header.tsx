@@ -1,35 +1,15 @@
-
-import {
-    BookOpen,
-    GraduationCap,
-} from "lucide-react"
+import { BookOpen } from "lucide-react"
 
 export function ManualHeader() {
     return (
-        <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <BookOpen className="h-4 w-4" />
-                <span>Documentação</span>
-                <span>/</span>
-                <span className="text-foreground">
-                    Manual do sistema
-                </span>
+        <header id="manual-topo" className="scroll-mt-24 space-y-2">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground sm:text-sm">
+                <BookOpen className="size-4 shrink-0" aria-hidden="true" />
+                <span>Documentação / Manual do sistema</span>
             </div>
-
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="space-y-2">
-
-
-                    <h1 className="text-3xl font-semibold tracking-tight">
-                        Manual do Sistema
-                    </h1>
-
-                    <p className="max-w-2xl text-sm text-muted-foreground">
-                        Guia de utilização da plataforma para professores
-                        e coordenação do projeto Skate no Cedin.
-                    </p>
-                </div>
-            </div>
-        </div>
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Manual do Sistema</h1>
+            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">Guia de utilização da plataforma Skate no Cedin para professores e coordenação.</p>
+            <p className="text-xs text-muted-foreground">Revisão de novembro de 2026</p>
+        </header>
     )
 }

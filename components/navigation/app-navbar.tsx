@@ -187,16 +187,16 @@ export function AppNavbar({
                         2xl:flex
                     ">
 
-                        <span className="
+                        {/*     <span className="
                             text-sm
                             font-semibold
                             leading-tight
                             text-foreground
                         ">
                             Skate no Cedin
-                        </span>
+                        </span> */}
 
-                        <span className="
+                        {/*      <span className="
                             hidden
                             text-[10px]
                             leading-tight
@@ -205,7 +205,7 @@ export function AppNavbar({
                             min-[380px]:block
                         ">
                             Educação e cultura urbana
-                        </span>
+                        </span> */}
 
                     </div>
 
